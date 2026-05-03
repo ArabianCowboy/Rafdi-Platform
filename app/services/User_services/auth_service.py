@@ -2,14 +2,10 @@ from app.Repo import UserRepo, CompanyRepo,UserRoleRepo
 from app.Dtos.User_DTOs import UserResponse
 from app.Dtos.Shared_DTOs import MessageResponse
 from app.Dtos.Auth_DTOs import RegisterCreate,TokenResponse
-from app.services.User_service.password_service import PasswordService
-from app.services.User_service.validation_service import ValidationService
-from app.services.User_service.role_assignment_service import RoleAssignmentService
-from app.services.Jwt_service import JWTService
-import logging
-
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
+from app.services.User_services.password_service import PasswordService
+from app.services.User_services.validation_service import ValidationService
+from app.services.User_services.role_assignment_service import RoleAssignmentService
+from app.services.Jwt_Services.Jwt_service import JWTService
 
 
 class AuthService:

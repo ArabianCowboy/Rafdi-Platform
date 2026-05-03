@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.Repo.Base_Repo import BaseRepo
 from app.models import Booking
 from app.Dtos.Booking_DTOs import BookingCreate, BookingStatusUpdate
+from app.models.Booking_Model import BookingStatusEnum
 
 class BookingRepo(BaseRepo[Booking]):
  
@@ -18,16 +19,7 @@ class BookingRepo(BaseRepo[Booking]):
  
     def get_by_company(self, company_id: int) -> list[Booking]:
         return self.db.query(Booking).filter(Booking.RenterCompanyID == company_id).all()
- 
-    def check_overlap(self, warehouse_id: int, start_date, end_date) -> bool:
-        from app.models.Booking_Model import BookingStatusEnum
-        overlap = self.db.query(Booking).filter(
-            Booking.WarehouseID == warehouse_id,
-            Booking.Status      == BookingStatusEnum.confirmed,
-            Booking.StartDate   <= end_date,
-            Booking.EndDate     >= start_date,
-        ).first()
-        return overlap is not None
+    
  
     def add(self, obj: BookingCreate) -> Booking:
         booking = Booking(
@@ -57,3 +49,19 @@ class BookingRepo(BaseRepo[Booking]):
         if booking:
             self.db.delete(booking)
             self.db.commit()
+
+    def check_overlap(self, warehouse_id: int, start_date, end_date) -> bool:
+        
+        overlap = self.db.query(Booking).filter(
+            Booking.WarehouseID == warehouse_id,
+            Booking.Status      == BookingStatusEnum.confirmed,
+            Booking.StartDate   <= end_date,
+            Booking.EndDate     >= start_date,
+        ).first()
+        return overlap is not None
+    
+    def get_confirmed_by_warehouse(self, warehouse_id: int) -> list[Booking]:
+        return self.db.query(Booking).filter(
+        Booking.WarehouseID == warehouse_id,
+        Booking.Status      == BookingStatusEnum.confirmed
+    ).all()
