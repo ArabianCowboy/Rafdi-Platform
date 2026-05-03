@@ -1,11 +1,11 @@
 from app.Repo import UserRepo, CompanyRepo
 from app.Dtos.User_DTOs import UserResponse
 from app.Dtos.Shared_DTOs import MessageResponse
-from app.Dtos.Auth_DTOs import RegisterCreate
+from app.Dtos.Auth_DTOs import RegisterCreate,TokenResponse
 from app.services.User_service.password_service import PasswordService
 from app.services.User_service.validation_service import ValidationService
 from app.services.User_service.role_assignment_service import RoleAssignmentService
-
+from app.services.Jwt_service import JWTService
 import logging
 
 logging.basicConfig(level=logging.DEBUG)
@@ -28,6 +28,7 @@ class AuthService:
         self.password_service   = password_service
         self.validation_service = validation_service
         self.role_service       = role_service
+        self.jwt_service        = JWTService
 
     def register(self, data: RegisterCreate) -> UserResponse:
         try:
@@ -60,6 +61,13 @@ class AuthService:
         if not self.password_service.verify_password(password, user.PasswordHash):
             raise ValueError("البريد الإلكتروني أو كلمة المرور غلط")
 
-        return MessageResponse(
-            message="تم تسجيل الدخول بنجاح"
+        user_roles = self.user_role_repo.get_by_user(user.UserID)
+        roles = [ur.role.RoleName for ur in user_roles if ur.role]
+
+        token = self.jwt_service.create_token(
+            user_id    = user.UserID,
+            company_id = user.CompanyID,
+            roles      = roles,
         )
+
+        return TokenResponse(access_token=token)
