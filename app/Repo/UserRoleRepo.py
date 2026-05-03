@@ -3,7 +3,6 @@ from sqlalchemy.orm import Session
  
 from app.Repo.Base_Repo import BaseRepo
 from app.models import User_Role
-from app.Dtos import UserRoleCreate
 
 class UserRoleRepo(BaseRepo[User_Role]):
  
@@ -32,7 +31,7 @@ class UserRoleRepo(BaseRepo[User_Role]):
             )
             self.db.add(user_role)
         self.db.flush()
-        
+
     def update(self, id: int, obj) -> Optional[User_Role]:
         raise NotImplementedError("Update not supported")
  

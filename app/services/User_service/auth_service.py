@@ -1,4 +1,4 @@
-from app.Repo import UserRepo, CompanyRepo
+from app.Repo import UserRepo, CompanyRepo,UserRoleRepo
 from app.Dtos.User_DTOs import UserResponse
 from app.Dtos.Shared_DTOs import MessageResponse
 from app.Dtos.Auth_DTOs import RegisterCreate,TokenResponse
@@ -19,16 +19,19 @@ class AuthService:
         self,
         user_repo          : UserRepo,
         company_repo       : CompanyRepo,
+        user_role_repo     : UserRoleRepo,
         password_service   : PasswordService,
         validation_service : ValidationService,
         role_service       : RoleAssignmentService,
+        jwt_service        : JWTService,
     ):
         self.user_repo          = user_repo
         self.company_repo       = company_repo
+        self.user_role_repo     = user_role_repo
         self.password_service   = password_service
         self.validation_service = validation_service
         self.role_service       = role_service
-        self.jwt_service        = JWTService
+        self.jwt_service        = jwt_service
 
     def register(self, data: RegisterCreate) -> UserResponse:
         try:

@@ -3,7 +3,6 @@ from sqlalchemy.orm import Session
 
 from app.Dtos.Auth_DTOs import RegisterCreate, LoginCreate,TokenResponse
 from app.Dtos.User_DTOs import UserResponse
-from app.Dtos.Shared_DTOs import MessageResponse
 from app.Repo.user_repo import UserRepo
 from app.Repo.Companey_Repo import CompanyRepo
 from app.Repo.UserRoleRepo import UserRoleRepo
@@ -26,7 +25,7 @@ def get_auth_service(db: Session = Depends(get_db)) -> AuthService:
     return AuthService(
         user_repo          = user_repo,
         company_repo       = company_repo,
-         user_role_repo     = user_role_repo,
+        user_role_repo     = user_role_repo,
         password_service   = PasswordService(),
         validation_service = ValidationService(user_repo, company_repo),
         role_service       = RoleAssignmentService(user_role_repo, role_repo),

@@ -1,6 +1,5 @@
 from app.Repo import UserRoleRepo
 from app.Repo import Role_Repo
-from app.Dtos import UserRoleCreate
 
 
 class RoleAssignmentService:
