@@ -1,24 +1,20 @@
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const handleLogin = () => {
 
-  if (email === "admin@test.com" && password === "123456") {
-
-    setError("");
-
-    localStorage.setItem("token", "fake-jwt-token");
-
-    alert("تم تسجيل الدخول بنجاح");
-
-  } else {
-
-    setError("البريد الإلكتروني أو كلمة المرور غير صحيحة");
-
-  }
+ if (email === "admin@test.com" && password === "123456") {
+  setError("");
+  localStorage.setItem("token", "fake-jwt-token");
+  navigate("/home");
+} else {
+  setError("البريد الإلكتروني أو كلمة المرور غير صحيحة");
+}
 
 };
 
@@ -28,7 +24,9 @@ function LoginPage() {
 
         <div className="auth-tabs">
           <button className="active-tab">تسجيل الدخول</button>
-          <button>إنشاء حساب</button>
+          <Link to="/register">
+            <button>إنشاء حساب</button>
+          </Link>
         </div>
 
         <div className="auth-form">

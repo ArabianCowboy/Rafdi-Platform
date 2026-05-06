@@ -167,3 +167,18 @@
   font-size: 14px;
   margin: 0;
 }
+.logout-btn {
+  height: 40px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 8px;
+  background: var(--danger);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.home-page {
+  min-height: 100vh;
+  background: var(--background);
+}
