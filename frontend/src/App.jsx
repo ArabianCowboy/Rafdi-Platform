@@ -1,9 +1,8 @@
+import "./App.css";
+import LoginPage from "./pages/LoginPage";
+
 function App() {
-  return (
-    <div className="App">
-      <h1>Rafdi Platform</h1>
-    </div>
-  );
+  return <LoginPage />;
 }
 
 export default App;
