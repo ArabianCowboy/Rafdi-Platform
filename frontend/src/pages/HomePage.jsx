@@ -10,18 +10,53 @@ function HomePage() {
 
   return (
     <main className="home-page" dir="rtl">
+
       <nav className="navbar">
         <div className="brand">رفدي</div>
+
+        <div className="nav-links">
+          <span>الرئيسية</span>
+          <span>المستودعات</span>
+          <span>الحجوزات</span>
+          <span>الدعم</span>
+        </div>
 
         <button className="logout-btn" onClick={handleLogout}>
           تسجيل الخروج
         </button>
       </nav>
 
-      <section className="page-header">
+      <section className="hero-section">
         <h1>مرحبًا بك في منصة رفدي</h1>
-        <p>تم تسجيل الدخول بنجاح، ويمكنك الآن متابعة استخدام المنصة.</p>
+
+        <p>
+          منصة ذكية لإدارة وحجز المستودعات اللوجستية بسهولة.
+        </p>
+
+        <button className="primary-btn">
+          ابحث عن مستودع
+        </button>
       </section>
+
+      <section className="cards-section">
+
+        <div className="dashboard-card">
+          <h3>عدد المستودعات</h3>
+          <p>128</p>
+        </div>
+
+        <div className="dashboard-card">
+          <h3>الحجوزات النشطة</h3>
+          <p>34</p>
+        </div>
+
+        <div className="dashboard-card">
+          <h3>الشركات المسجلة</h3>
+          <p>52</p>
+        </div>
+
+      </section>
+
     </main>
   );
 }
