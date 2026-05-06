@@ -162,3 +162,8 @@
   font-weight: 600;
   cursor: pointer;
 }
+.error-message {
+  color: var(--danger);
+  font-size: 14px;
+  margin: 0;
+}
