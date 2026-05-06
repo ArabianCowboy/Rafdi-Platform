@@ -32,7 +32,7 @@ class NotificationRepo(BaseRepo[Notification]):
             IsRead  = obj.IsRead,
         )
         self.db.add(notification)
-        self.db.commit()
+        self.db.flush()
         self.db.refresh(notification)
         return notification
  

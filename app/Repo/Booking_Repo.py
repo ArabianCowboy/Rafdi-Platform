@@ -31,7 +31,7 @@ class BookingRepo(BaseRepo[Booking]):
             Status          = obj.Status,
         )
         self.db.add(booking)
-        self.db.commit()
+        self.db.flush()
         self.db.refresh(booking)
         return booking
  

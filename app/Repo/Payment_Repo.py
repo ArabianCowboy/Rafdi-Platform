@@ -27,7 +27,7 @@ class PaymentRepo(BaseRepo[Payment]):
             Status      = obj.Status,
         )
         self.db.add(payment)
-        self.db.commit()
+        self.db.flush()
         self.db.refresh(payment)
         return payment
  
