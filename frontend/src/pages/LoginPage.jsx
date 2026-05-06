@@ -5,16 +5,21 @@ function LoginPage() {
   const [error, setError] = useState("");
 
   const handleLogin = () => {
-    if (!email || !password) {
-      setError("الرجاء إدخال البريد الألكتروني وكلمة المرور");
-      return;
-    }
-    if (email === "admin@test.com" && password === "123456") {
-      setError("");
-      alert("تم تسجيل الدخول بنجاح");
-    } else {
+
+  if (email === "admin@test.com" && password === "123456") {
+
+    setError("");
+
+    localStorage.setItem("token", "fake-jwt-token");
+
+    alert("تم تسجيل الدخول بنجاح");
+
+  } else {
+
     setError("البريد الإلكتروني أو كلمة المرور غير صحيحة");
-    }
+
+  }
+
 };
 
   return (
