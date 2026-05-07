@@ -16,11 +16,19 @@ function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
   const handleRegister = async (e) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
 
+    if (!companyName) { setError('يرجى إدخال اسم الشركة'); return; }
+    if (!commercialRegistration) { setError('يرجى إدخال رقم السجل التجاري'); return; }
+    if (!validateEmail(email)) { setError('يرجى إدخال بريد إلكتروني صحيح'); return; }
+    if (!password) { setError('يرجى إدخال كلمة المرور'); return; }
+    if (password.length < 6) { setError('كلمة المرور يجب أن تكون 6 أحرف على الأقل'); return; }
+
+    setLoading(true);
     try {
       const res = await fetch(`${API_URL}/auth/register`, {
         method: 'POST',
@@ -122,9 +130,9 @@ function RegisterPage() {
               <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2.5">اسم الشركة</label>
               <div className="relative">
                 <UserCircle2 className="absolute right-5 top-[1.1rem] text-gray-300" size={20} />
-                <input type="text" required placeholder="مثال: شركة رفدي"
+                <input type="text" placeholder="مثال: شركة رفدي"
                   className="w-full pr-14 px-6 py-4 bg-gray-50 rounded-2xl outline-none font-bold placeholder:text-gray-300 focus:ring-4 focus:ring-[#2E5F8A]/10 focus:bg-white transition-all"
-                  value={companyName} onChange={e => setCompanyName(e.target.value)} />
+                  value={companyName} onChange={e => { setCompanyName(e.target.value); if(error) setError(''); }} />
               </div>
             </div>
 
@@ -132,9 +140,9 @@ function RegisterPage() {
               <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2.5">رقم السجل التجاري</label>
               <div className="relative">
                 <ShieldCheck className="absolute right-5 top-[1.1rem] text-gray-300" size={20} />
-                <input type="text" required placeholder="1010XXXXXX"
+                <input type="text" placeholder="1010XXXXXX"
                   className="w-full pr-14 px-6 py-4 bg-gray-50 rounded-2xl outline-none font-bold placeholder:text-gray-300 focus:ring-4 focus:ring-[#2E5F8A]/10 focus:bg-white transition-all"
-                  value={commercialRegistration} onChange={e => setCommercialRegistration(e.target.value)} />
+                  value={commercialRegistration} onChange={e => { setCommercialRegistration(e.target.value); if(error) setError(''); }} />
               </div>
             </div>
 
@@ -168,9 +176,9 @@ function RegisterPage() {
               <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2.5">البريد الإلكتروني</label>
               <div className="relative">
                 <Mail className="absolute right-5 top-[1.1rem] text-gray-300" size={20} />
-                <input type="email" required placeholder="name@company.com"
+                <input type="text" placeholder="name@company.com"
                   className="w-full pr-14 px-6 py-4 bg-gray-50 rounded-2xl outline-none font-bold placeholder:text-gray-300 focus:ring-4 focus:ring-[#2E5F8A]/10 focus:bg-white transition-all"
-                  value={email} onChange={e => setEmail(e.target.value)} />
+                  value={email} onChange={e => { setEmail(e.target.value); if(error) setError(''); }} />
               </div>
             </div>
 
@@ -178,9 +186,9 @@ function RegisterPage() {
               <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2.5">كلمة المرور</label>
               <div className="relative">
                 <Lock className="absolute right-5 top-[1.1rem] text-gray-300" size={20} />
-                <input type="password" required placeholder="••••••••"
+                <input type="password" placeholder="••••••••"
                   className="w-full pr-14 px-6 py-4 bg-gray-50 rounded-2xl outline-none font-bold placeholder:text-gray-300 focus:ring-4 focus:ring-[#2E5F8A]/10 focus:bg-white transition-all"
-                  value={password} onChange={e => setPassword(e.target.value)} />
+                  value={password} onChange={e => { setPassword(e.target.value); if(error) setError(''); }} />
               </div>
             </div>
 

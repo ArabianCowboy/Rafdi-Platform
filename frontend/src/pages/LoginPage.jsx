@@ -12,11 +12,23 @@ function LoginPage() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
 
+    if (!validateEmail(email)) {
+      setError('يرجى إدخال بريد إلكتروني صحيح');
+      return;
+    }
+
+    if (!password) {
+      setError('يرجى إدخال كلمة المرور');
+      return;
+    }
+
+    setLoading(true);
     try {
       const res = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
@@ -105,9 +117,9 @@ function LoginPage() {
               <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2.5">البريد الإلكتروني</label>
               <div className="relative">
                 <Mail className="absolute right-5 top-[1.1rem] text-gray-300" size={20} />
-                <input type="email" required placeholder="name@company.com"
-                  className="w-full pr-14 px-6 py-4 bg-gray-50 rounded-2xl outline-none font-bold placeholder:text-gray-300 focus:ring-4 focus:ring-[#2E5F8A]/10 focus:bg-white transition-all"
-                  value={email} onChange={e => setEmail(e.target.value)} />
+                <input type="text" required placeholder="name@company.com"
+                  className={`w-full pr-14 px-6 py-4 bg-gray-50 rounded-2xl outline-none font-bold placeholder:text-gray-300 focus:ring-4 focus:ring-[#2E5F8A]/10 focus:bg-white transition-all ${error && error.includes('بريد') ? 'ring-2 ring-red-400 bg-red-50' : ''}`}
+                  value={email} onChange={e => { setEmail(e.target.value); if(error) setError(''); }} />
               </div>
             </div>
 
@@ -116,11 +128,11 @@ function LoginPage() {
               <div className="relative">
                 <Lock className="absolute right-5 top-[1.1rem] text-gray-300" size={20} />
                 <input type="password" required placeholder="••••••••"
-                  className="w-full pr-14 px-6 py-4 bg-gray-50 rounded-2xl outline-none font-bold placeholder:text-gray-300 focus:ring-4 focus:ring-[#2E5F8A]/10 focus:bg-white transition-all"
-                  value={password} onChange={e => setPassword(e.target.value)} />
+                  className={`w-full pr-14 px-6 py-4 bg-gray-50 rounded-2xl outline-none font-bold placeholder:text-gray-300 focus:ring-4 focus:ring-[#2E5F8A]/10 focus:bg-white transition-all ${error && error.includes('المرور') ? 'ring-2 ring-red-400 bg-red-50' : ''}`}
+                  value={password} onChange={e => { setPassword(e.target.value); if(error) setError(''); }} />
               </div>
             </div>
-            
+
             <button type="submit" disabled={loading}
               className="w-full bg-[#2E5F8A] text-white py-5 rounded-[1.5rem] font-black text-lg shadow-xl hover:bg-[#1E3F5C] hover:-translate-y-1 transition-all active:scale-[0.98] disabled:opacity-70 mt-4">
               {loading ? 'جاري التحميل...' : 'تسجيل الدخول'}
