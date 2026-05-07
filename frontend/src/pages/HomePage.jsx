@@ -30,11 +30,11 @@ function HomePage() {
         <h1>مرحبًا بك في منصة رفدي</h1>
 
         <p>
-          منصة ذكية لإدارة وحجز المستودعات اللوجستية بسهولة.
+          منصة لإدارة وحجز المستودعات اللوجستية .
         </p>
 
         <button className="primary-btn">
-          ابحث عن مستودع
+         المستودعات المتاحة
         </button>
       </section>
 
@@ -49,6 +49,12 @@ function HomePage() {
           <h3>الحجوزات النشطة</h3>
           <p>34</p>
         </div>
+
+        <div className="dashboard-card">
+          <h3>المستودعات المتاحة</h3>
+          <p>77</p>
+        </div>
+
 
         <div className="dashboard-card">
           <h3>الشركات المسجلة</h3>
