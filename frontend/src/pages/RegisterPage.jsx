@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Building2, Mail, Lock, ShieldCheck, UserCircle2 } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Building2, ShieldCheck, ArrowLeft } from 'lucide-react';
 
 const API_URL = 'https://www.rafdi.com';
 
@@ -11,6 +11,7 @@ function RegisterPage() {
   const [accountType, setAccountType] = useState('warehouse_owner');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -21,7 +22,6 @@ function RegisterPage() {
   const handleRegister = async (e) => {
     e.preventDefault();
     setError('');
-
     if (!companyName) { setError('يرجى إدخال اسم الشركة'); return; }
     if (!commercialRegistration) { setError('يرجى إدخال رقم السجل التجاري'); return; }
     if (!validateEmail(email)) { setError('يرجى إدخال بريد إلكتروني صحيح'); return; }
@@ -42,14 +42,9 @@ function RegisterPage() {
         }),
       });
       const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.detail || 'حدث خطأ أثناء إنشاء الحساب');
-        return;
-      }
-
+      if (!res.ok) { setError(data.detail || 'حدث خطأ أثناء إنشاء الحساب'); return; }
       setSuccess(true);
-      setTimeout(() => navigate('/login'), 2000);
+      setTimeout(() => navigate('/login'), 2500);
     } catch {
       setError('حدث خطأ في الاتصال، حاول مرة أخرى');
     } finally {
@@ -58,147 +53,247 @@ function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6"
-      style={{background: 'radial-gradient(circle at top right, rgba(46,95,138,0.15), transparent), radial-gradient(circle at bottom left, rgba(46,95,138,0.05), transparent)'}}>
-      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-        className="bg-white rounded-[3rem] shadow-[0_48px_96px_-12px_rgba(0,0,0,0.12)] overflow-hidden max-w-5xl w-full flex flex-col md:flex-row border border-gray-100">
+    <div className="min-h-screen flex" dir="rtl" style={{fontFamily: "'Cairo', sans-serif"}}>
 
-        {/* Left */}
-        <div className="bg-[#2E5F8A] text-white p-16 md:w-[45%] flex flex-col justify-between relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32 blur-3xl" />
-          <div className="relative z-10">
-            <div className="flex items-center gap-4 mb-12">
-              <div className="p-4 bg-white/10 rounded-2xl border border-white/10">
-                <Building2 size={36} />
+      {/* Left Panel */}
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden"
+        style={{background: 'linear-gradient(135deg, #0f2744 0%, #1a3f6f 40%, #2E5F8A 100%)'}}>
+
+        <div className="absolute inset-0 opacity-10"
+          style={{backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '60px 60px'}} />
+
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full opacity-20 blur-3xl"
+          style={{background: 'radial-gradient(circle, #4A8ABF, transparent)'}} />
+        <div className="absolute bottom-1/4 right-1/4 w-48 h-48 rounded-full opacity-15 blur-3xl"
+          style={{background: 'radial-gradient(circle, #60a5fa, transparent)'}} />
+
+        {/* Floating Cards */}
+        <motion.div
+          animate={{ y: [0, -12, 0] }}
+          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute top-24 right-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-5 w-52"
+        >
+          <p className="text-white/50 text-xs mb-1 font-bold uppercase tracking-widest">انضم إلى</p>
+          <p className="text-white text-3xl font-black">+500</p>
+          <p className="text-white/50 text-xs mt-1 font-bold">شركة مسجلة</p>
+        </motion.div>
+
+        <motion.div
+          animate={{ y: [0, 10, 0] }}
+          transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+          className="absolute bottom-32 left-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-5 w-48"
+        >
+          <p className="text-white/50 text-xs mb-1 font-bold uppercase tracking-widest">مستودع متاح</p>
+          <p className="text-white text-3xl font-black">77</p>
+          <p className="text-emerald-400 text-xs font-bold mt-1">في جميع المناطق</p>
+        </motion.div>
+
+        <div className="relative z-10 flex flex-col justify-center items-start p-16 w-full">
+          <div className="mb-12">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+                style={{background: 'linear-gradient(135deg, #4A8ABF, #2E5F8A)'}}>
+                <span className="text-white font-black text-lg">ر</span>
               </div>
-              <h1 className="text-4xl font-black tracking-tight italic">رفدي</h1>
+              <span className="text-white font-black text-2xl tracking-tight">رفدي</span>
             </div>
-            <h2 className="text-4xl font-extrabold mb-8 leading-tight">ابدأ رحلتك معنا</h2>
-            <p className="text-white/70 text-xl leading-relaxed mb-16">منصة الخدمات اللوجستية للمستودعات</p>
-            <div className="space-y-8">
-              <div className="flex items-center gap-6">
-                <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center border border-white/5">
-                  <Building2 size={24} className="text-[#4A8ABF]" />
-                </div>
-                <p className="font-bold text-lg text-white/90">إدارة المستودعات بكل سلاسة</p>
-              </div>
-              <div className="flex items-center gap-6">
-                <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center border border-white/5">
-                  <ShieldCheck size={24} className="text-[#4A8ABF]" />
-                </div>
-                <p className="font-bold text-lg text-white/90">بيئة عمل آمنة وموثقة</p>
-              </div>
-            </div>
+            <h1 className="text-5xl font-black text-white leading-tight mb-4">
+              انضم إلى<br />
+              <span style={{color: '#4A8ABF'}}>منصة رفدي</span><br />
+              اليوم
+            </h1>
+            <p className="text-white/50 text-lg leading-relaxed max-w-sm">
+              سجّل شركتك وابدأ بإدارة وحجز المستودعات بكل سهولة وأمان.
+            </p>
           </div>
-          <div className="relative z-10 pt-10 border-t border-white/10 opacity-40 text-center">
-            <p className="text-sm font-black uppercase tracking-[0.2em]">© 2026 Rafdi Platform</p>
+
+          <div className="space-y-4">
+            {[
+              { icon: '🏭', text: 'أضف مستودعاتك وابدأ التأجير فوراً' },
+              { icon: '🔒', text: 'بيانات محمية بأعلى معايير الأمان' },
+              { icon: '📊', text: 'تتبع حجوزاتك ومدفوعاتك بسهولة' },
+            ].map((item, i) => (
+              <motion.div key={i}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 + i * 0.1 }}
+                className="flex items-center gap-3"
+              >
+                <span className="text-xl">{item.icon}</span>
+                <p className="text-white/70 font-medium">{item.text}</p>
+              </motion.div>
+            ))}
           </div>
         </div>
+      </div>
 
-        {/* Right */}
-        <div className="p-16 md:w-[55%] bg-white flex flex-col justify-center overflow-y-auto">
-          <div className="flex p-1.5 bg-gray-50 rounded-2xl mb-12 w-fit border border-gray-100">
-            <Link to="/login">
-              <button className="py-3.5 px-10 rounded-xl font-black text-sm text-gray-400 hover:text-gray-600 transition-all">
+      {/* Right Panel - Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-[#F8FAFC] overflow-y-auto">
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-md py-8"
+        >
+          {/* Header */}
+          <div className="mb-8 text-right">
+            <div className="flex items-center gap-3 mb-6 lg:hidden">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center"
+                style={{background: 'linear-gradient(135deg, #4A8ABF, #2E5F8A)'}}>
+                <span className="text-white font-black">ر</span>
+              </div>
+              <span className="text-[#0f2744] font-black text-xl">رفدي</span>
+            </div>
+            <h2 className="text-3xl font-black text-[#0f2744] mb-2">إنشاء حساب جديد ✨</h2>
+            <p className="text-gray-400 font-medium">أدخل بيانات شركتك للبدء</p>
+          </div>
+
+          {/* Tabs */}
+          <div className="flex bg-white rounded-2xl p-1.5 mb-8 shadow-sm border border-gray-100">
+            <Link to="/login" className="flex-1">
+              <button className="w-full py-3 rounded-xl font-black text-sm text-gray-400 hover:text-gray-600 transition-all">
                 تسجيل الدخول
               </button>
             </Link>
-            <button className="py-3.5 px-10 rounded-xl font-black text-sm bg-white text-[#2E5F8A] shadow-lg">
+            <button className="flex-1 py-3 rounded-xl font-black text-sm transition-all"
+              style={{background: 'linear-gradient(135deg, #1a3f6f, #2E5F8A)', color: 'white'}}>
               إنشاء حساب
             </button>
           </div>
 
+          {/* Alerts */}
           <AnimatePresence>
             {error && (
-              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
-                className="mb-8 p-6 bg-red-50 border-r-4 border-red-500 text-red-800 rounded-2xl text-sm flex items-start gap-4">
-                <div className="p-2 bg-red-100 rounded-xl text-red-600"><ShieldCheck size={20} /></div>
-                <p className="font-black leading-relaxed text-right">{error}</p>
+              <motion.div
+                initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                className="mb-6 p-4 rounded-2xl text-sm flex items-center gap-3 text-right"
+                style={{background: '#FEF2F2', border: '1px solid #FCA5A5'}}
+              >
+                <div className="w-8 h-8 rounded-xl bg-red-100 flex items-center justify-center shrink-0 text-red-500 font-black text-lg">!</div>
+                <p className="font-bold text-red-700">{error}</p>
               </motion.div>
             )}
             {success && (
-              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
-                className="mb-8 p-6 bg-emerald-50 border-r-4 border-emerald-500 text-emerald-900 rounded-2xl text-sm flex items-start gap-4">
-                <div className="p-2 bg-emerald-100 rounded-xl text-emerald-600"><ShieldCheck size={20} /></div>
-                <p className="font-black leading-relaxed text-right">تم إنشاء الحساب بنجاح! سيتم تحويلك لصفحة تسجيل الدخول...</p>
+              <motion.div
+                initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                className="mb-6 p-4 rounded-2xl text-sm flex items-center gap-3 text-right"
+                style={{background: '#F0FDF4', border: '1px solid #86EFAC'}}
+              >
+                <div className="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0 text-emerald-500 text-lg">✓</div>
+                <p className="font-bold text-emerald-700">تم إنشاء الحساب بنجاح! جاري التحويل...</p>
               </motion.div>
             )}
           </AnimatePresence>
 
-          <form onSubmit={handleRegister} className="space-y-5 text-right">
+          {/* Form */}
+          <form onSubmit={handleRegister} className="space-y-4">
+
+            {/* Company Name */}
             <div>
-              <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2.5">اسم الشركة</label>
+              <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2 text-right">اسم الشركة</label>
               <div className="relative">
-                <UserCircle2 className="absolute right-5 top-[1.1rem] text-gray-300" size={20} />
-                <input type="text" placeholder="مثال: شركة رفدي"
-                  className="w-full pr-14 px-6 py-4 bg-gray-50 rounded-2xl outline-none font-bold placeholder:text-gray-300 focus:ring-4 focus:ring-[#2E5F8A]/10 focus:bg-white transition-all"
+                <input type="text" placeholder="مثال: شركة رفدي للخدمات اللوجستية"
+                  className="w-full py-4 px-5 pr-12 rounded-2xl font-bold text-right outline-none transition-all bg-white border-2 border-transparent placeholder:text-gray-300 text-[#0f2744]"
+                  onFocus={e => e.target.style.borderColor = '#2E5F8A'}
+                  onBlur={e => e.target.style.borderColor = 'transparent'}
                   value={companyName} onChange={e => { setCompanyName(e.target.value); if(error) setError(''); }} />
+                <Building2 className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
               </div>
             </div>
 
+            {/* Commercial Registration */}
             <div>
-              <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2.5">رقم السجل التجاري</label>
+              <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2 text-right">رقم السجل التجاري</label>
               <div className="relative">
-                <ShieldCheck className="absolute right-5 top-[1.1rem] text-gray-300" size={20} />
                 <input type="text" placeholder="1010XXXXXX"
-                  className="w-full pr-14 px-6 py-4 bg-gray-50 rounded-2xl outline-none font-bold placeholder:text-gray-300 focus:ring-4 focus:ring-[#2E5F8A]/10 focus:bg-white transition-all"
+                  className="w-full py-4 px-5 pr-12 rounded-2xl font-bold text-right outline-none transition-all bg-white border-2 border-transparent placeholder:text-gray-300 text-[#0f2744]"
+                  onFocus={e => e.target.style.borderColor = '#2E5F8A'}
+                  onBlur={e => e.target.style.borderColor = 'transparent'}
                   value={commercialRegistration} onChange={e => { setCommercialRegistration(e.target.value); if(error) setError(''); }} />
+                <ShieldCheck className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
               </div>
             </div>
 
+            {/* Account Type */}
             <div>
-              <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2.5">نوع الحساب</label>
-              <div className="space-y-3">
-                <label className="flex items-center gap-4 cursor-pointer bg-gray-50 px-6 py-4 rounded-2xl hover:bg-white border border-transparent hover:border-[#2E5F8A]/20 transition-all">
-                  <input type="radio" name="accountType" value="warehouse_owner"
-                    className="w-5 h-5 accent-[#2E5F8A]"
-                    checked={accountType === 'warehouse_owner'}
-                    onChange={e => setAccountType(e.target.value)} />
-                  <div>
-                    <p className="font-black text-gray-900">مالك مستودع</p>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">أرغب في تأجير مستودعاتي</p>
-                  </div>
-                </label>
-                <label className="flex items-center gap-4 cursor-pointer bg-gray-50 px-6 py-4 rounded-2xl hover:bg-white border border-transparent hover:border-[#2E5F8A]/20 transition-all">
-                  <input type="radio" name="accountType" value="renter_company"
-                    className="w-5 h-5 accent-[#2E5F8A]"
-                    checked={accountType === 'renter_company'}
-                    onChange={e => setAccountType(e.target.value)} />
-                  <div>
-                    <p className="font-black text-gray-900">مستأجر مستودع</p>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">أرغب في استئجار مستودعات</p>
-                  </div>
-                </label>
+              <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2 text-right">نوع الحساب</label>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { value: 'warehouse_owner', label: 'مالك مستودع', icon: '🏭', desc: 'أرغب في التأجير' },
+                  { value: 'renter_company', label: 'مستأجر', icon: '📦', desc: 'أرغب في الاستئجار' },
+                ].map((type) => (
+                  <button key={type.value} type="button"
+                    onClick={() => setAccountType(type.value)}
+                    className="p-4 rounded-2xl text-right transition-all border-2 bg-white"
+                    style={{
+                      borderColor: accountType === type.value ? '#2E5F8A' : 'transparent',
+                      background: accountType === type.value ? 'rgba(46,95,138,0.05)' : 'white'
+                    }}
+                  >
+                    <span className="text-2xl block mb-1">{type.icon}</span>
+                    <p className="font-black text-sm text-[#0f2744]">{type.label}</p>
+                    <p className="text-[10px] text-gray-400 font-bold">{type.desc}</p>
+                  </button>
+                ))}
               </div>
             </div>
 
+            {/* Email */}
             <div>
-              <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2.5">البريد الإلكتروني</label>
+              <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2 text-right">البريد الإلكتروني</label>
               <div className="relative">
-                <Mail className="absolute right-5 top-[1.1rem] text-gray-300" size={20} />
                 <input type="text" placeholder="name@company.com"
-                  className="w-full pr-14 px-6 py-4 bg-gray-50 rounded-2xl outline-none font-bold placeholder:text-gray-300 focus:ring-4 focus:ring-[#2E5F8A]/10 focus:bg-white transition-all"
+                  className="w-full py-4 px-5 pr-12 rounded-2xl font-bold text-right outline-none transition-all bg-white border-2 border-transparent placeholder:text-gray-300 text-[#0f2744]"
+                  onFocus={e => e.target.style.borderColor = '#2E5F8A'}
+                  onBlur={e => e.target.style.borderColor = 'transparent'}
                   value={email} onChange={e => { setEmail(e.target.value); if(error) setError(''); }} />
+                <Mail className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
               </div>
             </div>
 
+            {/* Password */}
             <div>
-              <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2.5">كلمة المرور</label>
+              <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2 text-right">كلمة المرور</label>
               <div className="relative">
-                <Lock className="absolute right-5 top-[1.1rem] text-gray-300" size={20} />
-                <input type="password" placeholder="••••••••"
-                  className="w-full pr-14 px-6 py-4 bg-gray-50 rounded-2xl outline-none font-bold placeholder:text-gray-300 focus:ring-4 focus:ring-[#2E5F8A]/10 focus:bg-white transition-all"
+                <input type={showPassword ? 'text' : 'password'} placeholder="••••••••"
+                  className="w-full py-4 px-5 pr-12 pl-12 rounded-2xl font-bold text-right outline-none transition-all bg-white border-2 border-transparent placeholder:text-gray-300 text-[#0f2744]"
+                  onFocus={e => e.target.style.borderColor = '#2E5F8A'}
+                  onBlur={e => e.target.style.borderColor = 'transparent'}
                   value={password} onChange={e => { setPassword(e.target.value); if(error) setError(''); }} />
+                <Lock className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
+                <button type="button" onClick={() => setShowPassword(!showPassword)}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500 transition-colors">
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
             </div>
 
-            <button type="submit" disabled={loading}
-              className="w-full bg-[#2E5F8A] text-white py-5 rounded-[1.5rem] font-black text-lg shadow-xl hover:bg-[#1E3F5C] hover:-translate-y-1 transition-all active:scale-[0.98] disabled:opacity-70 mt-4">
-              {loading ? 'جاري التحميل...' : 'إنشاء الحساب'}
-            </button>
+            {/* Submit */}
+            <motion.button type="submit" disabled={loading}
+              whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}
+              className="w-full py-4 rounded-2xl font-black text-white text-lg flex items-center justify-center gap-3 mt-2 disabled:opacity-70"
+              style={{background: loading ? '#93b4d4' : 'linear-gradient(135deg, #1a3f6f 0%, #2E5F8A 100%)', boxShadow: '0 8px 32px rgba(46,95,138,0.35)'}}
+            >
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <motion.span animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                    className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full block" />
+                  جاري التحميل...
+                </span>
+              ) : (
+                <>
+                  <ArrowLeft size={20} />
+                  إنشاء الحساب
+                </>
+              )}
+            </motion.button>
           </form>
-        </div>
-      </motion.div>
+
+          <p className="text-center text-xs text-gray-400 font-bold mt-8">
+            © 2026 Rafdi Platform — جميع الحقوق محفوظة
+          </p>
+        </motion.div>
+      </div>
     </div>
   );
 }
