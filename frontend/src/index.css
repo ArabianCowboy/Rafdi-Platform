@@ -1,38 +1,23 @@
-:root {
-  --primary: #5289b6;
-  --primary-dark: #5183a6;
-  --background: #f6f8fb;
-  --card: #ffffff;
-  --text-main: #111827;
-  --text-muted: #6b7280;
-  --border: #e5e7eb;
-  --success: #22c55e;
-  --danger: #ef4444;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cairo:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #2E5F8A;
+  --color-primary-dark: #1E3F5C;
+  --color-primary-light: #4A8ABF;
+  --color-background: #F9FAFB;
+  --color-success: #059669;
+  --color-error: #991B1B;
+  --color-warning: #D97706;
+  --font-sans: "Inter", "Cairo", ui-sans-serif, system-ui, sans-serif;
+  --font-cairo: "Cairo", sans-serif;
 }
 
-* {
-  box-sizing: border-box;
+@layer base {
+  body {
+    @apply bg-background text-gray-900 antialiased;
+  }
 }
 
-html {
-  direction: rtl;
-}
-
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background-color: var(--background);
-  color: var(--text-main);
-}
-
-button,
-input,
-select,
-textarea {
-  font-family: inherit;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
+.rtl { direction: rtl; }
+.ltr { direction: ltr; }
