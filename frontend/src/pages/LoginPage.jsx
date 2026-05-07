@@ -120,7 +120,7 @@ function LoginPage() {
                   value={password} onChange={e => setPassword(e.target.value)} />
               </div>
             </div>
-
+            
             <button type="submit" disabled={loading}
               className="w-full bg-[#2E5F8A] text-white py-5 rounded-[1.5rem] font-black text-lg shadow-xl hover:bg-[#1E3F5C] hover:-translate-y-1 transition-all active:scale-[0.98] disabled:opacity-70 mt-4">
               {loading ? 'جاري التحميل...' : 'تسجيل الدخول'}
