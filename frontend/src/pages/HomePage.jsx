@@ -59,19 +59,22 @@ function HomePage() {
               </div>
               <div className="hidden md:flex items-center gap-1">
                 {[
-                  { label: 'الرئيسية', icon: LayoutDashboard, active: true },
-                  { label: 'المستودعات', icon: Building2 },
-                  { label: 'الحجوزات', icon: Layers },
-                  { label: 'الدعم', icon: HeadphonesIcon },
+                  { label: 'الرئيسية', icon: LayoutDashboard, path: "/home" },
+                  { label: 'المستودعات', icon: Building2, path: "/warehouses" },
+                  { label: 'الحجوزات', icon: Layers, path: "/bookings" },
+                  { label: 'الدعم', icon: HeadphonesIcon, path: "/support" },
                 ].map((item) => (
-                  <button key={item.label}
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm transition-all"
+                <button
+                  key={item.label}
+                  onClick={() => navigate(item.path)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm transition-all"
                     style={{
-                      background: item.active ? 'rgba(46,95,138,0.08)' : 'transparent',
-                      color: item.active ? '#2E5F8A' : '#6B7280'
-                    }}>
-                    <item.icon size={16} />
-                    {item.label}
+                    background: item.active ? 'rgba(46,95,138,0.08)' : 'transparent',
+                    color: item.active ? '#2E5F8A' : '#6B7280'
+                      }}
+                        >
+                      <item.icon size={16} />
+                      {item.label}
                   </button>
                 ))}
               </div>
@@ -108,7 +111,9 @@ function HomePage() {
                 منصة متكاملة لإدارة وحجز المستودعات اللوجستية في جميع أنحاء المملكة العربية السعودية.
               </p>
               <div className="flex gap-3">
-                <button className="flex items-center gap-2 px-8 py-4 rounded-2xl font-black text-[#0f2744] bg-white hover:bg-gray-50 transition-all shadow-xl">
+                <button 
+                    onClick={() => navigate("/warehouses")}
+                  className="flex items-center gap-2 px-8 py-4 rounded-2xl font-black text-[#0f2744] bg-white hover:bg-gray-50 transition-all shadow-xl">
                   <Package size={20} />
                   استعرض المستودعات
                 </button>
@@ -141,7 +146,9 @@ function HomePage() {
       {/* Warehouses Section */}
       <section className="max-w-7xl mx-auto px-6 py-16">
         <div className="flex justify-between items-center mb-10">
-          <button className="flex items-center gap-2 text-[#2E5F8A] font-black text-sm hover:gap-3 transition-all">
+          <button 
+            onClick={() => navigate("/warehouses")}
+            className="flex items-center gap-2 text-[#2E5F8A] font-black text-sm hover:gap-3 transition-all">
             عرض الكل
             <ArrowLeft size={16} />
           </button>
