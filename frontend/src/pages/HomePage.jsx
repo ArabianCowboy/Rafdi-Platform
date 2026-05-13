@@ -38,7 +38,7 @@ function HomePage() {
   const stats = [
     { label: "المستودعات", value: warehouses.length || '0', icon: Building2, color: '#3B82F6' },
     { label: "الحجوزات النشطة", value: "34", icon: Layers, color: '#10B981' },
-    { label: "المتاحة الآن", value: warehouses.filter(w => w.is_active).length || '0', icon: CheckCircle, color: '#F59E0B' },
+    { label: "المتاحة الآن", value: warehouses.filter(w => w.IsActive).length || '0', icon: CheckCircle, color: '#F59E0B' },
     { label: "الشركات", value: "52", icon: Users, color: '#8B5CF6' },
   ];
 
@@ -98,7 +98,7 @@ function HomePage() {
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="text-right max-w-xl">
               <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-2 mb-6">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-white/80 text-xs font-bold">{warehouses.filter(w => w.is_active).length} مستودع متاح الآن</span>
+                <span className="text-white/80 text-xs font-bold">{warehouses.filter(w => w.IsActive).length} مستودع متاح الآن</span>
               </div>
               <h1 className="text-5xl font-black text-white leading-tight mb-5">
                 أدر مستودعاتك<br />
@@ -169,26 +169,26 @@ function HomePage() {
         {!loading && !error && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {warehouses.slice(0, 6).map((w, idx) => (
-              <motion.div key={w.id}
+              <motion.div key={w.WarehouseID}
                 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }}
                 className="bg-white rounded-3xl overflow-hidden border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
               >
                 {/* Image */}
                 <div className="h-44 relative overflow-hidden"
                   style={{background: 'linear-gradient(135deg, #1a3f6f, #2E5F8A)'}}>
-                  {w.image_url ? (
-                    <img src={w.image_url} alt={w.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  {w.ImagePath ? (
+                    <img src={w.ImagePath} alt={w.Name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   ) : (
                     <Building2 className="absolute inset-0 m-auto text-white/10" size={80} />
                   )}
                   <div className="absolute top-4 right-4">
                     <span className="px-3 py-1 rounded-full text-xs font-black text-white bg-white/20 border border-white/30">
-                      {w.is_active ? 'متاح' : 'غير متاح'}
+                      {w.IsActive ? 'متاح' : 'غير متاح'}
                     </span>
                   </div>
                   <div className="absolute bottom-4 left-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl px-3 py-1.5">
                     <p className="text-white font-black text-sm">
-                      {w.price_per_month?.toLocaleString()} <span className="text-white/60 font-bold text-xs">ر.س/شهر</span>
+                      {w.PricePerMonth?.toLocaleString()} <span className="text-white/60 font-bold text-xs">ر.س/شهر</span>
                     </p>
                   </div>
                 </div>
@@ -199,22 +199,22 @@ function HomePage() {
                       <Star size={14} className="text-amber-400 fill-amber-400" />
                       <span className="text-sm font-black text-gray-700">4.5</span>
                     </div>
-                    <h3 className="font-black text-[#0f2744] text-right">{w.name}</h3>
+                    <h3 className="font-black text-[#0f2744] text-right">{w.Name}</h3>
                   </div>
 
                   <div className="space-y-2 mb-5">
                     <div className="flex items-center justify-end gap-2 text-gray-400 text-sm">
-                      <span className="font-medium">{w.location}</span>
+                      <span className="font-medium">{w.Location}</span>
                       <MapPin size={14} className="text-[#2E5F8A]" />
                     </div>
                     <div className="flex items-center justify-end gap-2 text-gray-400 text-sm">
-                      <span className="font-medium">{w.size} م²</span>
+                      <span className="font-medium">{w.Size} م²</span>
                       <Package size={14} className="text-[#2E5F8A]" />
                     </div>
                   </div>
 
                   <button
-                    onClick={() => navigate(`/warehouse/${w.id}`)}
+                    onClick={() => navigate(`/warehouse/${w.WarehouseID}`)}
                     className="w-full py-3 rounded-2xl font-black text-sm transition-all group-hover:shadow-lg text-white"
                     style={{background: 'linear-gradient(135deg, #1a3f6f, #2E5F8A)', boxShadow: '0 4px 15px rgba(46,95,138,0.2)'}}>
                     احجز الآن
