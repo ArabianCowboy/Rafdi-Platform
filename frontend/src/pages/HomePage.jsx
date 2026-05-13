@@ -221,7 +221,7 @@ function HomePage() {
                   </div>
 
                   <button
-                    onClick={() => navigate(`/warehouse/${w.WarehouseID}`)}
+                    onClick={() => navigate(`/booking/${w.WarehouseID}`)}
                     className="w-full py-3 rounded-2xl font-black text-sm transition-all group-hover:shadow-lg text-white"
                     style={{background: 'linear-gradient(135deg, #1a3f6f, #2E5F8A)', boxShadow: '0 4px 15px rgba(46,95,138,0.2)'}}>
                     احجز الآن
