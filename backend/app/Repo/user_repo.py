@@ -14,6 +14,9 @@ class UserRepo(BaseRepo[User]):
 
     def get_by_id(self, id: int) -> Optional[User]:
         return self.db.query(User).filter(User.UserID == id).first()
+    
+    def get_by_company_id(self, id: int) -> Optional[User]:
+        return self.db.query(User).filter(User.CompanyID == id).first()
 
     def get_by_email(self, email: str) -> Optional[User]:
         return self.db.query(User).filter(User.Email == email).first()

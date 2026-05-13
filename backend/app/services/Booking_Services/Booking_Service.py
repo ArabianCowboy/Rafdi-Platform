@@ -82,10 +82,7 @@ class BookingService:
         except Exception as e:
             self.booking_repo.db.rollback()
             raise ValueError(str(e))
-
-    # ─────────────────────────────────────────
-    # Get
-    # ─────────────────────────────────────────
+        
 
     def get_by_company(self, company_id: int) -> list[BookingResponse]:
         bookings = self.booking_repo.get_by_company(company_id)
@@ -94,10 +91,6 @@ class BookingService:
     def get_all(self) -> list[BookingResponse]:
         bookings = self.booking_repo.get_all()
         return [BookingResponse.model_validate(b) for b in bookings]
-
-    # ─────────────────────────────────────────
-    # Update Status
-    # ─────────────────────────────────────────
 
     def update_status(self, booking_id: int, data: BookingStatusUpdate) -> BookingResponse:
         try:
