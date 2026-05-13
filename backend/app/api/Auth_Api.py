@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.Dtos.Auth_DTOs import RegisterCreate, LoginCreate, TokenResponse, ProfileUpdate
 from app.Dtos.User_DTOs import UserResponse
+from app.Dtos.Auth_DTOs import ForgotPasswordRequest, ResetPasswordRequest
 from app.Dtos.Company_DTOs import CompanyResponse
 from app.Repo.user_repo import UserRepo
 from app.Repo.Companey_Repo import CompanyRepo
@@ -14,10 +15,21 @@ from app.services.User_services.validation_service import ValidationService
 from app.services.User_services.role_assignment_service import RoleAssignmentService
 from app.services.User_services.UserProfileUpdate_service import UserProfileService
 from app.services.Jwt_Services.Jwt_service import JWTService
+from app.services.User_services.Otp_Service import OTPService
+from app.services.User_services.Email_Service import EmailService
+from app.services.User_services.Forgot_Password_service import ForgotPasswordService
 from app.api.Auth_middleware import get_current_user
 from app.config import get_db
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
+
+def get_forgot_password_service(db: Session = Depends(get_db)) -> ForgotPasswordService:
+    return ForgotPasswordService(
+        user_repo        = UserRepo(db),
+        otp_service      = OTPService(),
+        email_service    = EmailService(),
+        password_service = PasswordService(),
+    )
 
 
 def get_auth_service(db: Session = Depends(get_db)) -> AuthService:
@@ -81,5 +93,25 @@ def update_company(
 ):
     try:
         return service.update_company_name(current_user["company_id"], data)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
+@router.post("/forgot-password")
+def forgot_password(
+    data   : ForgotPasswordRequest,
+    service: ForgotPasswordService = Depends(get_forgot_password_service)
+):
+    service.send_otp(data.email)
+    return {"message": " سيصلك رمز التحقق على الأيميل"}
+
+
+@router.post("/reset-password")
+def reset_password(
+    data   : ResetPasswordRequest,
+    service: ForgotPasswordService = Depends(get_forgot_password_service)
+):
+    try:
+        service.reset_password(data.email, data.otp, data.new_password)
+        return {"message": "تم تغيير كلمة المرور بنجاح"}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

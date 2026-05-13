@@ -26,3 +26,12 @@ class LoginCreate(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type  : str = "bearer"
+
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+class ResetPasswordRequest(BaseModel):
+    email       : EmailStr
+    otp         : str
+    new_password: str
