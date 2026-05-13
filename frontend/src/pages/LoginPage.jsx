@@ -182,7 +182,9 @@ function LoginPage() {
             <div>
               <div className="flex justify-between items-center mb-2">
                 <button type="button" className="text-xs font-black text-[#2E5F8A] hover:text-[#1a3f6f] transition-colors">
-                  نسيت كلمة المرور؟
+                  <Link to="/forgot-password" className="text-xs font-black text-[#2E5F8A] hover:text-[#1a3f6f] transition-colors">
+  نسيت كلمة المرور؟
+</Link>
                 </button>
                 <label className="text-xs font-black text-gray-500 uppercase tracking-widest">
                   كلمة المرور
