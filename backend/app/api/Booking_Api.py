@@ -2,7 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.Dtos.Booking_DTOs import BookingCreate, BookingStatusUpdate, BookingResponse
-from app.Repo import Booking_Repo, Payment_Repo, WarehouseRepo, UserRepo, Notification_Repo
+from app.Repo.user_repo import UserRepo
+from app.Repo.Booking_Repo import BookingRepo
+from app.Repo.Payment_Repo import PaymentRepo
+from app.Repo.WarehouseRepo import WarehouseRepo
+from app.Repo.Notification_Repo import NotificationRepo
 from app.services.Booking_Services.Booking_Service import BookingService
 from app.services.Booking_Services.BookingOverlap_Service import BookingOverlapService
 from app.services.Booking_Services.BookingPrice_Service import BookingPriceService
@@ -15,11 +19,11 @@ router = APIRouter(prefix="/bookings", tags=["Bookings"])
 
 
 def get_booking_service(db: Session = Depends(get_db)) -> BookingService:
-    booking_repo   = Booking_Repo(db)
-    payment_repo   = Payment_Repo(db)
+    booking_repo   = BookingRepo(db)
+    payment_repo   = PaymentRepo(db)
     warehouse_repo = WarehouseRepo(db)
     user_repo      = UserRepo(db)
-    notification_service = NotificationService(Notification_Repo(db))
+    notification_service = NotificationService(NotificationRepo(db))
     return BookingService(
         booking_repo         = booking_repo,
         payment_repo         = payment_repo,
