@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Mail, Lock, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 
-const API_URL = 'https://www.rafdi.com';
+const API_URL = 'https://api.rafdi.com';
 
 function LoginPage() {
   const [email, setEmail] = useState('');

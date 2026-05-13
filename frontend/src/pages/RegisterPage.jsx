@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Mail, Lock, Eye, EyeOff, Building2, ShieldCheck, ArrowLeft } from 'lucide-react';
 
-const API_URL = 'https://www.rafdi.com';
+const API_URL = 'https://api.rafdi.com';
 
 function RegisterPage() {
   const [companyName, setCompanyName] = useState('');
