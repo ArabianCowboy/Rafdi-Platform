@@ -1,26 +1,45 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
-import { Building2, LogOut, LayoutDashboard, Layers, HeadphonesIcon, TrendingUp, Package, CheckCircle, Users, ArrowLeft, MapPin, Star } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Building2, LogOut, LayoutDashboard, Layers, HeadphonesIcon, Package, CheckCircle, Users, ArrowLeft, MapPin, Star, Loader } from "lucide-react";
+
+const API_URL = 'https://api.rafdi.com';
 
 function HomePage() {
   const navigate = useNavigate();
+  const [warehouses, setWarehouses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/login");
   };
 
-  const stats = [
-    { label: "المستودعات", value: "128", icon: Building2, color: '#3B82F6', bg: '#EFF6FF' },
-    { label: "الحجوزات النشطة", value: "34", icon: Layers, color: '#10B981', bg: '#F0FDF4' },
-    { label: "المتاحة الآن", value: "77", icon: CheckCircle, color: '#F59E0B', bg: '#FFFBEB' },
-    { label: "الشركات", value: "52", icon: Users, color: '#8B5CF6', bg: '#F5F3FF' },
-  ];
+  useEffect(() => {
+    const fetchWarehouses = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`${API_URL}/warehouses/`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('فشل تحميل المستودعات');
+        const data = await res.json();
+        setWarehouses(data);
+      } catch (err) {
+        setError('حدث خطأ في تحميل المستودعات');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchWarehouses();
+  }, []);
 
-  const warehouses = [
-    { name: 'مستودع الميناء النموذجي', location: 'جدة، المنطقة الصناعية', price: '15,000', size: '5,000 م²', rating: 4.8, tag: 'الأكثر طلباً' },
-    { name: 'مستودع شرق الرياض', location: 'الرياض، السلي', price: '8,000', size: '2,500 م²', rating: 4.5, tag: 'جديد' },
-    { name: 'مستودع الدمام اللوجستي', location: 'الدمام، ميناء الملك عبدالعزيز', price: '12,000', size: '3,000 م²', rating: 4.7, tag: 'مميز' },
+  const stats = [
+    { label: "المستودعات", value: warehouses.length || '0', icon: Building2, color: '#3B82F6' },
+    { label: "الحجوزات النشطة", value: "34", icon: Layers, color: '#10B981' },
+    { label: "المتاحة الآن", value: warehouses.filter(w => w.is_active).length || '0', icon: CheckCircle, color: '#F59E0B' },
+    { label: "الشركات", value: "52", icon: Users, color: '#8B5CF6' },
   ];
 
   return (
@@ -79,7 +98,7 @@ function HomePage() {
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="text-right max-w-xl">
               <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-2 mb-6">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-white/80 text-xs font-bold">77 مستودع متاح الآن</span>
+                <span className="text-white/80 text-xs font-bold">{warehouses.filter(w => w.is_active).length} مستودع متاح الآن</span>
               </div>
               <h1 className="text-5xl font-black text-white leading-tight mb-5">
                 أدر مستودعاتك<br />
@@ -99,20 +118,13 @@ function HomePage() {
               </div>
             </motion.div>
 
-            {/* Stats floating card */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2 }}
-              className="grid grid-cols-2 gap-4 w-full max-w-sm"
-            >
+            {/* Stats */}
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2 }}
+              className="grid grid-cols-2 gap-4 w-full max-w-sm">
               {stats.map((stat, idx) => (
                 <motion.div key={idx}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 + idx * 0.1 }}
-                  className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-5"
-                >
+                  initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 + idx * 0.1 }}
+                  className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-5">
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
                     style={{background: `${stat.color}30`}}>
                     <stat.icon size={20} style={{color: stat.color}} />
@@ -139,58 +151,86 @@ function HomePage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {warehouses.map((w, idx) => (
-            <motion.div key={idx}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.1 }}
-              className="bg-white rounded-3xl overflow-hidden border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
-            >
-              {/* Image Placeholder */}
-              <div className="h-44 relative overflow-hidden"
-                style={{background: 'linear-gradient(135deg, #1a3f6f, #2E5F8A)'}}>
-                <div className="absolute inset-0 opacity-10"
-                  style={{backgroundImage: 'linear-gradient(rgba(255,255,255,0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.2) 1px, transparent 1px)', backgroundSize: '30px 30px'}} />
-                <div className="absolute top-4 right-4">
-                  <span className="px-3 py-1 rounded-full text-xs font-black text-white bg-white/20 border border-white/30">
-                    {w.tag}
-                  </span>
+        {/* Loading */}
+        {loading && (
+          <div className="flex justify-center items-center py-20">
+            <Loader size={40} className="text-[#2E5F8A] animate-spin" />
+          </div>
+        )}
+
+        {/* Error */}
+        {error && (
+          <div className="text-center py-20">
+            <p className="text-red-500 font-bold">{error}</p>
+          </div>
+        )}
+
+        {/* Warehouses Grid */}
+        {!loading && !error && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {warehouses.slice(0, 6).map((w, idx) => (
+              <motion.div key={w.id}
+                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }}
+                className="bg-white rounded-3xl overflow-hidden border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
+              >
+                {/* Image */}
+                <div className="h-44 relative overflow-hidden"
+                  style={{background: 'linear-gradient(135deg, #1a3f6f, #2E5F8A)'}}>
+                  {w.image_url ? (
+                    <img src={w.image_url} alt={w.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  ) : (
+                    <Building2 className="absolute inset-0 m-auto text-white/10" size={80} />
+                  )}
+                  <div className="absolute top-4 right-4">
+                    <span className="px-3 py-1 rounded-full text-xs font-black text-white bg-white/20 border border-white/30">
+                      {w.is_active ? 'متاح' : 'غير متاح'}
+                    </span>
+                  </div>
+                  <div className="absolute bottom-4 left-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl px-3 py-1.5">
+                    <p className="text-white font-black text-sm">
+                      {w.price_per_month?.toLocaleString()} <span className="text-white/60 font-bold text-xs">ر.س/شهر</span>
+                    </p>
+                  </div>
                 </div>
-                <div className="absolute bottom-4 left-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl px-3 py-1.5">
-                  <p className="text-white font-black text-sm">{w.price} <span className="text-white/60 font-bold text-xs">ر.س/شهر</span></p>
+
+                <div className="p-6">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex items-center gap-1">
+                      <Star size={14} className="text-amber-400 fill-amber-400" />
+                      <span className="text-sm font-black text-gray-700">4.5</span>
+                    </div>
+                    <h3 className="font-black text-[#0f2744] text-right">{w.name}</h3>
+                  </div>
+
+                  <div className="space-y-2 mb-5">
+                    <div className="flex items-center justify-end gap-2 text-gray-400 text-sm">
+                      <span className="font-medium">{w.location}</span>
+                      <MapPin size={14} className="text-[#2E5F8A]" />
+                    </div>
+                    <div className="flex items-center justify-end gap-2 text-gray-400 text-sm">
+                      <span className="font-medium">{w.size} م²</span>
+                      <Package size={14} className="text-[#2E5F8A]" />
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => navigate(`/warehouse/${w.id}`)}
+                    className="w-full py-3 rounded-2xl font-black text-sm transition-all group-hover:shadow-lg text-white"
+                    style={{background: 'linear-gradient(135deg, #1a3f6f, #2E5F8A)', boxShadow: '0 4px 15px rgba(46,95,138,0.2)'}}>
+                    احجز الآن
+                  </button>
                 </div>
-                <Building2 className="absolute inset-0 m-auto text-white/10" size={80} />
+              </motion.div>
+            ))}
+
+            {warehouses.length === 0 && (
+              <div className="col-span-3 text-center py-20">
+                <Building2 size={60} className="text-gray-200 mx-auto mb-4" />
+                <p className="text-gray-400 font-bold">لا توجد مستودعات متاحة حالياً</p>
               </div>
-
-              <div className="p-6">
-                <div className="flex justify-between items-start mb-3">
-                  <div className="flex items-center gap-1">
-                    <Star size={14} className="text-amber-400 fill-amber-400" />
-                    <span className="text-sm font-black text-gray-700">{w.rating}</span>
-                  </div>
-                  <h3 className="font-black text-[#0f2744] text-right">{w.name}</h3>
-                </div>
-
-                <div className="space-y-2 mb-5">
-                  <div className="flex items-center justify-end gap-2 text-gray-400 text-sm">
-                    <span className="font-medium">{w.location}</span>
-                    <MapPin size={14} className="text-[#2E5F8A]" />
-                  </div>
-                  <div className="flex items-center justify-end gap-2 text-gray-400 text-sm">
-                    <span className="font-medium">{w.size}</span>
-                    <Package size={14} className="text-[#2E5F8A]" />
-                  </div>
-                </div>
-
-                <button className="w-full py-3 rounded-2xl font-black text-sm transition-all group-hover:shadow-lg"
-                  style={{background: 'linear-gradient(135deg, #1a3f6f, #2E5F8A)', color: 'white', boxShadow: '0 4px 15px rgba(46,95,138,0.2)'}}>
-                  احجز الآن
-                </button>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+            )}
+          </div>
+        )}
       </section>
 
       {/* Features */}
@@ -225,7 +265,6 @@ function HomePage() {
       <footer className="border-t border-gray-100 py-6 px-6 text-center">
         <p className="text-gray-400 text-xs font-bold">© 2026 Rafdi Platform — جميع الحقوق محفوظة</p>
       </footer>
-
     </div>
   );
 }
