@@ -7,8 +7,6 @@ from app.models import User, Company, Role, User_Role, Warehouse, Booking, Payme
 from app.api.Auth_Api         import router as auth_router
 from app.api.WareHouse_Api    import router as warehouse_router
 from app.api.Booking_Api      import router as booking_router
-from app.api.Payment_Api      import router as payment_router
-from app.api.Notification_Api import router as notification_router
 
 app = FastAPI(title="Rafdi Platform")
 
@@ -29,6 +27,3 @@ Base.metadata.create_all(bind=engine)
 app.include_router(auth_router)
 app.include_router(warehouse_router)
 app.include_router(booking_router)
-app.include_router(payment_router)
-app.include_router(notification_router)
-app.include_router(admin_router)
