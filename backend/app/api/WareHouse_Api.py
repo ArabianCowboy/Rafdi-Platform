@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.Dtos.Warehouse_DTOs import WarehouseCreate, WarehouseUpdate, WarehouseResponse, WarehouseToggleResponse
-from app.Repo import WarehouseRepo
+from app.Repo.WarehouseRepo import WarehouseRepo
 from app.services.Warehouse_services.Warehouse_service import WarehouseService
 from app.services.Warehouse_services.Warehouse_access_service import WarehouseAccessService
 from app.api.Auth_middleware import get_current_user, require_owner
