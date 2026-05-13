@@ -1,10 +1,10 @@
-from app.services.Notification_Services import NotificationService
+from app.services.Notification_Services import Notification_Service
 from app.Enums.EnumTypes import NotificationTypeEnum
 
 
 class NotificationTriggerService:
 
-    def __init__(self, notification_service: NotificationService):
+    def __init__(self, notification_service: Notification_Service):
         self.notification_service = notification_service
 
 
