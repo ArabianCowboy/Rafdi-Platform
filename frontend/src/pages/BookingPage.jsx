@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Building2, Calendar, ArrowLeft, CheckCircle, Loader, MapPin, Package } from 'lucide-react';
+import { Building2, Calendar, ArrowLeft, CheckCircle, Loader, MapPin, Package, AlertCircle, Info } from 'lucide-react';
 
 const API_URL = 'https://api.rafdi.com';
-
 const today = new Date().toISOString().split('T')[0];
 
 function BookingPage() {
@@ -37,18 +36,20 @@ function BookingPage() {
     fetchWarehouse();
   }, [id]);
 
-  const calcEstimatedPrice = () => {
-    if (!startDate || !endDate || !warehouse) return 0;
-    const days = Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24));
-    if (days <= 0) return 0;
-    return Math.ceil((days / 30) * warehouse.PricePerMonth);
-  };
-
   const calcDays = () => {
     if (!startDate || !endDate) return 0;
     const days = Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24));
     return days > 0 ? days : 0;
   };
+
+  const calcBasePrice = () => {
+    if (!startDate || !endDate || !warehouse) return 0;
+    const days = calcDays();
+    return Math.ceil(days * warehouse.PricePerDay);
+  };
+
+  const calcRenterCommission = () => Math.ceil(calcBasePrice() * 0.05);
+  const calcTotalPrice = () => calcBasePrice() + calcRenterCommission();
 
   const parseError = (detail) => {
     if (!detail) return 'حدث خطأ أثناء إنشاء الحجز';
@@ -60,7 +61,6 @@ function BookingPage() {
   const handleBooking = async (e) => {
     e.preventDefault();
     setError('');
-
     if (!startDate) { setError('يرجى اختيار تاريخ البداية'); return; }
     if (!endDate) { setError('يرجى اختيار تاريخ النهاية'); return; }
     if (new Date(endDate) <= new Date(startDate)) { setError('تاريخ النهاية يجب أن يكون بعد تاريخ البداية'); return; }
@@ -70,15 +70,8 @@ function BookingPage() {
       const token = localStorage.getItem('token');
       const res = await fetch(`${API_URL}/bookings/`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          WarehouseID: parseInt(id),
-          StartDate: startDate,
-          EndDate: endDate,
-        }),
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ WarehouseID: parseInt(id), StartDate: startDate, EndDate: endDate }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -94,7 +87,7 @@ function BookingPage() {
         state: {
           bookingId: data.BookingID,
           warehouseName: warehouse.Name,
-          estimatedPrice: data.TotalPrice || calcEstimatedPrice()
+          estimatedPrice: data.TotalPrice || calcTotalPrice()
         }
       }), 1500);
     } catch {
@@ -104,8 +97,10 @@ function BookingPage() {
     }
   };
 
-  const estimatedPrice = calcEstimatedPrice();
   const days = calcDays();
+  const basePrice = calcBasePrice();
+  const renterCommission = calcRenterCommission();
+  const totalPrice = calcTotalPrice();
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]" dir="rtl" style={{fontFamily: "'Cairo', sans-serif"}}>
@@ -144,8 +139,7 @@ function BookingPage() {
             {/* Left - Warehouse Info */}
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
               <div className="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm mb-6">
-                <div className="h-48 relative"
-                  style={{background: 'linear-gradient(135deg, #0f2744, #2E5F8A)'}}>
+                <div className="h-48 relative" style={{background: 'linear-gradient(135deg, #0f2744, #2E5F8A)'}}>
                   <div className="absolute inset-0 opacity-10"
                     style={{backgroundImage: 'linear-gradient(rgba(255,255,255,0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.2) 1px, transparent 1px)', backgroundSize: '30px 30px'}} />
                   {warehouse?.ImagePath ? (
@@ -162,7 +156,7 @@ function BookingPage() {
 
                 <div className="p-6 text-right">
                   <h2 className="text-xl font-black text-[#0f2744] mb-4">{warehouse?.Name}</h2>
-                  <div className="space-y-3">
+                  <div className="space-y-3 mb-4">
                     <div className="flex items-center justify-end gap-2 text-gray-500 text-sm">
                       <span className="font-medium">{warehouse?.Location}</span>
                       <MapPin size={16} className="text-[#2E5F8A]" />
@@ -172,10 +166,10 @@ function BookingPage() {
                       <Package size={16} className="text-[#2E5F8A]" />
                     </div>
                   </div>
-                  <div className="mt-4 pt-4 border-t border-gray-100">
+                  <div className="pt-4 border-t border-gray-100">
                     <div className="flex items-center justify-between">
                       <span className="text-2xl font-black text-[#2E5F8A]">
-                        {warehouse?.PricePerMonth?.toLocaleString()} <span className="text-sm text-gray-400 font-bold">ر.يوم</span>
+                        {warehouse?.PricePerDay?.toLocaleString()} <span className="text-sm text-gray-400 font-bold">ر.س/يوم</span>
                       </span>
                       <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">السعر اليومي</span>
                     </div>
@@ -183,19 +177,37 @@ function BookingPage() {
                 </div>
               </div>
 
-              {warehouse?.Description && (
-                <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm text-right">
-                  <h3 className="font-black text-[#0f2744] mb-3">وصف المستودع</h3>
-                  <p className="text-gray-500 font-medium leading-relaxed text-sm">{warehouse.Description}</p>
+              {/* Commission Info */}
+              <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm mb-6">
+                <div className="flex items-center gap-3 mb-4 justify-end">
+                  <h3 className="font-black text-[#0f2744]">نسب العمولة</h3>
+                  <Info size={18} className="text-[#2E5F8A]" />
                 </div>
-              )}
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="px-3 py-1 rounded-full bg-blue-50 text-blue-600 font-black text-xs">5%</span>
+                    <span className="text-gray-500 font-medium">عمولة المستأجر</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="px-3 py-1 rounded-full bg-purple-50 text-purple-600 font-black text-xs">7%</span>
+                    <span className="text-gray-500 font-medium">عمولة المالك</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Overlap Warning */}
+              <div className="bg-amber-50 rounded-3xl p-6 border border-amber-100">
+                <div className="flex items-center gap-3 justify-end">
+                  <p className="text-amber-700 font-bold text-sm">تأكد من التواريخ — لا يمكن الحجز في فترة محجوزة مسبقاً</p>
+                  <AlertCircle size={20} className="text-amber-500 shrink-0" />
+                </div>
+              </div>
             </motion.div>
 
             {/* Right - Booking Form */}
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
               <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-                <div className="p-6 text-right"
-                  style={{background: 'linear-gradient(135deg, #0f2744, #2E5F8A)'}}>
+                <div className="p-6 text-right" style={{background: 'linear-gradient(135deg, #0f2744, #2E5F8A)'}}>
                   <p className="text-white/60 text-xs font-bold uppercase tracking-widest mb-1">إتمام الحجز</p>
                   <h3 className="text-2xl font-black text-white">احجز مستودعك الآن</h3>
                 </div>
@@ -224,12 +236,9 @@ function BookingPage() {
                   {!success && (
                     <form onSubmit={handleBooking} className="space-y-5 text-right">
                       <div>
-                        <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">
-                          تاريخ البداية
-                        </label>
+                        <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">تاريخ البداية</label>
                         <div className="relative">
-                          <input type="date"
-                            min={today}
+                          <input type="date" min={today}
                             className="w-full py-4 px-5 pr-12 rounded-2xl font-bold outline-none transition-all bg-gray-50 border-2 border-transparent text-[#0f2744]"
                             onFocus={e => e.target.style.borderColor = '#2E5F8A'}
                             onBlur={e => e.target.style.borderColor = 'transparent'}
@@ -240,12 +249,9 @@ function BookingPage() {
                       </div>
 
                       <div>
-                        <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">
-                          تاريخ النهاية
-                        </label>
+                        <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">تاريخ النهاية</label>
                         <div className="relative">
-                          <input type="date"
-                            min={startDate || today}
+                          <input type="date" min={startDate || today}
                             className="w-full py-4 px-5 pr-12 rounded-2xl font-bold outline-none transition-all bg-gray-50 border-2 border-transparent text-[#0f2744]"
                             onFocus={e => e.target.style.borderColor = '#2E5F8A'}
                             onBlur={e => e.target.style.borderColor = 'transparent'}
@@ -255,18 +261,27 @@ function BookingPage() {
                         </div>
                       </div>
 
-                      {estimatedPrice > 0 && (
+                      {/* Price Summary */}
+                      {days > 0 && (
                         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                          className="rounded-2xl p-5 text-right"
-                          style={{background: 'rgba(46,95,138,0.05)', border: '1px solid rgba(46,95,138,0.1)'}}>
-                          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">ملخص تقديري</p>
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="text-[#2E5F8A] font-black text-xl">{estimatedPrice.toLocaleString()} ر.س</span>
-                            <span className="text-gray-400 text-xs font-bold">التكلفة التقديرية</span>
+                          className="rounded-2xl overflow-hidden"
+                          style={{border: '1px solid rgba(46,95,138,0.15)'}}>
+                          <div className="p-4 text-right" style={{background: 'rgba(46,95,138,0.05)'}}>
+                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">ملخص الحجز</p>
                           </div>
-                          <div className="flex justify-between items-center text-sm text-gray-400">
-                            <span className="font-medium">{days} يوم</span>
-                            <span className="font-bold">المدة</span>
+                          <div className="p-4 space-y-3 text-right">
+                            <div className="flex justify-between items-center text-sm">
+                              <span className="text-gray-700 font-black">{basePrice.toLocaleString()} ر.س</span>
+                              <span className="text-gray-400 font-bold">سعر الإيجار ({days} يوم × {warehouse?.PricePerDay?.toLocaleString()})</span>
+                            </div>
+                            <div className="flex justify-between items-center text-sm">
+                              <span className="text-blue-600 font-black">+{renterCommission.toLocaleString()} ر.س</span>
+                              <span className="text-gray-400 font-bold">عمولة المنصة (5%)</span>
+                            </div>
+                            <div className="flex justify-between items-center pt-3 border-t border-gray-100">
+                              <span className="text-[#2E5F8A] font-black text-xl">{totalPrice.toLocaleString()} ر.س</span>
+                              <span className="text-gray-500 font-black text-sm">الإجمالي</span>
+                            </div>
                           </div>
                         </motion.div>
                       )}
@@ -284,7 +299,7 @@ function BookingPage() {
                         ) : (
                           <>
                             <CheckCircle size={20} />
-                            تأكيد الحجز
+                            تأكيد الحجز {days > 0 && `— ${totalPrice.toLocaleString()} ر.س`}
                           </>
                         )}
                       </motion.button>
