@@ -18,7 +18,13 @@ class PaymentService:
         self.booking_repo       = booking_repo
         self.commission_service = commission_service
 
-    def process_payment(self, booking_id: int) -> PaymentResponse:
+    def process_payment(
+        self,
+        booking_id       : int,
+        moyasar_payment_id: str = None,
+        moyasar_status   : str = None,
+        payment_method   : str = None,
+    ) -> PaymentResponse:
         try:
             booking = self.booking_repo.get_by_id(booking_id)
             if not booking:
@@ -32,9 +38,12 @@ class PaymentService:
             if payment.Status == PaymentStatusEnum.paid:
                 raise ValueError("تم الدفع مسبقاً")
 
-            commission     = self.commission_service.calculate(booking.TotalPrice)
-            payment.Amount = commission["total_amount"]
-            payment.Status = PaymentStatusEnum.paid
+            commission            = self.commission_service.calculate(booking.TotalPrice)
+            payment.Amount        = commission["total_amount"]
+            payment.Status        = PaymentStatusEnum.paid
+            payment.MoyasarPaymentID = moyasar_payment_id
+            payment.MoyasarStatus    = moyasar_status
+            payment.PaymentMethod    = payment_method
 
             booking.Status = BookingStatusEnum.confirmed
 
@@ -48,7 +57,6 @@ class PaymentService:
         except Exception as e:
             self.payment_repo.db.rollback()
             raise ValueError(str(e))
-
 
     def get_by_booking(self, booking_id: int) -> PaymentResponse:
         payment = self.payment_repo.get_by_booking(booking_id)
@@ -64,7 +72,6 @@ class PaymentService:
         response.net_amount        = commission["net_amount"]
 
         return response
-
 
     def get_all(self) -> list[PaymentResponse]:
         payments = self.payment_repo.get_all()

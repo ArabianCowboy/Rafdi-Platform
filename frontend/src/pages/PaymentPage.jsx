@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { CreditCard, ArrowLeft, CheckCircle, Loader, ShieldCheck, Lock } from 'lucide-react';
+import { ArrowLeft, CheckCircle, ShieldCheck } from 'lucide-react';
 
 const API_URL = 'https://api.rafdi.com';
+const MOYASAR_KEY = 'pk_test_xZj2Ucqc3pVSkktyUTZLs1ER6JhSKxj4Pnwvt8Ds';
 
 function PaymentPage() {
   const navigate = useNavigate();
@@ -12,56 +13,71 @@ function PaymentPage() {
   const warehouseName = location.state?.warehouseName || 'المستودع';
   const estimatedPrice = location.state?.estimatedPrice || 0;
 
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState('');
   const [paymentData, setPaymentData] = useState(null);
 
-  const [cardNumber, setCardNumber] = useState('');
-  const [cardName, setCardName] = useState('');
-  const [expiry, setExpiry] = useState('');
-  const [cvv, setCvv] = useState('');
-  const [showCvv, setShowCvv] = useState(false);
-
   useEffect(() => {
-    if (!bookingId) {
-      navigate('/home');
-    }
+    if (!bookingId) { navigate('/home'); return; }
+
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://cdn.moyasar.com/mpf/1.14.0/moyasar.css';
+    document.head.appendChild(link);
+
+    const script = document.createElement('script');
+    script.src = 'https://cdn.moyasar.com/mpf/1.14.0/moyasar.js';
+    script.async = true;
+    script.onload = () => initMoyasar();
+    document.head.appendChild(script);
+
+    return () => {
+      document.head.removeChild(link);
+      document.head.removeChild(script);
+    };
   }, [bookingId]);
 
-  const formatCardNumber = (value) => {
-    return value.replace(/\D/g, '').slice(0, 16).replace(/(.{4})/g, '$1 ').trim();
+  const initMoyasar = () => {
+    if (!window.Moyasar) return;
+
+    window.Moyasar.init({
+      element: '.moyasar-form-wrapper',
+      amount: estimatedPrice * 100,
+      currency: 'SAR',
+      description: `حجز مستودع: ${warehouseName}`,
+      publishable_api_key: MOYASAR_KEY,
+      callback_url: window.location.href,
+      methods: ['creditcard', 'applepay'],
+      apple_pay: {
+        country: 'SA',
+        label: 'رفدي - حجز مستودع',
+        validate_merchant_url: 'https://api.moyasar.com/v1/applepay/initiate',
+      },
+      on_completed: async (payment) => {
+        if (payment.status === 'paid') {
+          await processBackendPayment(payment);
+        }
+      },
+    });
   };
 
-  const formatExpiry = (value) => {
-    const cleaned = value.replace(/\D/g, '').slice(0, 4);
-    if (cleaned.length >= 2) return cleaned.slice(0, 2) + '/' + cleaned.slice(2);
-    return cleaned;
-  };
-
-  const handlePayment = async (e) => {
-    e.preventDefault();
-    setError('');
-
-    if (!cardName) { setError('يرجى إدخال اسم صاحب البطاقة'); return; }
-    if (cardNumber.replace(/\s/g, '').length < 16) { setError('يرجى إدخال رقم بطاقة صحيح'); return; }
-    if (expiry.length < 5) { setError('يرجى إدخال تاريخ انتهاء صحيح'); return; }
-    if (cvv.length < 3) { setError('يرجى إدخال رمز CVV صحيح'); return; }
-
-    setSubmitting(true);
+  const processBackendPayment = async (payment) => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`${API_URL}/payments/?booking_id=${bookingId}`, {
+      const params = new URLSearchParams({
+        booking_id: bookingId,
+        moyasar_payment_id: payment.id,
+        moyasar_status: payment.status,
+        payment_method: payment.source.type,
+      });
+
+      const res = await fetch(`${API_URL}/payments/?${params}`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
       });
       const data = await res.json();
       if (!res.ok) {
-        if (res.status === 403) {
-          setError('عذراً، ليس لديك صلاحية لإتمام هذا الدفع');
-        } else {
-          setError(data.detail || 'حدث خطأ أثناء معالجة الدفع');
-        }
+        setError(data.detail || 'حدث خطأ أثناء تأكيد الدفع');
         return;
       }
       setPaymentData(data);
@@ -69,8 +85,6 @@ function PaymentPage() {
       setTimeout(() => navigate('/home'), 3000);
     } catch {
       setError('حدث خطأ في الاتصال، حاول مرة أخرى');
-    } finally {
-      setSubmitting(false);
     }
   };
 
@@ -101,8 +115,6 @@ function PaymentPage() {
 
           {/* Left - Order Summary */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-
-            {/* Summary Card */}
             <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden mb-6">
               <div className="p-6 text-right"
                 style={{background: 'linear-gradient(135deg, #0f2744, #2E5F8A)'}}>
@@ -114,14 +126,13 @@ function PaymentPage() {
                   <span className="text-[#2E5F8A] font-black text-2xl">{estimatedPrice.toLocaleString()} ر.س</span>
                   <span className="text-gray-400 text-sm font-bold">المبلغ الإجمالي</span>
                 </div>
-                <div className="flex justify-between items-center text-sm text-gray-400 pt-3 border-t border-gray-100">
+                <div className="flex justify-between items-center text-sm pt-3 border-t border-gray-100">
                   <span className="font-bold text-emerald-500">آمن ومشفر 🔒</span>
-                  <span className="font-bold">حالة الدفع</span>
+                  <span className="text-gray-400 font-bold">حالة الدفع</span>
                 </div>
               </div>
             </div>
 
-            {/* Security Info */}
             <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm">
               <div className="flex items-center gap-3 mb-4 justify-end">
                 <h3 className="font-black text-[#0f2744]">معلومات الأمان</h3>
@@ -130,8 +141,9 @@ function PaymentPage() {
               <div className="space-y-3">
                 {[
                   { icon: '🔒', text: 'جميع البيانات مشفرة بالكامل' },
-                  { icon: '✅', text: 'دفع آمن ومعتمد' },
+                  { icon: '✅', text: 'دفع آمن عبر ميسر' },
                   { icon: '🛡️', text: 'بيانات بطاقتك محمية ولا تُخزن' },
+                  { icon: '🍎', text: 'يدعم Apple Pay' },
                 ].map((item, i) => (
                   <div key={i} className="flex items-center gap-3 justify-end text-sm text-gray-500">
                     <span className="font-medium">{item.text}</span>
@@ -142,16 +154,13 @@ function PaymentPage() {
             </div>
           </motion.div>
 
-          {/* Right - Payment Form */}
+          {/* Right - Moyasar Form */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
             <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
               <div className="p-6 text-right"
                 style={{background: 'linear-gradient(135deg, #0f2744, #2E5F8A)'}}>
                 <p className="text-white/60 text-xs font-bold uppercase tracking-widest mb-1">إتمام الدفع</p>
-                <h3 className="text-2xl font-black text-white flex items-center justify-end gap-2">
-                  <CreditCard size={24} />
-                  بيانات البطاقة
-                </h3>
+                <h3 className="text-2xl font-black text-white">ادفع بأمان عبر ميسر</h3>
               </div>
 
               <div className="p-6">
@@ -166,7 +175,7 @@ function PaymentPage() {
                   )}
                   {success && (
                     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-                      className="mb-6 p-6 rounded-2xl text-center"
+                      className="p-6 rounded-2xl text-center"
                       style={{background: '#F0FDF4', border: '1px solid #86EFAC'}}>
                       <CheckCircle size={48} className="text-emerald-500 mx-auto mb-3" />
                       <p className="font-black text-emerald-700 text-xl mb-1">تم الدفع بنجاح! 🎉</p>
@@ -174,6 +183,7 @@ function PaymentPage() {
                       {paymentData && (
                         <div className="mt-4 pt-4 border-t border-emerald-100 text-right space-y-1">
                           <p className="text-xs text-emerald-600 font-bold">رقم العملية: #{paymentData.PaymentID}</p>
+                          <p className="text-xs text-emerald-600 font-bold">طريقة الدفع: {paymentData.PaymentMethod}</p>
                           <p className="text-xs text-emerald-600 font-bold">المبلغ: {parseFloat(paymentData.Amount).toLocaleString()} ر.س</p>
                         </div>
                       )}
@@ -182,93 +192,7 @@ function PaymentPage() {
                 </AnimatePresence>
 
                 {!success && (
-                  <form onSubmit={handlePayment} className="space-y-5 text-right">
-
-                    {/* Card Name */}
-                    <div>
-                      <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">
-                        اسم صاحب البطاقة
-                      </label>
-                      <input type="text" placeholder="الاسم كما يظهر على البطاقة"
-                        className="w-full py-4 px-5 rounded-2xl font-bold outline-none transition-all bg-gray-50 border-2 border-transparent text-[#0f2744] placeholder:text-gray-300"
-                        onFocus={e => e.target.style.borderColor = '#2E5F8A'}
-                        onBlur={e => e.target.style.borderColor = 'transparent'}
-                        value={cardName}
-                        onChange={e => { setCardName(e.target.value); if(error) setError(''); }} />
-                    </div>
-
-                    {/* Card Number */}
-                    <div>
-                      <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">
-                        رقم البطاقة
-                      </label>
-                      <div className="relative">
-                        <input type="text" placeholder="0000 0000 0000 0000"
-                          className="w-full py-4 px-5 pr-12 rounded-2xl font-bold outline-none transition-all bg-gray-50 border-2 border-transparent text-[#0f2744] placeholder:text-gray-300 tracking-widest"
-                          onFocus={e => e.target.style.borderColor = '#2E5F8A'}
-                          onBlur={e => e.target.style.borderColor = 'transparent'}
-                          value={cardNumber}
-                          onChange={e => { setCardNumber(formatCardNumber(e.target.value)); if(error) setError(''); }} />
-                        <CreditCard className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
-                      </div>
-                    </div>
-
-                    {/* Expiry & CVV */}
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">
-                          تاريخ الانتهاء
-                        </label>
-                        <input type="text" placeholder="MM/YY"
-                          className="w-full py-4 px-5 rounded-2xl font-bold outline-none transition-all bg-gray-50 border-2 border-transparent text-[#0f2744] placeholder:text-gray-300 text-center tracking-widest"
-                          onFocus={e => e.target.style.borderColor = '#2E5F8A'}
-                          onBlur={e => e.target.style.borderColor = 'transparent'}
-                          value={expiry}
-                          onChange={e => { setExpiry(formatExpiry(e.target.value)); if(error) setError(''); }} />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">
-                          CVV
-                        </label>
-                        <div className="relative">
-                          <input type={showCvv ? 'text' : 'password'} placeholder="000"
-                            maxLength={4}
-                            className="w-full py-4 px-5 pl-10 rounded-2xl font-bold outline-none transition-all bg-gray-50 border-2 border-transparent text-[#0f2744] placeholder:text-gray-300 text-center tracking-widest"
-                            onFocus={e => e.target.style.borderColor = '#2E5F8A'}
-                            onBlur={e => e.target.style.borderColor = 'transparent'}
-                            value={cvv}
-                            onChange={e => { setCvv(e.target.value.replace(/\D/g, '').slice(0, 4)); if(error) setError(''); }} />
-                          <button type="button" onClick={() => setShowCvv(!showCvv)}
-                            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500 transition-colors">
-                            <Lock size={16} />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Submit */}
-                    <motion.button type="submit" disabled={submitting}
-                      whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}
-                      className="w-full py-4 rounded-2xl font-black text-white text-lg flex items-center justify-center gap-3 disabled:opacity-70 mt-2"
-                      style={{background: submitting ? '#93b4d4' : 'linear-gradient(135deg, #1a3f6f 0%, #2E5F8A 100%)', boxShadow: '0 8px 32px rgba(46,95,138,0.35)'}}>
-                      {submitting ? (
-                        <span className="flex items-center gap-2">
-                          <motion.span animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                            className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full block" />
-                          جاري معالجة الدفع...
-                        </span>
-                      ) : (
-                        <>
-                          <ShieldCheck size={20} />
-                          ادفع الآن {estimatedPrice > 0 && `- ${estimatedPrice.toLocaleString()} ر.س`}
-                        </>
-                      )}
-                    </motion.button>
-
-                    <p className="text-center text-xs text-gray-400 font-bold">
-                      🔒 جميع المعاملات مشفرة وآمنة
-                    </p>
-                  </form>
+                  <div className="moyasar-form-wrapper" />
                 )}
               </div>
             </div>
