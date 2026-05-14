@@ -23,7 +23,6 @@ from app.config import get_db
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
-# Build the auth service and connect it to the repos and helper services it needs.
 def get_forgot_password_service(db: Session = Depends(get_db)) -> ForgotPasswordService:
     return ForgotPasswordService(
         user_repo        = UserRepo(db),
@@ -33,6 +32,7 @@ def get_forgot_password_service(db: Session = Depends(get_db)) -> ForgotPassword
     )
 
 
+# Build the auth service and connect it to the repos and helper services it needs.
 def get_auth_service(db: Session = Depends(get_db)) -> AuthService:
     user_repo      = UserRepo(db)
     company_repo   = CompanyRepo(db)
@@ -75,9 +75,8 @@ def login(
         return service.login(data.email, data.password)
     except ValueError as e:
         raise HTTPException(status_code=401, detail=str(e))
-    "except Exception:
+    except Exception:
         raise HTTPException(status_code=500, detail="حدث خطأ أثناء تسجيل الدخول")
-"
 
 @router.patch("/profile/email", response_model=UserResponse)
 def update_email(
