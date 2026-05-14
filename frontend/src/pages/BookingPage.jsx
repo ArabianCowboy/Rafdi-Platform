@@ -21,10 +21,8 @@ function BookingPage() {
       try {
         const token = localStorage.getItem('token');
         const res = await fetch(`${API_URL}/warehouses/${id}`, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-     });
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
         if (!res.ok) throw new Error('فشل تحميل المستودع');
         const data = await res.json();
         setWarehouse(data);
@@ -37,7 +35,8 @@ function BookingPage() {
     fetchWarehouse();
   }, [id]);
 
-  const calcTotalPrice = () => {
+  // حساب تقديري للعرض فقط - السعر الفعلي يحسبه الباك اند
+  const calcEstimatedPrice = () => {
     if (!startDate || !endDate || !warehouse) return 0;
     const start = new Date(startDate);
     const end = new Date(endDate);
@@ -45,6 +44,12 @@ function BookingPage() {
     if (days <= 0) return 0;
     const months = days / 30;
     return Math.ceil(months * warehouse.PricePerMonth);
+  };
+
+  const calcDays = () => {
+    if (!startDate || !endDate) return 0;
+    const days = Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24));
+    return days > 0 ? days : 0;
   };
 
   const handleBooking = async (e) => {
@@ -68,7 +73,6 @@ function BookingPage() {
           WarehouseID: parseInt(id),
           StartDate: startDate,
           EndDate: endDate,
-          TotalPrice: calcTotalPrice(),
           Status: 'pending'
         }),
       });
@@ -83,7 +87,8 @@ function BookingPage() {
     }
   };
 
-  const totalPrice = calcTotalPrice();
+  const estimatedPrice = calcEstimatedPrice();
+  const days = calcDays();
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]" dir="rtl" style={{fontFamily: "'Cairo', sans-serif"}}>
@@ -239,21 +244,21 @@ function BookingPage() {
                         </div>
                       </div>
 
-                      {/* Price Summary */}
-                      {totalPrice > 0 && (
+                      {/* Estimated Price - للعرض فقط */}
+                      {estimatedPrice > 0 && (
                         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
                           className="rounded-2xl p-5 text-right"
                           style={{background: 'rgba(46,95,138,0.05)', border: '1px solid rgba(46,95,138,0.1)'}}>
+                          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">ملخص تقديري</p>
                           <div className="flex justify-between items-center mb-2">
-                            <span className="text-[#2E5F8A] font-black text-lg">{totalPrice.toLocaleString()} ر.س</span>
-                            <span className="text-gray-400 text-xs font-bold uppercase tracking-widest">التكلفة الإجمالية</span>
+                            <span className="text-[#2E5F8A] font-black text-xl">{estimatedPrice.toLocaleString()} ر.س</span>
+                            <span className="text-gray-400 text-xs font-bold">التكلفة التقديرية</span>
                           </div>
                           <div className="flex justify-between items-center text-sm text-gray-400">
-                            <span className="font-medium">
-                              {Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24))} يوم
-                            </span>
+                            <span className="font-medium">{days} يوم</span>
                             <span className="font-bold">المدة</span>
                           </div>
+                          <p className="text-[10px] text-gray-300 font-bold mt-3">* السعر النهائي يحدده الباك اند</p>
                         </motion.div>
                       )}
 
