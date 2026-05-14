@@ -195,7 +195,7 @@ function HomePage() {
                   </div>
                   <div className="absolute bottom-4 left-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl px-3 py-1.5">
                     <p className="text-white font-black text-sm">
-                      {w.PricePerMonth?.toLocaleString()} <span className="text-white/60 font-bold text-xs">ر.س/شهر</span>
+                      {w.PricePerMonth?.toLocaleString()} <span className="text-white/60 font-bold text-xs">ر.س/يوم</span>
                     </p>
                   </div>
                 </div>
