@@ -8,7 +8,8 @@ const API_URL = 'https://api.rafdi.com';
 function RegisterPage() {
   const [companyName, setCompanyName] = useState('');
   const [commercialRegistration, setCommercialRegistration] = useState('');
-  const [accountType, setAccountType] = useState('warehouse_owner');
+  const [isOwner, setIsOwner] = useState(false);
+  const [isRenter, setIsRenter] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -24,9 +25,14 @@ function RegisterPage() {
     setError('');
     if (!companyName) { setError('يرجى إدخال اسم الشركة'); return; }
     if (!commercialRegistration) { setError('يرجى إدخال رقم السجل التجاري'); return; }
+    if (!isOwner && !isRenter) { setError('يرجى اختيار نوع الحساب'); return; }
     if (!validateEmail(email)) { setError('يرجى إدخال بريد إلكتروني صحيح'); return; }
     if (!password) { setError('يرجى إدخال كلمة المرور'); return; }
     if (password.length < 6) { setError('كلمة المرور يجب أن تكون 6 أحرف على الأقل'); return; }
+
+    const accountTypes = [];
+    if (isOwner) accountTypes.push('warehouse_owner');
+    if (isRenter) accountTypes.push('renter_company');
 
     setLoading(true);
     try {
@@ -36,7 +42,7 @@ function RegisterPage() {
         body: JSON.stringify({
           company_name: companyName,
           commercial_registration: commercialRegistration,
-          account_types: [accountType],
+          account_types: accountTypes,
           email,
           password,
         }),
@@ -58,36 +64,24 @@ function RegisterPage() {
       {/* Left Panel */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden"
         style={{background: 'linear-gradient(135deg, #0f2744 0%, #1a3f6f 40%, #2E5F8A 100%)'}}>
-
         <div className="absolute inset-0 opacity-10"
           style={{backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '60px 60px'}} />
-
         <div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full opacity-20 blur-3xl"
           style={{background: 'radial-gradient(circle, #4A8ABF, transparent)'}} />
         <div className="absolute bottom-1/4 right-1/4 w-48 h-48 rounded-full opacity-15 blur-3xl"
           style={{background: 'radial-gradient(circle, #60a5fa, transparent)'}} />
-
-        {/* Floating Cards */}
-        <motion.div
-          animate={{ y: [0, -12, 0] }}
-          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute top-24 right-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-5 w-52"
-        >
+        <motion.div animate={{ y: [0, -12, 0] }} transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute top-24 right-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-5 w-52">
           <p className="text-white/50 text-xs mb-1 font-bold uppercase tracking-widest">انضم إلى</p>
           <p className="text-white text-3xl font-black">+500</p>
           <p className="text-white/50 text-xs mt-1 font-bold">شركة مسجلة</p>
         </motion.div>
-
-        <motion.div
-          animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-          className="absolute bottom-32 left-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-5 w-48"
-        >
+        <motion.div animate={{ y: [0, 10, 0] }} transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+          className="absolute bottom-32 left-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-5 w-48">
           <p className="text-white/50 text-xs mb-1 font-bold uppercase tracking-widest">مستودع متاح</p>
           <p className="text-white text-3xl font-black">77</p>
           <p className="text-emerald-400 text-xs font-bold mt-1">في جميع المناطق</p>
         </motion.div>
-
         <div className="relative z-10 flex flex-col justify-center items-start p-16 w-full">
           <div className="mb-12">
             <div className="flex items-center gap-3 mb-8">
@@ -106,19 +100,14 @@ function RegisterPage() {
               سجّل شركتك وابدأ بإدارة وحجز المستودعات بكل سهولة وأمان.
             </p>
           </div>
-
           <div className="space-y-4">
             {[
               { icon: '🏭', text: 'أضف مستودعاتك وابدأ التأجير فوراً' },
               { icon: '🔒', text: 'بيانات محمية بأعلى معايير الأمان' },
               { icon: '📊', text: 'تتبع حجوزاتك ومدفوعاتك بسهولة' },
             ].map((item, i) => (
-              <motion.div key={i}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 + i * 0.1 }}
-                className="flex items-center gap-3"
-              >
+              <motion.div key={i} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 + i * 0.1 }}
+                className="flex items-center gap-3">
                 <span className="text-xl">{item.icon}</span>
                 <p className="text-white/70 font-medium">{item.text}</p>
               </motion.div>
@@ -127,15 +116,11 @@ function RegisterPage() {
         </div>
       </div>
 
-      {/* Right Panel - Form */}
+      {/* Right Panel */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-[#F8FAFC] overflow-y-auto">
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-          className="w-full max-w-md py-8"
-        >
-          {/* Header */}
+        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}
+          className="w-full max-w-md py-8">
+
           <div className="mb-8 text-right">
             <div className="flex items-center gap-3 mb-6 lg:hidden">
               <div className="w-9 h-9 rounded-xl flex items-center justify-center"
@@ -148,7 +133,6 @@ function RegisterPage() {
             <p className="text-gray-400 font-medium">أدخل بيانات شركتك للبدء</p>
           </div>
 
-          {/* Tabs */}
           <div className="flex bg-white rounded-2xl p-1.5 mb-8 shadow-sm border border-gray-100">
             <Link to="/login" className="flex-1">
               <button className="w-full py-3 rounded-xl font-black text-sm text-gray-400 hover:text-gray-600 transition-all">
@@ -161,34 +145,26 @@ function RegisterPage() {
             </button>
           </div>
 
-          {/* Alerts */}
           <AnimatePresence>
             {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                className="mb-6 p-4 rounded-2xl text-sm flex items-center gap-3 text-right"
-                style={{background: '#FEF2F2', border: '1px solid #FCA5A5'}}
-              >
+              <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                className="mb-6 p-4 rounded-2xl text-sm flex items-center gap-3"
+                style={{background: '#FEF2F2', border: '1px solid #FCA5A5'}}>
                 <div className="w-8 h-8 rounded-xl bg-red-100 flex items-center justify-center shrink-0 text-red-500 font-black text-lg">!</div>
-                <p className="font-bold text-red-700">{error}</p>
+                <p className="font-bold text-red-700 text-right">{error}</p>
               </motion.div>
             )}
             {success && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                className="mb-6 p-4 rounded-2xl text-sm flex items-center gap-3 text-right"
-                style={{background: '#F0FDF4', border: '1px solid #86EFAC'}}
-              >
+              <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                className="mb-6 p-4 rounded-2xl text-sm flex items-center gap-3"
+                style={{background: '#F0FDF4', border: '1px solid #86EFAC'}}>
                 <div className="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0 text-emerald-500 text-lg">✓</div>
                 <p className="font-bold text-emerald-700">تم إنشاء الحساب بنجاح! جاري التحويل...</p>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Form */}
           <form onSubmit={handleRegister} className="space-y-4">
-
-            {/* Company Name */}
             <div>
               <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2 text-right">اسم الشركة</label>
               <div className="relative">
@@ -201,7 +177,6 @@ function RegisterPage() {
               </div>
             </div>
 
-            {/* Commercial Registration */}
             <div>
               <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2 text-right">رقم السجل التجاري</label>
               <div className="relative">
@@ -214,22 +189,27 @@ function RegisterPage() {
               </div>
             </div>
 
-            {/* Account Type */}
+            {/* Account Type - Checkbox */}
             <div>
-              <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2 text-right">نوع الحساب</label>
+              <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-3 text-right">نوع الحساب — يمكن اختيار أكثر من نوع</label>
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { value: 'warehouse_owner', label: 'مالك مستودع', icon: '🏭', desc: 'أرغب في التأجير' },
-                  { value: 'renter_company', label: 'مستأجر', icon: '📦', desc: 'أرغب في الاستئجار' },
+                  { value: 'owner', label: 'مالك مستودع', icon: '🏭', desc: 'أرغب في التأجير', checked: isOwner, onChange: () => setIsOwner(!isOwner) },
+                  { value: 'renter', label: 'مستأجر', icon: '📦', desc: 'أرغب في الاستئجار', checked: isRenter, onChange: () => setIsRenter(!isRenter) },
                 ].map((type) => (
-                  <button key={type.value} type="button"
-                    onClick={() => setAccountType(type.value)}
-                    className="p-4 rounded-2xl text-right transition-all border-2 bg-white"
+                  <button key={type.value} type="button" onClick={type.onChange}
+                    className="p-4 rounded-2xl text-right transition-all border-2 bg-white relative"
                     style={{
-                      borderColor: accountType === type.value ? '#2E5F8A' : 'transparent',
-                      background: accountType === type.value ? 'rgba(46,95,138,0.05)' : 'white'
-                    }}
-                  >
+                      borderColor: type.checked ? '#2E5F8A' : 'transparent',
+                      background: type.checked ? 'rgba(46,95,138,0.05)' : 'white',
+                      boxShadow: type.checked ? '0 0 0 1px rgba(46,95,138,0.2)' : 'none'
+                    }}>
+                    {type.checked && (
+                      <div className="absolute top-2 left-2 w-5 h-5 rounded-full flex items-center justify-center"
+                        style={{background: '#2E5F8A'}}>
+                        <span className="text-white text-xs font-black">✓</span>
+                      </div>
+                    )}
                     <span className="text-2xl block mb-1">{type.icon}</span>
                     <p className="font-black text-sm text-[#0f2744]">{type.label}</p>
                     <p className="text-[10px] text-gray-400 font-bold">{type.desc}</p>
@@ -238,7 +218,6 @@ function RegisterPage() {
               </div>
             </div>
 
-            {/* Email */}
             <div>
               <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2 text-right">البريد الإلكتروني</label>
               <div className="relative">
@@ -251,7 +230,6 @@ function RegisterPage() {
               </div>
             </div>
 
-            {/* Password */}
             <div>
               <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2 text-right">كلمة المرور</label>
               <div className="relative">
@@ -268,12 +246,10 @@ function RegisterPage() {
               </div>
             </div>
 
-            {/* Submit */}
             <motion.button type="submit" disabled={loading}
               whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}
               className="w-full py-4 rounded-2xl font-black text-white text-lg flex items-center justify-center gap-3 mt-2 disabled:opacity-70"
-              style={{background: loading ? '#93b4d4' : 'linear-gradient(135deg, #1a3f6f 0%, #2E5F8A 100%)', boxShadow: '0 8px 32px rgba(46,95,138,0.35)'}}
-            >
+              style={{background: loading ? '#93b4d4' : 'linear-gradient(135deg, #1a3f6f 0%, #2E5F8A 100%)', boxShadow: '0 8px 32px rgba(46,95,138,0.35)'}}>
               {loading ? (
                 <span className="flex items-center gap-2">
                   <motion.span animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
