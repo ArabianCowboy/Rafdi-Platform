@@ -16,14 +16,14 @@ function PaymentPage() {
   const estimatedPriceFromState = location.state?.estimatedPrice;
 
   if (bookingIdFromState) {
-    sessionStorage.setItem('bookingId', bookingIdFromState);
-    sessionStorage.setItem('warehouseName', warehouseNameFromState || 'المستودع');
-    sessionStorage.setItem('estimatedPrice', estimatedPriceFromState || 0);
+    localStorage.setItem('paymentBookingId', bookingIdFromState);
+    localStorage.setItem('paymentWarehouseName', warehouseNameFromState || 'المستودع');
+    localStorage.setItem('paymentEstimatedPrice', estimatedPriceFromState || 0);
   }
 
-  const bookingId = bookingIdFromState || sessionStorage.getItem('bookingId');
-  const warehouseName = warehouseNameFromState || sessionStorage.getItem('warehouseName') || 'المستودع';
-  const estimatedPrice = parseFloat(estimatedPriceFromState || sessionStorage.getItem('estimatedPrice') || 0);
+  const bookingId = bookingIdFromState || localStorage.getItem('paymentBookingId');
+  const warehouseName = warehouseNameFromState || localStorage.getItem('paymentWarehouseName') || 'المستودع';
+  const estimatedPrice = parseFloat(estimatedPriceFromState || localStorage.getItem('paymentEstimatedPrice') || 0);
 
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -36,7 +36,7 @@ function PaymentPage() {
     setProcessing(true);
     try {
       const token = localStorage.getItem('token');
-      const currentBookingId = bookingIdFromState || sessionStorage.getItem('bookingId');
+      const currentBookingId = bookingIdFromState || localStorage.getItem('paymentBookingId');
       const params = new URLSearchParams({
         booking_id: currentBookingId,
         moyasar_payment_id: moyasarPaymentId,
@@ -55,9 +55,9 @@ function PaymentPage() {
       }
       setPaymentData(data);
       setSuccess(true);
-      sessionStorage.removeItem('bookingId');
-      sessionStorage.removeItem('warehouseName');
-      sessionStorage.removeItem('estimatedPrice');
+      localStorage.removeItem('paymentBookingId');
+      localStorage.removeItem('paymentWarehouseName');
+      localStorage.removeItem('paymentEstimatedPrice');
       setTimeout(() => navigate('/home'), 4000);
     } catch {
       setError('حدث خطأ في الاتصال، حاول مرة أخرى');
@@ -68,9 +68,6 @@ function PaymentPage() {
   };
 
   useEffect(() => {
-      console.log('bookingId:', bookingId);
-  console.log('sessionStorage bookingId:', sessionStorage.getItem('bookingId'));
-  console.log('URL params:', window.location.search);
     if (!bookingId) { navigate('/home'); return; }
 
     const urlParams = new URLSearchParams(window.location.search);
