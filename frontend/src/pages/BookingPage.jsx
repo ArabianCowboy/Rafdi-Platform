@@ -78,7 +78,6 @@ function BookingPage() {
           WarehouseID: parseInt(id),
           StartDate: startDate,
           EndDate: endDate,
-          Status: 'pending'
         }),
       });
       const data = await res.json();
@@ -95,7 +94,7 @@ function BookingPage() {
         state: {
           bookingId: data.BookingID,
           warehouseName: warehouse.Name,
-          estimatedPrice: calcEstimatedPrice()
+          estimatedPrice: data.TotalPrice || calcEstimatedPrice()
         }
       }), 1500);
     } catch {

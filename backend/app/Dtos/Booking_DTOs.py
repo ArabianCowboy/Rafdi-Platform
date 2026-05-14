@@ -8,10 +8,10 @@ from app.Enums.EnumTypes import BookingStatusEnum
 
 class BookingCreate(BaseModel):
     WarehouseID    : int
-    RenterCompanyID: int
     StartDate      : date
     EndDate        : date
-    TotalPrice     : Decimal
+    RenterCompanyID: int = 0
+    TotalPrice     : Decimal = Decimal(0)
     Status         : BookingStatusEnum = BookingStatusEnum.pending
  
  
