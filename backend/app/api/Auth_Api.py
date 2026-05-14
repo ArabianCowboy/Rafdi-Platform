@@ -23,6 +23,7 @@ from app.config import get_db
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
+# Build the auth service and connect it to the repos and helper services it needs.
 def get_forgot_password_service(db: Session = Depends(get_db)) -> ForgotPasswordService:
     return ForgotPasswordService(
         user_repo        = UserRepo(db),
@@ -60,9 +61,12 @@ def register(
         return service.register(data)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="حدث خطأ أثناء إنشاء الحساب")
 
 
 @router.post("/login", response_model=TokenResponse)
+# Authenticate the user and return a JWT token if the email and password are correct.
 def login(
     data   : LoginCreate,
     service: AuthService = Depends(get_auth_service)
@@ -71,7 +75,9 @@ def login(
         return service.login(data.email, data.password)
     except ValueError as e:
         raise HTTPException(status_code=401, detail=str(e))
-
+    "except Exception:
+        raise HTTPException(status_code=500, detail="حدث خطأ أثناء تسجيل الدخول")
+"
 
 @router.patch("/profile/email", response_model=UserResponse)
 def update_email(
@@ -83,6 +89,8 @@ def update_email(
         return service.update_email(current_user["user_id"], data)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="حدث خطأ أثناء تحديث البريد الإلكتروني")
 
 
 @router.patch("/profile/company", response_model=CompanyResponse)
@@ -95,14 +103,21 @@ def update_company(
         return service.update_company_name(current_user["company_id"], data)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="حدث خطأ أثناء تحديث اسم الشركة")
     
 @router.post("/forgot-password")
 def forgot_password(
     data   : ForgotPasswordRequest,
     service: ForgotPasswordService = Depends(get_forgot_password_service)
 ):
-    service.send_otp(data.email)
-    return {"message": " سيصلك رمز التحقق على الأيميل"}
+    try:
+        service.send_otp(data.email)
+        return {"message": " سيصلك رمز التحقق على الأيميل"}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="حدث خطأ أثناء إرسال رمز التحقق")
 
 
 @router.post("/reset-password")
@@ -115,3 +130,5 @@ def reset_password(
         return {"message": "تم تغيير كلمة المرور بنجاح"}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="حدث خطأ أثناء تغيير كلمة المرور")
