@@ -146,7 +146,7 @@ function WarehousePage() {
                     <p className="text-white font-black text-sm">
                       {warehouse.PricePerMonth?.toLocaleString()}{" "}
                       <span className="text-white/60 font-bold text-xs">
-                        ر.س/شهر
+                        ر.س/يوم
                       </span>
                     </p>
                   </div>
