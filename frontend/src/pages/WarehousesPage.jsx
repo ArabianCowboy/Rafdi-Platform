@@ -14,6 +14,21 @@ const getUserRoles = () => {
   } catch { return []; }
 };
 
+const getCompanyId = () => {
+  try {
+    const token = localStorage.getItem('token');
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.company_id;
+  } catch { return null; }
+};
+
+const parseError = (detail) => {
+  if (!detail) return 'حدث خطأ';
+  if (typeof detail === 'string') return detail;
+  if (Array.isArray(detail)) return detail.map(e => e.msg).join(', ');
+  return 'حدث خطأ';
+};
+
 const emptyForm = { Name: '', Location: '', Size: '', PricePerDay: '', Description: '', IsActive: true, ImagePath: '' };
 
 function WarehousesPage() {
@@ -33,11 +48,10 @@ function WarehousesPage() {
   const token = localStorage.getItem('token');
   const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
 
-  useEffect(() => {
-    fetchWarehouses();
-  }, []);
+  useEffect(() => { fetchWarehouses(); }, []);
 
   const fetchWarehouses = async () => {
+    setLoading(true);
     try {
       const res = await fetch(`${API_URL}/warehouses/`, { headers: { 'Authorization': `Bearer ${token}` } });
       if (res.ok) setWarehouses(await res.json());
@@ -45,7 +59,10 @@ function WarehousesPage() {
   };
 
   const openCreate = () => { setForm(emptyForm); setEditWarehouse(null); setError(''); setShowModal(true); };
-  const openEdit = (w) => { setForm({ Name: w.Name, Location: w.Location, Size: w.Size, PricePerDay: w.PricePerDay, Description: w.Description, IsActive: w.IsActive, ImagePath: w.ImagePath || '' }); setEditWarehouse(w); setError(''); setShowModal(true); };
+  const openEdit = (w) => {
+    setForm({ Name: w.Name, Location: w.Location, Size: w.Size, PricePerDay: w.PricePerDay, Description: w.Description || '', IsActive: w.IsActive, ImagePath: w.ImagePath || '' });
+    setEditWarehouse(w); setError(''); setShowModal(true);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -59,9 +76,13 @@ function WarehousesPage() {
     try {
       const url = editWarehouse ? `${API_URL}/warehouses/${editWarehouse.WarehouseID}` : `${API_URL}/warehouses/`;
       const method = editWarehouse ? 'PATCH' : 'POST';
-      const res = await fetch(url, { method, headers, body: JSON.stringify({ ...form, Size: parseFloat(form.Size), PricePerDay: parseFloat(form.PricePerDay) }) });
+      const body = editWarehouse
+        ? { ...form, Size: parseFloat(form.Size), PricePerDay: parseFloat(form.PricePerDay) }
+        : { ...form, CompanyID: getCompanyId(), Size: parseFloat(form.Size), PricePerDay: parseFloat(form.PricePerDay) };
+
+      const res = await fetch(url, { method, headers, body: JSON.stringify(body) });
       const data = await res.json();
-      if (!res.ok) { setError(data.detail || 'حدث خطأ'); return; }
+      if (!res.ok) { setError(parseError(data.detail)); return; }
       setSuccess(editWarehouse ? 'تم تعديل المستودع بنجاح ✅' : 'تم إنشاء المستودع بنجاح ✅');
       setShowModal(false);
       fetchWarehouses();
@@ -111,7 +132,6 @@ function WarehousesPage() {
 
       <div className="max-w-7xl mx-auto px-6 py-12">
 
-        {/* Header */}
         <div className="flex justify-between items-center mb-10 text-right">
           <div />
           <div>
@@ -120,7 +140,6 @@ function WarehousesPage() {
           </div>
         </div>
 
-        {/* Success */}
         <AnimatePresence>
           {success && (
             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
@@ -131,7 +150,6 @@ function WarehousesPage() {
           )}
         </AnimatePresence>
 
-        {/* Loading */}
         {loading ? (
           <div className="flex justify-center py-20">
             <Loader size={40} className="text-[#2E5F8A] animate-spin" />
@@ -153,9 +171,9 @@ function WarehousesPage() {
             {warehouses.map((w, idx) => (
               <motion.div key={w.WarehouseID}
                 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }}
-                className="bg-white rounded-3xl overflow-hidden border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
+                whileHover={{ y: -4, boxShadow: '0 20px 40px rgba(46,95,138,0.12)' }}
+                className="bg-white rounded-3xl overflow-hidden border border-gray-100 transition-all duration-300 group">
 
-                {/* Image */}
                 <div className="h-44 relative overflow-hidden"
                   style={{background: 'linear-gradient(135deg, #1a3f6f, #2E5F8A)'}}>
                   {w.ImagePath ? (
@@ -194,14 +212,11 @@ function WarehousesPage() {
 
                   {isOwner && (
                     <div className="flex gap-2 pt-4 border-t border-gray-100">
-                      {/* Edit */}
                       <motion.button onClick={() => openEdit(w)} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                         className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-2xl font-black text-sm transition-all border-2 border-[#2E5F8A]/20 text-[#2E5F8A] hover:bg-[#2E5F8A]/5">
                         <Edit2 size={15} />
                         تعديل
                       </motion.button>
-
-                      {/* Toggle */}
                       <motion.button onClick={() => handleToggle(w)} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                         className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-2xl font-black text-sm transition-all border-2 ${w.IsActive ? 'border-red-200 text-red-500 hover:bg-red-50' : 'border-emerald-200 text-emerald-500 hover:bg-emerald-50'}`}>
                         <Power size={15} />
@@ -227,8 +242,7 @@ function WarehousesPage() {
             <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }}
               className="bg-white rounded-3xl shadow-2xl w-full max-w-lg relative z-10 overflow-hidden max-h-[90vh] overflow-y-auto">
 
-              {/* Modal Header */}
-              <div className="p-6 text-right sticky top-0 bg-white border-b border-gray-100 z-10"
+              <div className="p-6 text-right sticky top-0 z-10"
                 style={{background: 'linear-gradient(135deg, #0f2744, #2E5F8A)'}}>
                 <div className="flex items-center justify-between">
                   <button onClick={() => setShowModal(false)}
@@ -306,7 +320,6 @@ function WarehousesPage() {
                       onChange={e => setForm({...form, Description: e.target.value})} />
                   </div>
 
-                  {/* IsActive Toggle */}
                   <div className="flex items-center justify-between p-4 rounded-2xl bg-gray-50">
                     <button type="button" onClick={() => setForm({...form, IsActive: !form.IsActive})}
                       className="relative w-12 h-6 rounded-full transition-all"
