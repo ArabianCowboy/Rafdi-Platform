@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { useState, useEffect } from "react";
-import { Building2, LogOut, LayoutDashboard, Layers, HeadphonesIcon, Package, CheckCircle, Users, ArrowLeft, MapPin, Star, Loader, Bell, Settings } from "lucide-react";
+import { Building2, LogOut, LayoutDashboard, Layers, HeadphonesIcon, Package, CheckCircle, Users, ArrowLeft, MapPin, Star, Loader, Settings } from "lucide-react";
 
 const API_URL = 'https://api.rafdi.com';
 
@@ -18,9 +18,15 @@ const getUserInfo = () => {
   try {
     const token = localStorage.getItem('token');
     if (!token) return {};
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    return payload;
+    return JSON.parse(atob(token.split('.')[1]));
   } catch { return {}; }
+};
+
+const getCompanyId = () => {
+  try {
+    const token = localStorage.getItem('token');
+    return JSON.parse(atob(token.split('.')[1])).company_id;
+  } catch { return null; }
 };
 
 function HomePage() {
@@ -47,18 +53,23 @@ function HomePage() {
         const token = localStorage.getItem('token');
         const headers = { 'Authorization': `Bearer ${token}` };
 
+        // جلب كل المستودعات
         const warehousesRes = await fetch(`${API_URL}/warehouses/`, { headers });
-        if (warehousesRes.ok) setWarehouses(await warehousesRes.json());
+        if (warehousesRes.ok) {
+          const data = await warehousesRes.json();
+          setWarehouses(data);
+          // فلترة مستودعاتي من الكل بدون endpoint إضافي
+          if (isOwner) {
+            const companyId = getCompanyId();
+            setMyWarehouses(data.filter(w => w.CompanyID === companyId));
+          }
+        }
 
         if (isRenter) {
           const bookingsRes = await fetch(`${API_URL}/bookings/my`, { headers });
           if (bookingsRes.ok) setMyBookings(await bookingsRes.json());
         }
 
-        if (isOwner) {
-          const myWarehousesRes = await fetch(`${API_URL}/warehouses/my`, { headers });
-          if (myWarehousesRes.ok) setMyWarehouses(await myWarehousesRes.json());
-        }
       } catch {} finally { setLoading(false); }
     };
     fetchData();
@@ -73,11 +84,27 @@ function HomePage() {
   ];
 
   const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'صباح الخير';
-    if (hour < 17) return 'مساء الخير';
+    const h = new Date().getHours();
+    if (h < 12) return 'صباح الخير';
+    if (h < 17) return 'مساء الخير';
     return 'مساء النور';
   };
+
+  const displayName = userInfo.company_name || userInfo.name || userInfo.email || 'مرحباً بك';
+
+  const stats = [
+    { label: 'مستودع مسجل', value: warehouses.length, icon: Building2, color: '#3B82F6' },
+    { label: 'جاهزة للحجز', value: warehouses.filter(w => w.IsActive).length, icon: CheckCircle, color: '#10B981' },
+    ...(isRenter ? [{ label: 'حجز نشط', value: myBookings.length, icon: Layers, color: '#F59E0B' }] : []),
+    ...(isOwner ? [{ label: 'مستودع مملوك', value: myWarehouses.length, icon: Users, color: '#8B5CF6' }] : []),
+  ];
+
+  const quickActions = [
+    { label: 'استعرض المستودعات', icon: Building2, color: '#2E5F8A', bg: 'rgba(46,95,138,0.08)', action: () => setActiveTab('warehouses') },
+    ...(isRenter ? [{ label: 'حجوزاتي', icon: Layers, color: '#10B981', bg: 'rgba(16,185,129,0.08)', action: () => setActiveTab('bookings') }] : []),
+    ...(isOwner ? [{ label: 'مستودعاتي', icon: Building2, color: '#8B5CF6', bg: 'rgba(139,92,246,0.08)', action: () => setActiveTab('my-warehouses') }] : []),
+    ...(isOwner ? [{ label: 'إدارة المستودعات', icon: Settings, color: '#F59E0B', bg: 'rgba(245,158,11,0.08)', action: () => navigate('/warehouses') }] : []),
+  ];
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]" dir="rtl" style={{fontFamily: "'Cairo', sans-serif"}}>
@@ -114,6 +141,13 @@ function HomePage() {
                 {isOwner && <span className="px-3 py-1 rounded-full text-xs font-black bg-blue-50 text-blue-600 border border-blue-100">مالك مستودع</span>}
                 {isRenter && <span className="px-3 py-1 rounded-full text-xs font-black bg-emerald-50 text-emerald-600 border border-emerald-100">مستأجر</span>}
               </div>
+
+              {/* Avatar */}
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-white text-sm"
+                style={{background: 'linear-gradient(135deg, #4A8ABF, #2E5F8A)'}}>
+                {displayName.charAt(0)}
+              </div>
+
               <button onClick={handleLogout}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all">
                 <LogOut size={16} />
@@ -129,36 +163,29 @@ function HomePage() {
         style={{background: 'linear-gradient(135deg, #0f2744 0%, #1a3f6f 50%, #2E5F8A 100%)'}}>
         <div className="absolute inset-0 opacity-10"
           style={{backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '60px 60px'}} />
+
         <div className="max-w-7xl mx-auto px-6 py-10 relative z-10">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+          {/* Greeting */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
             <p className="text-white/50 text-sm font-bold mb-1">{getGreeting()} 👋</p>
-            <h1 className="text-3xl font-black text-white mb-1">
-              {userInfo.company_name || userInfo.sub || 'مرحباً بك'}
-            </h1>
+            <h1 className="text-3xl font-black text-white mb-1">{displayName}</h1>
             <p className="text-white/50 text-sm font-medium">
               {new Date().toLocaleDateString('ar-SA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
             </p>
           </motion.div>
 
-          {/* Stats Row */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
-            {[
-              { label: 'إجمالي المستودعات', value: warehouses.length, icon: Building2, color: '#3B82F6', sub: 'مستودع مسجل' },
-              { label: 'المتاحة الآن', value: warehouses.filter(w => w.IsActive).length, icon: CheckCircle, color: '#10B981', sub: 'جاهزة للحجز' },
-              ...(isRenter ? [{ label: 'حجوزاتي', value: myBookings.length, icon: Layers, color: '#F59E0B', sub: 'حجز نشط' }] : []),
-              ...(isOwner ? [{ label: 'مستودعاتي', value: myWarehouses.length, icon: Users, color: '#8B5CF6', sub: 'مستودع مملوك' }] : []),
-            ].map((stat, idx) => (
+          {/* Stats */}
+          <div className={`grid grid-cols-2 ${stats.length >= 4 ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-4`}>
+            {stats.map((stat, idx) => (
               <motion.div key={idx}
                 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + idx * 0.1 }}
                 className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-5">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-                    style={{background: `${stat.color}30`}}>
-                    <stat.icon size={18} style={{color: stat.color}} />
-                  </div>
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3"
+                  style={{background: `${stat.color}30`}}>
+                  <stat.icon size={18} style={{color: stat.color}} />
                 </div>
                 <p className="text-3xl font-black text-white">{loading ? '—' : stat.value}</p>
-                <p className="text-white/60 text-xs font-bold mt-1">{stat.sub}</p>
+                <p className="text-white/60 text-xs font-bold mt-1">{stat.label}</p>
               </motion.div>
             ))}
           </div>
@@ -168,20 +195,14 @@ function HomePage() {
       <div className="max-w-7xl mx-auto px-6 py-10">
 
         {/* Quick Actions */}
-        {activeTab === 'home' && (
+        {activeTab === 'home' && quickActions.length > 0 && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
             <h2 className="text-lg font-black text-[#0f2744] text-right mb-4">إجراءات سريعة</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[
-                { label: 'استعرض المستودعات', icon: Building2, color: '#2E5F8A', bg: 'rgba(46,95,138,0.08)', action: () => setActiveTab('warehouses') },
-                ...(isRenter ? [{ label: 'حجوزاتي', icon: Layers, color: '#10B981', bg: 'rgba(16,185,129,0.08)', action: () => setActiveTab('bookings') }] : []),
-                ...(isOwner ? [{ label: 'مستودعاتي', icon: Building2, color: '#8B5CF6', bg: 'rgba(139,92,246,0.08)', action: () => setActiveTab('my-warehouses') }] : []),
-                ...(isOwner ? [{ label: 'إدارة المستودعات', icon: Settings, color: '#F59E0B', bg: 'rgba(245,158,11,0.08)', action: () => navigate('/warehouses') }] : []),
-              ].map((action, i) => (
+            <div className={`grid grid-cols-2 md:grid-cols-${Math.min(quickActions.length, 4)} gap-4`}>
+              {quickActions.map((action, i) => (
                 <motion.button key={i} onClick={action.action}
                   whileHover={{ scale: 1.02, y: -2 }} whileTap={{ scale: 0.98 }}
-                  className="p-5 rounded-2xl text-right transition-all border border-gray-100 bg-white hover:shadow-md"
-                  style={{}}>
+                  className="p-5 rounded-2xl text-right transition-all border border-gray-100 bg-white hover:shadow-md">
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
                     style={{background: action.bg}}>
                     <action.icon size={20} style={{color: action.color}} />
@@ -213,13 +234,18 @@ function HomePage() {
               <div className="flex justify-center py-20">
                 <Loader size={40} className="text-[#2E5F8A] animate-spin" />
               </div>
+            ) : warehouses.length === 0 ? (
+              <div className="col-span-3 text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
+                <Building2 size={60} className="text-gray-200 mx-auto mb-4" />
+                <p className="text-gray-400 font-bold">لا توجد مستودعات متاحة</p>
+              </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {warehouses.slice(0, activeTab === 'home' ? 3 : warehouses.length).map((w, idx) => (
                   <motion.div key={w.WarehouseID}
                     initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }}
                     whileHover={{ y: -4, boxShadow: '0 20px 40px rgba(46,95,138,0.15)' }}
-                    className="bg-white rounded-3xl overflow-hidden border border-gray-100 transition-all duration-300 group cursor-pointer">
+                    className="bg-white rounded-3xl overflow-hidden border border-gray-100 transition-all duration-300 group">
                     <div className="h-44 relative overflow-hidden"
                       style={{background: 'linear-gradient(135deg, #1a3f6f, #2E5F8A)'}}>
                       {w.ImagePath ? (
@@ -267,13 +293,6 @@ function HomePage() {
                     </div>
                   </motion.div>
                 ))}
-
-                {warehouses.length === 0 && (
-                  <div className="col-span-3 text-center py-20">
-                    <Building2 size={60} className="text-gray-200 mx-auto mb-4" />
-                    <p className="text-gray-400 font-bold">لا توجد مستودعات متاحة</p>
-                  </div>
-                )}
               </div>
             )}
           </section>
@@ -368,9 +387,13 @@ function HomePage() {
                     initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }}
                     whileHover={{ y: -4, boxShadow: '0 20px 40px rgba(46,95,138,0.15)' }}
                     className="bg-white rounded-3xl overflow-hidden border border-gray-100 transition-all">
-                    <div className="h-40 relative"
+                    <div className="h-40 relative overflow-hidden"
                       style={{background: 'linear-gradient(135deg, #1a3f6f, #2E5F8A)'}}>
-                      <Building2 className="absolute inset-0 m-auto text-white/10" size={60} />
+                      {w.ImagePath ? (
+                        <img src={w.ImagePath} alt={w.Name} className="w-full h-full object-cover" />
+                      ) : (
+                        <Building2 className="absolute inset-0 m-auto text-white/10" size={60} />
+                      )}
                       <div className="absolute top-4 right-4">
                         <span className={`px-3 py-1 rounded-full text-xs font-black text-white ${w.IsActive ? 'bg-emerald-500/30' : 'bg-red-500/30'}`}>
                           {w.IsActive ? 'نشط' : 'معطل'}
