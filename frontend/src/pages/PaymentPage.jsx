@@ -95,7 +95,7 @@ function PaymentPage() {
       if (!window.Moyasar) return;
       window.Moyasar.init({
         element: '.moyasar-form-wrapper',
-        amount: Math.round(estimatedPrice * 100),
+        amount: Math.round(parseFloat(estimatedPrice) * 100),
         currency: 'SAR',
         description: `حجز مستودع: ${warehouseName}`,
         publishable_api_key: MOYASAR_KEY,
