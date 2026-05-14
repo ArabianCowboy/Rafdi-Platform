@@ -175,9 +175,9 @@ function BookingPage() {
                   <div className="mt-4 pt-4 border-t border-gray-100">
                     <div className="flex items-center justify-between">
                       <span className="text-2xl font-black text-[#2E5F8A]">
-                        {warehouse?.PricePerMonth?.toLocaleString()} <span className="text-sm text-gray-400 font-bold">ر.س/شهر</span>
+                        {warehouse?.PricePerMonth?.toLocaleString()} <span className="text-sm text-gray-400 font-bold">ر.يوم</span>
                       </span>
-                      <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">السعر الشهري</span>
+                      <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">السعر اليومي</span>
                     </div>
                   </div>
                 </div>
