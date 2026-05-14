@@ -8,7 +8,7 @@ class WarehouseCreate(BaseModel):
     Name         : str
     Location     : str
     Size         : int
-    PricePerMonth: Decimal
+    PricePerDay: Decimal
     Description  : Optional[str] = None
     IsActive     : bool = True
     ImagePath    : Optional[str] = None
@@ -18,7 +18,7 @@ class WarehouseUpdate(BaseModel):
     Name         : Optional[str]     = None
     Location     : Optional[str]     = None
     Size         : Optional[int]     = None
-    PricePerMonth: Optional[Decimal] = None
+    PricePerDay: Optional[Decimal] = None
     Description  : Optional[str]     = None
     IsActive     : Optional[bool]    = None
     ImagePath    : Optional[str]     = None
@@ -30,7 +30,7 @@ class WarehouseResponse(BaseModel):
     Name         : str
     Location     : str
     Size         : int
-    PricePerMonth: Decimal
+    PricePerDay: Decimal
     Description  : Optional[str] = None
     IsActive     : bool
     ImagePath    : Optional[str] = None

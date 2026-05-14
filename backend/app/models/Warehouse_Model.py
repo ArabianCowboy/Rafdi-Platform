@@ -17,7 +17,7 @@ class Warehouse(TimestampMixin, Base):
     Name         : Mapped[str]           = mapped_column(String(255))
     Location     : Mapped[str]           = mapped_column(String(255))
     Size         : Mapped[int]
-    PricePerMonth: Mapped[DECIMAL]       = mapped_column(Numeric(10, 2))
+    PricePerDay: Mapped[DECIMAL]       = mapped_column(Numeric(10, 2))
     Description  : Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     IsActive     : Mapped[bool]          = mapped_column(Boolean, default=True)
     ImagePath    : Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
