@@ -50,6 +50,13 @@ function BookingPage() {
     return days > 0 ? days : 0;
   };
 
+  const parseError = (detail) => {
+    if (!detail) return 'حدث خطأ أثناء إنشاء الحجز';
+    if (typeof detail === 'string') return detail;
+    if (Array.isArray(detail)) return detail.map(e => e.msg).join(', ');
+    return 'حدث خطأ أثناء إنشاء الحجز';
+  };
+
   const handleBooking = async (e) => {
     e.preventDefault();
     setError('');
@@ -77,9 +84,9 @@ function BookingPage() {
       const data = await res.json();
       if (!res.ok) {
         if (res.status === 403) {
-          setError('عذراً، الحجز متاح للمستأجرين فقط 🔒 يرجى تسجيل الدخول بحساب مستأجر مستودع.');
+          setError('عذراً، الحجز متاح للمستأجرين فقط 🔒');
         } else {
-          setError(data.detail || 'حدث خطأ أثناء إنشاء الحجز');
+          setError(parseError(data.detail));
         }
         return;
       }
