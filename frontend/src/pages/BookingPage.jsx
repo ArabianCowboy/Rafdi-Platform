@@ -84,7 +84,13 @@ function BookingPage() {
         return;
       }
       setSuccess(true);
-      setTimeout(() => navigate('/home'), 2500);
+      setTimeout(() => navigate('/payment', {
+        state: {
+          bookingId: data.BookingID,
+          warehouseName: warehouse.Name,
+          estimatedPrice: calcEstimatedPrice()
+        }
+      }), 1500);
     } catch {
       setError('حدث خطأ في الاتصال، حاول مرة أخرى');
     } finally {
@@ -204,7 +210,7 @@ function BookingPage() {
                         style={{background: '#F0FDF4', border: '1px solid #86EFAC'}}>
                         <CheckCircle size={40} className="text-emerald-500 mx-auto mb-3" />
                         <p className="font-black text-emerald-700 text-lg">تم الحجز بنجاح! 🎉</p>
-                        <p className="text-emerald-600 text-sm font-medium mt-1">جاري تحويلك للصفحة الرئيسية...</p>
+                        <p className="text-emerald-600 text-sm font-medium mt-1">جاري تحويلك لصفحة الدفع...</p>
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -243,7 +249,6 @@ function BookingPage() {
                         </div>
                       </div>
 
-                      {/* Estimated Price */}
                       {estimatedPrice > 0 && (
                         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
                           className="rounded-2xl p-5 text-right"

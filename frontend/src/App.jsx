@@ -6,6 +6,7 @@ import WarehousePage from './pages/WarehousesPage';
 import BookingsPage from './pages/BookingsPage';
 import BookingPage from "./pages/BookingPage";
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import PaymentPage from './pages/PaymentPage';
 
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
         <Route path="/booking/:id" element={<BookingPage />} />
         <Route path="/bookings" element={<BookingsPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/payment" element={<PaymentPage />} />
       </Routes>
     </BrowserRouter>
   );
