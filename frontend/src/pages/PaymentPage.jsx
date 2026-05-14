@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, CheckCircle, ShieldCheck, Loader } from 'lucide-react';
@@ -9,8 +9,8 @@ const MOYASAR_KEY = 'pk_test_xZj2Ucqc3pVSkktyUTZLs1ER6JhSKxj4Pnwvt8Ds';
 function PaymentPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const processingRef = useRef(false);
 
-  // نحفظ bookingId في sessionStorage عشان ما يضيع بعد redirect
   const bookingIdFromState = location.state?.bookingId;
   const warehouseNameFromState = location.state?.warehouseName;
   const estimatedPriceFromState = location.state?.estimatedPrice;
@@ -31,12 +31,14 @@ function PaymentPage() {
   const [processing, setProcessing] = useState(false);
 
   const processBackendPayment = async (moyasarPaymentId, moyasarStatus, paymentMethod) => {
-    if (processing) return;
+    if (processingRef.current) return;
+    processingRef.current = true;
     setProcessing(true);
     try {
       const token = localStorage.getItem('token');
+      const currentBookingId = bookingIdFromState || sessionStorage.getItem('bookingId');
       const params = new URLSearchParams({
-        booking_id: bookingId,
+        booking_id: currentBookingId,
         moyasar_payment_id: moyasarPaymentId,
         moyasar_status: moyasarStatus,
         payment_method: paymentMethod || 'creditcard',
@@ -56,18 +58,18 @@ function PaymentPage() {
       sessionStorage.removeItem('bookingId');
       sessionStorage.removeItem('warehouseName');
       sessionStorage.removeItem('estimatedPrice');
-      setTimeout(() => navigate('/home'), 3000);
+      setTimeout(() => navigate('/home'), 4000);
     } catch {
       setError('حدث خطأ في الاتصال، حاول مرة أخرى');
     } finally {
       setProcessing(false);
+      processingRef.current = false;
     }
   };
 
   useEffect(() => {
     if (!bookingId) { navigate('/home'); return; }
 
-    // تحقق من callback بعد redirect من ميسر
     const urlParams = new URLSearchParams(window.location.search);
     const paymentId = urlParams.get('id');
     const paymentStatus = urlParams.get('status');
@@ -82,7 +84,6 @@ function PaymentPage() {
       return;
     }
 
-    // تحميل Moyasar
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = 'https://cdn.moyasar.com/mpf/1.14.0/moyasar.css';

@@ -87,7 +87,7 @@ function BookingPage() {
         state: {
           bookingId: data.BookingID,
           warehouseName: warehouse.Name,
-          estimatedPrice: data.TotalPrice || calcTotalPrice()
+          estimatedPrice: parseFloat(data.TotalPrice) * 1.05 || calcTotalPrice()
         }
       }), 1500);
     } catch {
