@@ -37,6 +37,14 @@ def get_by_id(
         return service.get_by_id(warehouse_id)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+    
+
+@router.get("/my", response_model=list[WarehouseResponse])
+def get_my_warehouses(
+    service     : WarehouseService = Depends(get_warehouse_service),
+    current_user: dict             = Depends(require_owner)
+):
+    return service.get_by_company(current_user["company_id"])
 
 
 @router.post("/", response_model=WarehouseResponse)

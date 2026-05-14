@@ -25,15 +25,15 @@ class WarehouseRepo(BaseRepo[Warehouse]):
 
     def add(self, obj: WarehouseCreate) -> Warehouse:
         warehouse = Warehouse(
-            CompanyID     = obj.CompanyID,
-            Name          = obj.Name,
-            Location      = obj.Location,
-            Size          = obj.Size,
-            PricePerMonth = obj.PricePerMonth,
-            Description   = obj.Description,
-            IsActive      = obj.IsActive,
-            ImagePath     = obj.ImagePath,
-        )
+        CompanyID   = obj.CompanyID,
+        Name        = obj.Name,
+        Location    = obj.Location,
+        Size        = obj.Size,
+        PricePerDay = obj.PricePerDay,
+        Description = obj.Description,
+        IsActive    = obj.IsActive,
+        ImagePath   = obj.ImagePath,
+    )
         self.db.add(warehouse)
         self.db.commit()
         self.db.refresh(warehouse)
@@ -43,25 +43,19 @@ class WarehouseRepo(BaseRepo[Warehouse]):
         warehouse = self.get_by_id(id)
         if not warehouse:
             return None
-        
+    
         if obj.Name:
             warehouse.Name = obj.Name
-
         if obj.Location:
             warehouse.Location = obj.Location
-
         if obj.Size:
             warehouse.Size = obj.Size
-
-        if obj.PricePerMonth: 
-            warehouse.PricePerMonth = obj.PricePerMonth
-
-        if obj.Description: 
+        if obj.PricePerDay:
+            warehouse.PricePerDay = obj.PricePerDay
+        if obj.Description:
             warehouse.Description = obj.Description
-
         if obj.ImagePath:
-            warehouse.ImagePath = obj.ImagePath
-
+            warehouse.ImagePath   = obj.ImagePath
         if obj.IsActive is not None:
             warehouse.IsActive = obj.IsActive
 

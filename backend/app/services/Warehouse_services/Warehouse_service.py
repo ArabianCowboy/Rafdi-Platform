@@ -34,6 +34,11 @@ class WarehouseService:
             raise ValueError("المستودع غير موجود")
         
         return WarehouseResponse.model_validate(warehouse)
+    
+
+    def get_by_company(self, company_id: int) -> list[WarehouseResponse]:
+        warehouses = self.warehouse_repo.get_by_company(company_id)
+        return [WarehouseResponse.model_validate(w) for w in warehouses]
 
 
     def create(self, data: WarehouseCreate, company_id: int) -> WarehouseResponse:
