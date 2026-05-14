@@ -5,6 +5,8 @@ import { Building2, Calendar, ArrowLeft, CheckCircle, Loader, MapPin, Package } 
 
 const API_URL = 'https://api.rafdi.com';
 
+const today = new Date().toISOString().split('T')[0];
+
 function BookingPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -35,15 +37,11 @@ function BookingPage() {
     fetchWarehouse();
   }, [id]);
 
-  // حساب تقديري للعرض فقط - السعر الفعلي يحسبه الباك اند
   const calcEstimatedPrice = () => {
     if (!startDate || !endDate || !warehouse) return 0;
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+    const days = Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24));
     if (days <= 0) return 0;
-    const months = days / 30;
-    return Math.ceil(months * warehouse.PricePerMonth);
+    return Math.ceil((days / 30) * warehouse.PricePerMonth);
   };
 
   const calcDays = () => {
@@ -77,7 +75,14 @@ function BookingPage() {
         }),
       });
       const data = await res.json();
-      if (!res.ok) { setError(data.detail || 'حدث خطأ أثناء إنشاء الحجز'); return; }
+      if (!res.ok) {
+        if (res.status === 403) {
+          setError('عذراً، الحجز متاح للمستأجرين فقط 🔒 يرجى تسجيل الدخول بحساب مستأجر مستودع.');
+        } else {
+          setError(data.detail || 'حدث خطأ أثناء إنشاء الحجز');
+        }
+        return;
+      }
       setSuccess(true);
       setTimeout(() => navigate('/home'), 2500);
     } catch {
@@ -126,8 +131,6 @@ function BookingPage() {
 
             {/* Left - Warehouse Info */}
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-
-              {/* Warehouse Card */}
               <div className="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm mb-6">
                 <div className="h-48 relative"
                   style={{background: 'linear-gradient(135deg, #0f2744, #2E5F8A)'}}>
@@ -157,7 +160,6 @@ function BookingPage() {
                       <Package size={16} className="text-[#2E5F8A]" />
                     </div>
                   </div>
-
                   <div className="mt-4 pt-4 border-t border-gray-100">
                     <div className="flex items-center justify-between">
                       <span className="text-2xl font-black text-[#2E5F8A]">
@@ -169,7 +171,6 @@ function BookingPage() {
                 </div>
               </div>
 
-              {/* Description */}
               {warehouse?.Description && (
                 <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm text-right">
                   <h3 className="font-black text-[#0f2744] mb-3">وصف المستودع</h3>
@@ -181,8 +182,6 @@ function BookingPage() {
             {/* Right - Booking Form */}
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
               <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-
-                {/* Header */}
                 <div className="p-6 text-right"
                   style={{background: 'linear-gradient(135deg, #0f2744, #2E5F8A)'}}>
                   <p className="text-white/60 text-xs font-bold uppercase tracking-widest mb-1">إتمام الحجز</p>
@@ -193,10 +192,10 @@ function BookingPage() {
                   <AnimatePresence>
                     {error && (
                       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                        className="mb-6 p-4 rounded-2xl text-sm flex items-center gap-3"
+                        className="mb-6 p-4 rounded-2xl text-sm flex items-start gap-3"
                         style={{background: '#FEF2F2', border: '1px solid #FCA5A5'}}>
-                        <div className="w-8 h-8 rounded-xl bg-red-100 flex items-center justify-center shrink-0 text-red-500 font-black">!</div>
-                        <p className="font-bold text-red-700 text-right">{error}</p>
+                        <div className="w-8 h-8 rounded-xl bg-red-100 flex items-center justify-center shrink-0 text-red-500 font-black mt-0.5">!</div>
+                        <p className="font-bold text-red-700 text-right leading-relaxed">{error}</p>
                       </motion.div>
                     )}
                     {success && (
@@ -218,12 +217,12 @@ function BookingPage() {
                         </label>
                         <div className="relative">
                           <input type="date"
-                            min={new Date().toISOString().split('T')[0]}
+                            min={today}
                             className="w-full py-4 px-5 pr-12 rounded-2xl font-bold outline-none transition-all bg-gray-50 border-2 border-transparent text-[#0f2744]"
                             onFocus={e => e.target.style.borderColor = '#2E5F8A'}
                             onBlur={e => e.target.style.borderColor = 'transparent'}
                             value={startDate}
-                            onChange={e => { setStartDate(e.target.value); if(error) setError(''); }} />
+                            onChange={e => { setStartDate(e.target.value); setEndDate(''); if(error) setError(''); }} />
                           <Calendar className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
                         </div>
                       </div>
@@ -234,7 +233,7 @@ function BookingPage() {
                         </label>
                         <div className="relative">
                           <input type="date"
-                            min={startDate || new Date().toISOString().split('T')[0]}
+                            min={startDate || today}
                             className="w-full py-4 px-5 pr-12 rounded-2xl font-bold outline-none transition-all bg-gray-50 border-2 border-transparent text-[#0f2744]"
                             onFocus={e => e.target.style.borderColor = '#2E5F8A'}
                             onBlur={e => e.target.style.borderColor = 'transparent'}
@@ -244,7 +243,7 @@ function BookingPage() {
                         </div>
                       </div>
 
-                      {/* Estimated Price - للعرض فقط */}
+                      {/* Estimated Price */}
                       {estimatedPrice > 0 && (
                         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
                           className="rounded-2xl p-5 text-right"
@@ -258,7 +257,6 @@ function BookingPage() {
                             <span className="font-medium">{days} يوم</span>
                             <span className="font-bold">المدة</span>
                           </div>
-                          <p className="text-[10px] text-gray-300 font-bold mt-3">* السعر النهائي يحدده الباك اند</p>
                         </motion.div>
                       )}
 
