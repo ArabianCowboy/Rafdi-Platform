@@ -1,20 +1,26 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { useState, useEffect } from "react";
-import { Building2, LogOut, LayoutDashboard, Layers, HeadphonesIcon, Package, CheckCircle, Users, ArrowLeft, MapPin, Star, Loader } from "lucide-react";
+import { Building2, LogOut, LayoutDashboard, Layers, HeadphonesIcon, Package, CheckCircle, Users, ArrowLeft, MapPin, Star, Loader, Bell, Settings } from "lucide-react";
 
 const API_URL = 'https://api.rafdi.com';
 
-// قراءة الـ roles من الـ JWT token
 const getUserRoles = () => {
   try {
     const token = localStorage.getItem('token');
     if (!token) return [];
     const payload = JSON.parse(atob(token.split('.')[1]));
     return payload.roles || [];
-  } catch {
-    return [];
-  }
+  } catch { return []; }
+};
+
+const getUserInfo = () => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) return {};
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload;
+  } catch { return {}; }
 };
 
 function HomePage() {
@@ -23,10 +29,10 @@ function HomePage() {
   const [myBookings, setMyBookings] = useState([]);
   const [myWarehouses, setMyWarehouses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('home');
 
   const roles = getUserRoles();
+  const userInfo = getUserInfo();
   const isRenter = roles.includes('renter_company');
   const isOwner = roles.includes('warehouse_owner');
 
@@ -41,46 +47,22 @@ function HomePage() {
         const token = localStorage.getItem('token');
         const headers = { 'Authorization': `Bearer ${token}` };
 
-        // جلب المستودعات دائماً
         const warehousesRes = await fetch(`${API_URL}/warehouses/`, { headers });
-        if (warehousesRes.ok) {
-          const data = await warehousesRes.json();
-          setWarehouses(data);
-        }
+        if (warehousesRes.ok) setWarehouses(await warehousesRes.json());
 
-        // جلب حجوزاتي إذا كان مستأجر
         if (isRenter) {
           const bookingsRes = await fetch(`${API_URL}/bookings/my`, { headers });
-          if (bookingsRes.ok) {
-            const data = await bookingsRes.json();
-            setMyBookings(data);
-          }
+          if (bookingsRes.ok) setMyBookings(await bookingsRes.json());
         }
 
-        // جلب مستودعاتي إذا كان مالك
         if (isOwner) {
           const myWarehousesRes = await fetch(`${API_URL}/warehouses/my`, { headers });
-          if (myWarehousesRes.ok) {
-            const data = await myWarehousesRes.json();
-            setMyWarehouses(data);
-          }
+          if (myWarehousesRes.ok) setMyWarehouses(await myWarehousesRes.json());
         }
-
-      } catch {
-        setError('حدث خطأ في تحميل البيانات');
-      } finally {
-        setLoading(false);
-      }
+      } catch {} finally { setLoading(false); }
     };
     fetchData();
   }, []);
-
-  const stats = [
-    { label: "المستودعات", value: warehouses.length || '0', icon: Building2, color: '#3B82F6' },
-    { label: "الحجوزات النشطة", value: myBookings.length || '0', icon: Layers, color: '#10B981' },
-    { label: "المتاحة الآن", value: warehouses.filter(w => w.IsActive).length || '0', icon: CheckCircle, color: '#F59E0B' },
-    { label: isOwner ? "مستودعاتي" : "الشركات", value: isOwner ? myWarehouses.length : '0', icon: Users, color: '#8B5CF6' },
-  ];
 
   const navItems = [
     { label: 'الرئيسية', icon: LayoutDashboard, id: 'home' },
@@ -90,14 +72,21 @@ function HomePage() {
     { label: 'الدعم', icon: HeadphonesIcon, id: 'support' },
   ];
 
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'صباح الخير';
+    if (hour < 17) return 'مساء الخير';
+    return 'مساء النور';
+  };
+
   return (
     <div className="min-h-screen bg-[#F8FAFC]" dir="rtl" style={{fontFamily: "'Cairo', sans-serif"}}>
 
       {/* Navbar */}
       <nav className="bg-white border-b border-gray-100 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="flex justify-between items-center h-18 py-3">
-            <div className="flex items-center gap-10">
+          <div className="flex justify-between items-center py-3">
+            <div className="flex items-center gap-8">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center"
                   style={{background: 'linear-gradient(135deg, #4A8ABF, #2E5F8A)'}}>
@@ -121,18 +110,9 @@ function HomePage() {
             </div>
 
             <div className="flex items-center gap-3">
-              {/* Role Badges */}
               <div className="hidden md:flex gap-2">
-                {isOwner && (
-                  <span className="px-3 py-1 rounded-full text-xs font-black bg-blue-50 text-blue-600 border border-blue-100">
-                    مالك مستودع
-                  </span>
-                )}
-                {isRenter && (
-                  <span className="px-3 py-1 rounded-full text-xs font-black bg-emerald-50 text-emerald-600 border border-emerald-100">
-                    مستأجر
-                  </span>
-                )}
+                {isOwner && <span className="px-3 py-1 rounded-full text-xs font-black bg-blue-50 text-blue-600 border border-blue-100">مالك مستودع</span>}
+                {isRenter && <span className="px-3 py-1 rounded-full text-xs font-black bg-emerald-50 text-emerald-600 border border-emerald-100">مستأجر</span>}
               </div>
               <button onClick={handleLogout}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all">
@@ -144,74 +124,88 @@ function HomePage() {
         </div>
       </nav>
 
-      {/* Hero */}
-      <section className="relative overflow-hidden py-20 px-6"
+      {/* Dashboard Header */}
+      <div className="relative overflow-hidden"
         style={{background: 'linear-gradient(135deg, #0f2744 0%, #1a3f6f 50%, #2E5F8A 100%)'}}>
         <div className="absolute inset-0 opacity-10"
           style={{backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '60px 60px'}} />
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
-            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="text-right max-w-xl">
-              <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-2 mb-6">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-white/80 text-xs font-bold">{warehouses.filter(w => w.IsActive).length} مستودع متاح الآن</span>
-              </div>
-              <h1 className="text-5xl font-black text-white leading-tight mb-5">
-                أدر مستودعاتك<br />
-                <span style={{color: '#4A8ABF'}}>بذكاء وكفاءة</span>
-              </h1>
-              <p className="text-white/60 text-lg leading-relaxed mb-8">
-                منصة متكاملة لإدارة وحجز المستودعات اللوجستية في جميع أنحاء المملكة العربية السعودية.
-              </p>
-              <div className="flex gap-3">
-                <button onClick={() => setActiveTab('warehouses')}
-                  className="flex items-center gap-2 px-8 py-4 rounded-2xl font-black text-[#0f2744] bg-white hover:bg-gray-50 transition-all shadow-xl">
-                  <Package size={20} />
-                  استعرض المستودعات
-                </button>
-                {isRenter && (
-                  <button onClick={() => setActiveTab('bookings')}
-                    className="flex items-center gap-2 px-6 py-4 rounded-2xl font-black text-white border border-white/20 bg-white/10 hover:bg-white/20 transition-all">
-                    <Layers size={20} />
-                    حجوزاتي
-                  </button>
-                )}
-              </div>
-            </motion.div>
+        <div className="max-w-7xl mx-auto px-6 py-10 relative z-10">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+            <p className="text-white/50 text-sm font-bold mb-1">{getGreeting()} 👋</p>
+            <h1 className="text-3xl font-black text-white mb-1">
+              {userInfo.company_name || userInfo.sub || 'مرحباً بك'}
+            </h1>
+            <p className="text-white/50 text-sm font-medium">
+              {new Date().toLocaleDateString('ar-SA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            </p>
+          </motion.div>
 
-            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2 }}
-              className="grid grid-cols-2 gap-4 w-full max-w-sm">
-              {stats.map((stat, idx) => (
-                <motion.div key={idx}
-                  initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 + idx * 0.1 }}
-                  className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-5">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
+          {/* Stats Row */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+            {[
+              { label: 'إجمالي المستودعات', value: warehouses.length, icon: Building2, color: '#3B82F6', sub: 'مستودع مسجل' },
+              { label: 'المتاحة الآن', value: warehouses.filter(w => w.IsActive).length, icon: CheckCircle, color: '#10B981', sub: 'جاهزة للحجز' },
+              ...(isRenter ? [{ label: 'حجوزاتي', value: myBookings.length, icon: Layers, color: '#F59E0B', sub: 'حجز نشط' }] : []),
+              ...(isOwner ? [{ label: 'مستودعاتي', value: myWarehouses.length, icon: Users, color: '#8B5CF6', sub: 'مستودع مملوك' }] : []),
+            ].map((stat, idx) => (
+              <motion.div key={idx}
+                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + idx * 0.1 }}
+                className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-5">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center"
                     style={{background: `${stat.color}30`}}>
-                    <stat.icon size={20} style={{color: stat.color}} />
+                    <stat.icon size={18} style={{color: stat.color}} />
                   </div>
-                  <p className="text-3xl font-black text-white">{stat.value}</p>
-                  <p className="text-white/50 text-xs font-bold mt-1">{stat.label}</p>
-                </motion.div>
-              ))}
-            </motion.div>
+                </div>
+                <p className="text-3xl font-black text-white">{loading ? '—' : stat.value}</p>
+                <p className="text-white/60 text-xs font-bold mt-1">{stat.sub}</p>
+              </motion.div>
+            ))}
           </div>
         </div>
-      </section>
+      </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-16">
+      <div className="max-w-7xl mx-auto px-6 py-10">
+
+        {/* Quick Actions */}
+        {activeTab === 'home' && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
+            <h2 className="text-lg font-black text-[#0f2744] text-right mb-4">إجراءات سريعة</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { label: 'استعرض المستودعات', icon: Building2, color: '#2E5F8A', bg: 'rgba(46,95,138,0.08)', action: () => setActiveTab('warehouses') },
+                ...(isRenter ? [{ label: 'حجوزاتي', icon: Layers, color: '#10B981', bg: 'rgba(16,185,129,0.08)', action: () => setActiveTab('bookings') }] : []),
+                ...(isOwner ? [{ label: 'مستودعاتي', icon: Building2, color: '#8B5CF6', bg: 'rgba(139,92,246,0.08)', action: () => setActiveTab('my-warehouses') }] : []),
+                ...(isOwner ? [{ label: 'إدارة المستودعات', icon: Settings, color: '#F59E0B', bg: 'rgba(245,158,11,0.08)', action: () => navigate('/warehouses') }] : []),
+              ].map((action, i) => (
+                <motion.button key={i} onClick={action.action}
+                  whileHover={{ scale: 1.02, y: -2 }} whileTap={{ scale: 0.98 }}
+                  className="p-5 rounded-2xl text-right transition-all border border-gray-100 bg-white hover:shadow-md"
+                  style={{}}>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
+                    style={{background: action.bg}}>
+                    <action.icon size={20} style={{color: action.color}} />
+                  </div>
+                  <p className="font-black text-sm text-[#0f2744]">{action.label}</p>
+                </motion.button>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
         {/* Tab: المستودعات */}
         {(activeTab === 'home' || activeTab === 'warehouses') && (
           <section>
-            <div className="flex justify-between items-center mb-10">
-              <button onClick={() => setActiveTab('warehouses')}
-                className="flex items-center gap-2 text-[#2E5F8A] font-black text-sm hover:gap-3 transition-all">
+            <div className="flex justify-between items-center mb-6">
+              <motion.button onClick={() => setActiveTab('warehouses')}
+                whileHover={{ x: -4 }} whileTap={{ scale: 0.97 }}
+                className="flex items-center gap-2 text-[#2E5F8A] font-black text-sm">
                 عرض الكل
                 <ArrowLeft size={16} />
-              </button>
+              </motion.button>
               <div className="text-right">
-                <p className="text-gray-400 text-sm font-medium">اختر المناسب لك</p>
-                <h2 className="text-2xl font-black text-[#0f2744]">المستودعات المميزة</h2>
+                <h2 className="text-xl font-black text-[#0f2744]">المستودعات المتاحة</h2>
+                <p className="text-gray-400 text-sm font-medium">{warehouses.filter(w => w.IsActive).length} مستودع متاح</p>
               </div>
             </div>
 
@@ -224,7 +218,8 @@ function HomePage() {
                 {warehouses.slice(0, activeTab === 'home' ? 3 : warehouses.length).map((w, idx) => (
                   <motion.div key={w.WarehouseID}
                     initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }}
-                    className="bg-white rounded-3xl overflow-hidden border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
+                    whileHover={{ y: -4, boxShadow: '0 20px 40px rgba(46,95,138,0.15)' }}
+                    className="bg-white rounded-3xl overflow-hidden border border-gray-100 transition-all duration-300 group cursor-pointer">
                     <div className="h-44 relative overflow-hidden"
                       style={{background: 'linear-gradient(135deg, #1a3f6f, #2E5F8A)'}}>
                       {w.ImagePath ? (
@@ -233,7 +228,7 @@ function HomePage() {
                         <Building2 className="absolute inset-0 m-auto text-white/10" size={80} />
                       )}
                       <div className="absolute top-4 right-4">
-                        <span className="px-3 py-1 rounded-full text-xs font-black text-white bg-white/20 border border-white/30">
+                        <span className={`px-3 py-1 rounded-full text-xs font-black text-white border ${w.IsActive ? 'bg-emerald-500/30 border-emerald-400/30' : 'bg-red-500/30 border-red-400/30'}`}>
                           {w.IsActive ? 'متاح' : 'غير متاح'}
                         </span>
                       </div>
@@ -261,16 +256,24 @@ function HomePage() {
                           <Package size={14} className="text-[#2E5F8A]" />
                         </div>
                       </div>
-                      {isRenter && (
-                        <button onClick={() => navigate(`/booking/${w.WarehouseID}`)}
-                          className="w-full py-3 rounded-2xl font-black text-sm text-white transition-all group-hover:shadow-lg"
-                          style={{background: 'linear-gradient(135deg, #1a3f6f, #2E5F8A)'}}>
+                      {isRenter && w.IsActive && (
+                        <motion.button onClick={() => navigate(`/booking/${w.WarehouseID}`)}
+                          whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+                          className="w-full py-3 rounded-2xl font-black text-sm text-white transition-all"
+                          style={{background: 'linear-gradient(135deg, #1a3f6f, #2E5F8A)', boxShadow: '0 4px 15px rgba(46,95,138,0.25)'}}>
                           احجز الآن
-                        </button>
+                        </motion.button>
                       )}
                     </div>
                   </motion.div>
                 ))}
+
+                {warehouses.length === 0 && (
+                  <div className="col-span-3 text-center py-20">
+                    <Building2 size={60} className="text-gray-200 mx-auto mb-4" />
+                    <p className="text-gray-400 font-bold">لا توجد مستودعات متاحة</p>
+                  </div>
+                )}
               </div>
             )}
           </section>
@@ -279,14 +282,20 @@ function HomePage() {
         {/* Tab: حجوزاتي */}
         {activeTab === 'bookings' && isRenter && (
           <section>
-            <div className="text-right mb-10">
+            <div className="text-right mb-6">
               <h2 className="text-2xl font-black text-[#0f2744]">حجوزاتي</h2>
-              <p className="text-gray-400 font-medium">جميع حجوزاتك النشطة والسابقة</p>
+              <p className="text-gray-400 font-medium">{myBookings.length} حجز</p>
             </div>
             {myBookings.length === 0 ? (
               <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
                 <Layers size={48} className="text-gray-200 mx-auto mb-4" />
                 <p className="text-gray-400 font-bold">لا توجد حجوزات حالياً</p>
+                <motion.button onClick={() => setActiveTab('warehouses')}
+                  whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                  className="mt-4 px-6 py-3 rounded-2xl font-black text-white text-sm"
+                  style={{background: 'linear-gradient(135deg, #1a3f6f, #2E5F8A)'}}>
+                  استعرض المستودعات
+                </motion.button>
               </div>
             ) : (
               <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
@@ -328,21 +337,37 @@ function HomePage() {
         {/* Tab: مستودعاتي */}
         {activeTab === 'my-warehouses' && isOwner && (
           <section>
-            <div className="text-right mb-10">
-              <h2 className="text-2xl font-black text-[#0f2744]">مستودعاتي</h2>
-              <p className="text-gray-400 font-medium">المستودعات المسجلة باسمك</p>
+            <div className="flex justify-between items-center mb-6">
+              <motion.button onClick={() => navigate('/warehouses')}
+                whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                className="flex items-center gap-2 px-4 py-2 rounded-2xl font-black text-sm text-white"
+                style={{background: 'linear-gradient(135deg, #1a3f6f, #2E5F8A)'}}>
+                <Settings size={16} />
+                إدارة المستودعات
+              </motion.button>
+              <div className="text-right">
+                <h2 className="text-2xl font-black text-[#0f2744]">مستودعاتي</h2>
+                <p className="text-gray-400 font-medium">{myWarehouses.length} مستودع</p>
+              </div>
             </div>
             {myWarehouses.length === 0 ? (
               <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
                 <Building2 size={48} className="text-gray-200 mx-auto mb-4" />
                 <p className="text-gray-400 font-bold">لا توجد مستودعات مسجلة</p>
+                <motion.button onClick={() => navigate('/warehouses')}
+                  whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                  className="mt-4 px-6 py-3 rounded-2xl font-black text-white text-sm"
+                  style={{background: 'linear-gradient(135deg, #1a3f6f, #2E5F8A)'}}>
+                  أضف مستودعك الأول
+                </motion.button>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {myWarehouses.map((w, idx) => (
                   <motion.div key={w.WarehouseID}
                     initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }}
-                    className="bg-white rounded-3xl overflow-hidden border border-gray-100 hover:shadow-xl transition-all">
+                    whileHover={{ y: -4, boxShadow: '0 20px 40px rgba(46,95,138,0.15)' }}
+                    className="bg-white rounded-3xl overflow-hidden border border-gray-100 transition-all">
                     <div className="h-40 relative"
                       style={{background: 'linear-gradient(135deg, #1a3f6f, #2E5F8A)'}}>
                       <Building2 className="absolute inset-0 m-auto text-white/10" size={60} />
@@ -367,37 +392,6 @@ function HomePage() {
                 ))}
               </div>
             )}
-          </section>
-        )}
-
-        {/* Features */}
-        {activeTab === 'home' && (
-          <section className="mt-16">
-            <div className="rounded-3xl p-10 text-right"
-              style={{background: 'linear-gradient(135deg, #0f2744, #2E5F8A)'}}>
-              <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
-                <div className="grid grid-cols-3 gap-6">
-                  {[
-                    { icon: '⚡', label: 'حجز فوري' },
-                    { icon: '🔒', label: 'دفع آمن' },
-                    { icon: '📱', label: 'متاح 24/7' },
-                  ].map((f, i) => (
-                    <div key={i} className="text-center">
-                      <div className="text-3xl mb-2">{f.icon}</div>
-                      <p className="text-white/80 font-black text-sm">{f.label}</p>
-                    </div>
-                  ))}
-                </div>
-                <div className="text-right">
-                  <h3 className="text-2xl font-black text-white mb-2">جاهز للبدء؟</h3>
-                  <p className="text-white/60 font-medium mb-4">انضم لأكثر من 500 شركة تثق بمنصة رفدي</p>
-                  <button onClick={() => navigate('/register')}
-                    className="px-8 py-3 bg-white rounded-2xl font-black text-[#0f2744] hover:bg-gray-50 transition-all">
-                    ابدأ الآن مجاناً
-                  </button>
-                </div>
-              </div>
-            </div>
           </section>
         )}
       </div>
