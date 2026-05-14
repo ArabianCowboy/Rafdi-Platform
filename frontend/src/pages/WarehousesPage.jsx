@@ -51,12 +51,14 @@ function WarehousesPage() {
   useEffect(() => { fetchWarehouses(); }, []);
 
   const fetchWarehouses = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`${API_URL}/warehouses/`, { headers: { 'Authorization': `Bearer ${token}` } });
-      if (res.ok) setWarehouses(await res.json());
-    } catch {} finally { setLoading(false); }
-  };
+  setLoading(true);
+  try {
+    const res = await fetch(`${API_URL}/warehouses/my`, { 
+      headers: { 'Authorization': `Bearer ${token}` } 
+    });
+    if (res.ok) setWarehouses(await res.json());
+  } catch {} finally { setLoading(false); }
+};
 
   const openCreate = () => { setForm(emptyForm); setEditWarehouse(null); setError(''); setShowModal(true); };
   const openEdit = (w) => {
