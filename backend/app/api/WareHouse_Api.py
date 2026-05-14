@@ -11,7 +11,6 @@ from app.config import get_db
 router = APIRouter(prefix="/warehouses", tags=["Warehouses"])
 
 
-# Build the warehouse service and connect it to the database session.
 def get_warehouse_service(db: Session = Depends(get_db)) -> WarehouseService:
     warehouse_repo = WarehouseRepo(db)
     return WarehouseService(
@@ -38,8 +37,6 @@ def get_by_id(
         return service.get_by_id(warehouse_id)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
-    except Exception:
-        raise HTTPException(status_code=500, detail="حدث خطأ أثناء جلب بيانات المستودع")
 
 
 @router.post("/", response_model=WarehouseResponse)
@@ -52,8 +49,6 @@ def create(
         return service.create(data, current_user["company_id"])
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-    except Exception:
-        raise HTTPException(status_code=500, detail="حدث خطأ أثناء إنشاء المستودع")
 
 
 @router.patch("/{warehouse_id}", response_model=WarehouseResponse)
@@ -67,8 +62,6 @@ def update(
         return service.update(warehouse_id, data, current_user["company_id"])
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-    except Exception:
-        raise HTTPException(status_code=500, detail="حدث خطأ أثناء تحديث المستودع")
 
 
 @router.patch("/{warehouse_id}/toggle", response_model=WarehouseToggleResponse)
@@ -81,5 +74,3 @@ def toggle(
         return service.toggle(warehouse_id, current_user["company_id"])
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-    except Exception:
-        raise HTTPException(status_code=500, detail="حدث خطأ أثناء تغيير حالة المستودع")

@@ -18,7 +18,6 @@ from app.config import get_db
 router = APIRouter(prefix="/bookings", tags=["Bookings"])
 
 
-# Build the booking service by wiring the repos and helper services together.
 def get_booking_service(db: Session = Depends(get_db)) -> BookingService:
     booking_repo   = BookingRepo(db)
     payment_repo   = PaymentRepo(db)
@@ -36,15 +35,13 @@ def get_booking_service(db: Session = Depends(get_db)) -> BookingService:
     )
 
 
-# Create a new booking. Only renter accounts can use this endpoint.
 @router.post("/", response_model=BookingResponse)
 def create(
     data        : BookingCreate,
     service     : BookingService = Depends(get_booking_service),
     current_user: dict           = Depends(require_renter)
-): 
+):
     try:
-        # Use the authenticated user's IDs instead of trusting client input.
         return service.create(
             data             = data,
             renter_company_id= current_user["company_id"],
@@ -52,33 +49,24 @@ def create(
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-    except Exception:
-        raise HTTPException(status_code=500, detail="حدث خطأ أثناء إنشاء الحجز")
 
 
-# Return bookings for the logged-in user's company.
 @router.get("/my", response_model=list[BookingResponse])
 def get_my_bookings(
     service     : BookingService = Depends(get_booking_service),
     current_user: dict           = Depends(get_current_user)
 ):
-    try:
-        return service.get_by_company(current_user["company_id"])
-    except Exception:
-        raise HTTPException(status_code=500, detail="حدث خطأ أثناء جلب الحجوزات")
+    return service.get_by_company(current_user["company_id"])
 
 
-# Update the status of one booking using the booking ID from the URL.
 @router.patch("/{booking_id}/status", response_model=BookingResponse)
 def update_status(
     booking_id  : int,
     data        : BookingStatusUpdate,
     service     : BookingService = Depends(get_booking_service),
     current_user: dict           = Depends(get_current_user)
-): 
+):
     try:
         return service.update_status(booking_id, data)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-    except Exception:
-        raise HTTPException(status_code=500, detail="حدث خطأ أثناء تحديث حالة الحجز")
