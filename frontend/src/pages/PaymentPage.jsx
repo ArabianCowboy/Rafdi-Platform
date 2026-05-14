@@ -68,6 +68,9 @@ function PaymentPage() {
   };
 
   useEffect(() => {
+      console.log('bookingId:', bookingId);
+  console.log('sessionStorage bookingId:', sessionStorage.getItem('bookingId'));
+  console.log('URL params:', window.location.search);
     if (!bookingId) { navigate('/home'); return; }
 
     const urlParams = new URLSearchParams(window.location.search);
