@@ -126,7 +126,6 @@ function HomePage() {
 
   const navItems = [
     { label: 'الرئيسية', icon: LayoutDashboard, id: 'home', path: null },
-    { label: 'المستودعات', icon: Building2, id: 'warehouses', path: null },
     ...(isRenter ? [{ label: 'حجوزاتي', icon: Layers, id: 'bookings', path: '/bookings' }] : []),
     ...(isOwner ? [{ label: 'مستودعاتي', icon: Building2, id: 'my-warehouses', path: '/warehouses' }] : []),
     ...(isOwner ? [{ label: 'إدارة الحجوزات', icon: Users, id: 'owner-bookings', path: '/owner-bookings' }] : []),
@@ -139,14 +138,6 @@ function HomePage() {
       setActiveTab(item.id);
     }
   };
-
-  const quickActions = [
-    { label: 'استعرض المستودعات', icon: Building2, action: () => setActiveTab('warehouses') },
-    ...(isRenter ? [{ label: 'حجوزاتي', icon: Layers, action: () => navigate('/bookings') }] : []),
-    ...(isOwner ? [{ label: 'مستودعاتي', icon: Building2, action: () => navigate('/warehouses') }] : []),
-    ...(isOwner ? [{ label: 'حجوزات مستودعاتي', icon: Users, action: () => navigate('/owner-bookings') }] : []),
-    ...(isOwner ? [{ label: 'إدارة الحجوزات', icon: Settings, action: () => navigate('/warehouses') }] : []),
-  ];
 
   return (
     <div className="min-h-screen bg-[#f7f8fa]" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
