@@ -134,7 +134,6 @@ function HomePage() {
     { label: 'المستودعات', icon: Building2, id: 'warehouses' },
     ...(isRenter ? [{ label: 'حجوزاتي', icon: Layers, id: 'bookings' }] : []),
     ...(isOwner ? [{ label: 'مستودعاتي', icon: Building2, id: 'my-warehouses' }] : []),
-    { label: 'الدعم', icon: HeadphonesIcon, id: 'support' },
   ];
 
   return (

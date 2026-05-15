@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'motion/react';
-import { Mail, Lock, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Building2, CheckCircle, ArrowLeft } from 'lucide-react';
 
 const API_URL = 'https://api.rafdi.com';
 
@@ -13,7 +12,7 @@ function LoginPage() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const validateEmail = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -39,202 +38,161 @@ function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex" dir="rtl" style={{fontFamily: "'Cairo', sans-serif"}}>
-      
-      {/* Left Panel - Decorative */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden"
-        style={{background: 'linear-gradient(135deg, #0f2744 0%, #1a3f6f 40%, #2E5F8A 100%)'}}>
-        
-        {/* Grid Pattern */}
-        <div className="absolute inset-0 opacity-10"
-          style={{backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '60px 60px'}} />
-        
-        {/* Glowing Orbs */}
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full opacity-20 blur-3xl"
-          style={{background: 'radial-gradient(circle, #4A8ABF, transparent)'}} />
-        <div className="absolute bottom-1/4 right-1/4 w-48 h-48 rounded-full opacity-15 blur-3xl"
-          style={{background: 'radial-gradient(circle, #60a5fa, transparent)'}} />
+    <div className="min-h-screen flex" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
 
-        {/* Floating Cards */}
-        <motion.div
-          animate={{ y: [0, -12, 0] }}
-          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute top-24 right-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-5 w-52"
-        >
-          <p className="text-white/50 text-xs mb-1 font-bold uppercase tracking-widest">المستودعات النشطة</p>
-          <p className="text-white text-3xl font-black">128</p>
-          <div className="mt-2 h-1 rounded-full bg-white/10">
-            <div className="h-1 rounded-full bg-[#4A8ABF] w-3/4" />
+      {/* Left Panel */}
+      <div className="hidden lg:flex lg:w-1/2 flex-col justify-between bg-[#1a3a5c] p-12">
+        {/* Logo */}
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center">
+            <span className="text-white font-black text-sm">ر</span>
           </div>
-        </motion.div>
+          <span className="text-white font-black text-lg">رفدي</span>
+        </div>
 
-        <motion.div
-          animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-          className="absolute bottom-32 left-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-5 w-48"
-        >
-          <p className="text-white/50 text-xs mb-1 font-bold uppercase tracking-widest">الحجوزات</p>
-          <p className="text-white text-3xl font-black">34</p>
-          <p className="text-emerald-400 text-xs font-bold mt-1">↑ 12% هذا الشهر</p>
-        </motion.div>
+        {/* Main content */}
+        <div>
+          <h1 className="text-4xl font-black text-white leading-snug mb-4">
+            منصة حجز<br />وإدارة المستودعات
+          </h1>
+          <p className="text-blue-200 text-base leading-relaxed mb-10 max-w-sm">
+            ربط مباشر بين أصحاب المستودعات والشركات الباحثة عن مساحة تخزين آمنة وموثوقة.
+          </p>
 
-        {/* Center Content */}
-        <div className="relative z-10 flex flex-col justify-center items-start p-16 w-full">
-          <div className="mb-12">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                style={{background: 'linear-gradient(135deg, #4A8ABF, #2E5F8A)'}}>
-                <span className="text-white font-black text-lg">ر</span>
+          {/* Trust indicators */}
+          <div className="space-y-3">
+            {[
+              'مستودعات في مناطق متعددة بالمملكة',
+              'نظام حجز وتتبع فوري',
+              'دفع آمن عبر ميسر',
+            ].map((item, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <CheckCircle size={16} className="text-emerald-400 shrink-0" />
+                <span className="text-blue-100 text-sm">{item}</span>
               </div>
-              <span className="text-white font-black text-2xl tracking-tight">رفدي</span>
-            </div>
-            <h1 className="text-5xl font-black text-white leading-tight mb-4">
-              منصة إدارة<br />
-              <span style={{color: '#4A8ABF'}}>المستودعات</span><br />
-              اللوجستية
-            </h1>
-            <p className="text-white/50 text-lg leading-relaxed max-w-sm">
-              حلول متكاملة لإدارة وحجز المستودعات بكفاءة عالية وأمان تام.
-            </p>
+            ))}
           </div>
 
-          <div className="flex gap-3">
-            {['موثوق', 'آمن', 'سريع'].map((tag) => (
-              <span key={tag} className="px-4 py-2 rounded-full text-xs font-black text-white/70 border border-white/20 bg-white/5">
-                {tag}
-              </span>
+          {/* Stats */}
+          <div className="flex gap-8 mt-10 pt-10 border-t border-white/10">
+            {[
+              { value: '+128', label: 'مستودع نشط' },
+              { value: '+500', label: 'شركة مسجلة' },
+              { value: '٩٩٪', label: 'رضا العملاء' },
+            ].map((s, i) => (
+              <div key={i}>
+                <p className="text-2xl font-black text-white">{s.value}</p>
+                <p className="text-blue-300 text-xs mt-0.5">{s.label}</p>
+              </div>
             ))}
           </div>
         </div>
+
+        <p className="text-blue-400 text-xs">© 2026 Rafdi Platform</p>
       </div>
 
       {/* Right Panel - Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-[#F8FAFC]">
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-          className="w-full max-w-md"
-        >
-          {/* Header */}
-          <div className="mb-10 text-right">
-            <div className="flex items-center gap-3 mb-8 lg:hidden">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-                style={{background: 'linear-gradient(135deg, #4A8ABF, #2E5F8A)'}}>
-                <span className="text-white font-black">ر</span>
-              </div>
-              <span className="text-[#0f2744] font-black text-xl">رفدي</span>
+      <div className="w-full lg:w-1/2 flex items-center justify-center bg-[#f7f8fa] p-6">
+        <div className="w-full max-w-sm">
+
+          {/* Mobile logo */}
+          <div className="flex items-center gap-2 mb-8 lg:hidden">
+            <div className="w-8 h-8 rounded-lg bg-[#1a3a5c] flex items-center justify-center">
+              <span className="text-white font-black text-sm">ر</span>
             </div>
-            <h2 className="text-3xl font-black text-[#0f2744] mb-2">أهلاً بعودتك 👋</h2>
-            <p className="text-gray-400 font-medium">سجّل دخولك للمتابعة</p>
+            <span className="text-[#1a3a5c] font-black text-lg">رفدي</span>
+          </div>
+
+          {/* Header */}
+          <div className="mb-7 text-right">
+            <h2 className="text-2xl font-black text-gray-900 mb-1">تسجيل الدخول</h2>
+            <p className="text-gray-500 text-sm">أدخل بياناتك للوصول إلى حسابك</p>
           </div>
 
           {/* Tabs */}
-          <div className="flex bg-white rounded-2xl p-1.5 mb-8 shadow-sm border border-gray-100">
-            <button className="flex-1 py-3 rounded-xl font-black text-sm transition-all"
-              style={{background: 'linear-gradient(135deg, #1a3f6f, #2E5F8A)', color: 'white'}}>
+          <div className="flex bg-white border border-gray-200 rounded-xl p-1 mb-6">
+            <button className="flex-1 py-2.5 rounded-lg text-sm font-bold text-white bg-[#1a3a5c] transition-all">
               تسجيل الدخول
             </button>
             <Link to="/register" className="flex-1">
-              <button className="w-full py-3 rounded-xl font-black text-sm text-gray-400 hover:text-gray-600 transition-all">
-                إنشاء حساب
+              <button className="w-full py-2.5 rounded-lg text-sm font-semibold text-gray-500 hover:text-gray-700 transition-colors">
+                حساب جديد
               </button>
             </Link>
           </div>
 
           {/* Error */}
-          <AnimatePresence>
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className="mb-6 p-4 rounded-2xl text-sm flex items-center gap-3 text-right"
-                style={{background: '#FEF2F2', border: '1px solid #FCA5A5'}}
-              >
-                <div className="w-8 h-8 rounded-xl bg-red-100 flex items-center justify-center shrink-0 text-red-500 font-black text-lg">!</div>
-                <p className="font-bold text-red-700">{error}</p>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {error && (
+            <div className="mb-5 p-3.5 rounded-xl text-sm flex items-start gap-2.5 bg-red-50 border border-red-200">
+              <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center shrink-0 mt-0.5">
+                <span className="text-red-600 text-xs font-black">!</span>
+              </div>
+              <p className="font-semibold text-red-700 text-right">{error}</p>
+            </div>
+          )}
 
           {/* Form */}
-          <form onSubmit={handleLogin} className="space-y-5">
-            <div>
-              <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2 text-right">
-                البريد الإلكتروني
-              </label>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="text-right">
+              <label className="block text-xs font-bold text-gray-600 mb-1.5">البريد الإلكتروني</label>
               <div className="relative">
                 <input
                   type="text"
                   placeholder="name@company.com"
-                  className="w-full py-4 px-5 pr-12 rounded-2xl font-bold text-right outline-none transition-all bg-white border-2 border-transparent placeholder:text-gray-300 text-[#0f2744]"
-                  style={{'--tw-ring-color': '#2E5F8A'}}
-                  onFocus={e => e.target.style.borderColor = '#2E5F8A'}
-                  onBlur={e => e.target.style.borderColor = 'transparent'}
+                  className="w-full py-3 px-4 pr-10 rounded-xl text-sm font-medium text-right bg-white border border-gray-200 outline-none focus:border-[#1a3a5c] transition-colors placeholder:text-gray-400 text-gray-900"
                   value={email}
-                  onChange={e => { setEmail(e.target.value); if(error) setError(''); }}
+                  onChange={e => { setEmail(e.target.value); if (error) setError(''); }}
                 />
-                <Mail className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
+                <Mail size={15} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
               </div>
             </div>
 
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <button type="button" className="text-xs font-black text-[#2E5F8A] hover:text-[#1a3f6f] transition-colors">
-                  <Link to="/forgot-password" className="text-xs font-black text-[#2E5F8A] hover:text-[#1a3f6f] transition-colors">
-  نسيت كلمة المرور؟
-</Link>
-                </button>
-                <label className="text-xs font-black text-gray-500 uppercase tracking-widest">
-                  كلمة المرور
-                </label>
+            <div className="text-right">
+              <div className="flex justify-between items-center mb-1.5">
+                <Link to="/forgot-password" className="text-xs font-semibold text-[#1a3a5c] hover:underline">
+                  نسيت كلمة المرور؟
+                </Link>
+                <label className="text-xs font-bold text-gray-600">كلمة المرور</label>
               </div>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"
-                  className="w-full py-4 px-5 pr-12 pl-12 rounded-2xl font-bold text-right outline-none transition-all bg-white border-2 border-transparent placeholder:text-gray-300 text-[#0f2744]"
-                  onFocus={e => e.target.style.borderColor = '#2E5F8A'}
-                  onBlur={e => e.target.style.borderColor = 'transparent'}
+                  className="w-full py-3 px-4 pr-10 pl-10 rounded-xl text-sm font-medium text-right bg-white border border-gray-200 outline-none focus:border-[#1a3a5c] transition-colors placeholder:text-gray-400 text-gray-900"
                   value={password}
-                  onChange={e => { setPassword(e.target.value); if(error) setError(''); }}
+                  onChange={e => { setPassword(e.target.value); if (error) setError(''); }}
                 />
-                <Lock className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
+                <Lock size={15} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
                 <button type="button" onClick={() => setShowPassword(!showPassword)}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500 transition-colors">
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                  {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                 </button>
               </div>
             </div>
 
-            <motion.button
+            <button
               type="submit"
               disabled={loading}
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.98 }}
-              className="w-full py-4 rounded-2xl font-black text-white text-lg flex items-center justify-center gap-3 mt-2 disabled:opacity-70"
-              style={{background: loading ? '#93b4d4' : 'linear-gradient(135deg, #1a3f6f 0%, #2E5F8A 100%)', boxShadow: '0 8px 32px rgba(46,95,138,0.35)'}}
+              className="w-full py-3 rounded-xl font-bold text-white text-sm bg-[#1a3a5c] hover:bg-[#14304e] disabled:opacity-60 transition-colors flex items-center justify-center gap-2 mt-2"
             >
               {loading ? (
                 <span className="flex items-center gap-2">
-                  <motion.span animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                    className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full block" />
-                  جاري التحميل...
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin block" />
+                  جاري الدخول...
                 </span>
               ) : (
                 <>
-                  <ArrowLeft size={20} />
+                  <ArrowLeft size={16} />
                   تسجيل الدخول
                 </>
               )}
-            </motion.button>
+            </button>
           </form>
 
-          <p className="text-center text-xs text-gray-400 font-bold mt-8">
+          <p className="text-center text-xs text-gray-400 mt-8">
             © 2026 Rafdi Platform — جميع الحقوق محفوظة
           </p>
-        </motion.div>
+        </div>
       </div>
     </div>
   );
