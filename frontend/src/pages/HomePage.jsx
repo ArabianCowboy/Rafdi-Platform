@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Building2, LogOut, Layers, Package, CheckCircle, Users, MapPin, Loader, Settings, Search, ChevronLeft, LayoutDashboard, HeadphonesIcon } from "lucide-react";
+import { Building2, LogOut, Layers, Package, CheckCircle, Users, MapPin, Loader, Settings, Search, ChevronLeft, LayoutDashboard } from "lucide-react";
 
 const API_URL = 'https://api.rafdi.com';
 
@@ -37,7 +37,6 @@ const StatusBadge = ({ active }) => (
 
 const WarehouseCard = ({ w, isRenter, onBook }) => (
   <div className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 transition-colors group">
-    {/* Image */}
     <div className="relative h-48 bg-gray-100 overflow-hidden">
       {w.ImagePath ? (
         <img src={w.ImagePath} alt={w.Name}
@@ -58,8 +57,6 @@ const WarehouseCard = ({ w, isRenter, onBook }) => (
         </p>
       </div>
     </div>
-
-    {/* Info */}
     <div className="p-4">
       <h3 className="font-bold text-gray-900 text-sm mb-2 text-right">{w.Name}</h3>
       <div className="flex items-center justify-end gap-1.5 text-gray-500 text-xs mb-1">
@@ -70,11 +67,9 @@ const WarehouseCard = ({ w, isRenter, onBook }) => (
         <span>{w.Size?.toLocaleString()} م²</span>
         <Package size={11} className="text-gray-400 shrink-0" />
       </div>
-
       {w.Description && (
         <p className="text-xs text-gray-400 mt-2 text-right line-clamp-2 leading-relaxed">{w.Description}</p>
       )}
-
       {isRenter && w.IsActive && (
         <button onClick={() => onBook(w.WarehouseID)}
           className="w-full mt-4 py-2.5 bg-[#1a3a5c] hover:bg-[#14304e] text-white text-sm font-bold rounded-lg transition-colors">
@@ -130,11 +125,19 @@ function HomePage() {
   );
 
   const navItems = [
-    { label: 'الرئيسية', icon: LayoutDashboard, id: 'home' },
-    { label: 'المستودعات', icon: Building2, id: 'warehouses' },
-    ...(isRenter ? [{ label: 'حجوزاتي', icon: Layers, id: 'bookings' }] : []),
-    ...(isOwner ? [{ label: 'مستودعاتي', icon: Building2, id: 'my-warehouses' }] : []),
+    { label: 'الرئيسية', icon: LayoutDashboard, id: 'home', path: null },
+    { label: 'المستودعات', icon: Building2, id: 'warehouses', path: null },
+    ...(isRenter ? [{ label: 'حجوزاتي', icon: Layers, id: 'bookings', path: '/bookings' }] : []),
+    ...(isOwner ? [{ label: 'مستودعاتي', icon: Building2, id: 'my-warehouses', path: null }] : []),
   ];
+
+  const handleNavClick = (item) => {
+    if (item.path) {
+      navigate(item.path);
+    } else {
+      setActiveTab(item.id);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#f7f8fa]" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
@@ -143,8 +146,6 @@ function HomePage() {
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex items-center justify-between h-14">
-
-            {/* Logo */}
             <div className="flex items-center gap-5">
               <div className="flex items-center gap-2 cursor-pointer" onClick={() => setActiveTab('home')}>
                 <div className="w-8 h-8 rounded-lg bg-[#1a3a5c] flex items-center justify-center">
@@ -155,7 +156,7 @@ function HomePage() {
 
               <nav className="hidden md:flex items-center gap-0.5">
                 {navItems.map(item => (
-                  <button key={item.id} onClick={() => setActiveTab(item.id)}
+                  <button key={item.id} onClick={() => handleNavClick(item)}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors"
                     style={{
                       color: activeTab === item.id ? '#1a3a5c' : '#6b7280',
@@ -168,7 +169,6 @@ function HomePage() {
               </nav>
             </div>
 
-            {/* User */}
             <div className="flex items-center gap-3">
               <div className="hidden md:flex items-center gap-1.5">
                 {isOwner && <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-100">مالك</span>}
@@ -189,24 +189,18 @@ function HomePage() {
         </div>
       </header>
 
-      {/* Hero / Search — shown on home & warehouses */}
+      {/* Hero / Search */}
       {(activeTab === 'home' || activeTab === 'warehouses') && (
         <div className="bg-[#1a3a5c] py-10 px-4">
           <div className="max-w-2xl mx-auto text-center">
-            <h1 className="text-2xl font-black text-white mb-1">
-              ابحث عن مستودعك المثالي
-            </h1>
+            <h1 className="text-2xl font-black text-white mb-1">ابحث عن مستودعك المثالي</h1>
             <p className="text-blue-200 text-sm mb-6">
               {warehouses.filter(w => w.IsActive).length} مستودع متاح في مناطق متعددة
             </p>
             <div className="relative">
-              <input
-                type="text"
-                value={search}
-                onChange={e => setSearch(e.target.value)}
+              <input type="text" value={search} onChange={e => setSearch(e.target.value)}
                 placeholder="ابحث بالاسم أو الموقع..."
-                className="w-full py-3.5 pr-12 pl-4 rounded-xl text-sm font-medium bg-white border border-gray-200 outline-none text-gray-900 placeholder:text-gray-400"
-              />
+                className="w-full py-3.5 pr-12 pl-4 rounded-xl text-sm font-medium bg-white border border-gray-200 outline-none text-gray-900 placeholder:text-gray-400" />
               <Search size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" />
             </div>
           </div>
@@ -239,14 +233,14 @@ function HomePage() {
 
       <main className="max-w-6xl mx-auto px-4 py-8">
 
-        {/* Quick actions — home only */}
+        {/* Quick actions */}
         {activeTab === 'home' && (
           <div className="mb-8">
             <h2 className="text-sm font-bold text-gray-500 mb-3 text-right">وصول سريع</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {[
                 { label: 'استعرض المستودعات', icon: Building2, action: () => setActiveTab('warehouses') },
-                ...(isRenter ? [{ label: 'حجوزاتي', icon: Layers, action: () => setActiveTab('bookings') }] : []),
+                ...(isRenter ? [{ label: 'حجوزاتي', icon: Layers, action: () => navigate('/bookings') }] : []),
                 ...(isOwner ? [{ label: 'مستودعاتي', icon: Building2, action: () => setActiveTab('my-warehouses') }] : []),
                 ...(isOwner ? [{ label: 'إدارة المستودعات', icon: Settings, action: () => navigate('/warehouses') }] : []),
               ].map((a, i) => (
@@ -293,64 +287,6 @@ function HomePage() {
                     <WarehouseCard key={w.WarehouseID} w={w} isRenter={isRenter}
                       onBook={id => navigate(`/booking/${id}`)} />
                   ))}
-              </div>
-            )}
-          </section>
-        )}
-
-        {/* Bookings */}
-        {activeTab === 'bookings' && isRenter && (
-          <section>
-            <div className="flex justify-between items-center mb-5">
-              <span className="text-sm text-gray-500">{myBookings.length} حجز</span>
-              <h2 className="text-base font-black text-gray-900">حجوزاتي</h2>
-            </div>
-
-            {myBookings.length === 0 ? (
-              <div className="text-center py-16 bg-white border border-dashed border-gray-300 rounded-xl">
-                <Layers size={32} className="text-gray-300 mx-auto mb-3" />
-                <p className="text-sm text-gray-500 mb-4">لا توجد حجوزات حتى الآن</p>
-                <button onClick={() => setActiveTab('warehouses')}
-                  className="px-4 py-2 bg-[#1a3a5c] text-white text-sm font-bold rounded-lg">
-                  ابحث عن مستودع
-                </button>
-              </div>
-            ) : (
-              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-                <table className="w-full text-right">
-                  <thead>
-                    <tr className="bg-gray-50 border-b border-gray-100">
-                      {['المستودع', 'من', 'إلى', 'المبلغ', 'الحالة'].map(h => (
-                        <th key={h} className="px-4 py-3 text-xs font-bold text-gray-500">{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-50">
-                    {myBookings.map(b => (
-                      <tr key={b.BookingID} className="hover:bg-gray-50 transition-colors">
-                        <td className="px-4 py-3.5 text-sm font-semibold text-gray-900">
-                          {b.warehouse?.Name || `مستودع #${b.WarehouseID}`}
-                        </td>
-                        <td className="px-4 py-3.5 text-sm text-gray-500 font-mono">{b.StartDate}</td>
-                        <td className="px-4 py-3.5 text-sm text-gray-500 font-mono">{b.EndDate}</td>
-                        <td className="px-4 py-3.5 text-sm font-bold text-gray-900">
-                          {parseFloat(b.TotalPrice).toLocaleString()} <span className="text-gray-400 font-normal">ر.س</span>
-                        </td>
-                        <td className="px-4 py-3.5">
-                          <span className={`text-xs font-semibold px-2 py-0.5 rounded-md border ${
-                            b.Status === 'confirmed'
-                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                              : b.Status === 'pending'
-                              ? 'bg-amber-50 text-amber-700 border-amber-200'
-                              : 'bg-red-50 text-red-600 border-red-200'
-                          }`}>
-                            {b.Status === 'confirmed' ? 'مؤكد' : b.Status === 'pending' ? 'قيد الانتظار' : 'ملغي'}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
               </div>
             )}
           </section>
