@@ -40,8 +40,6 @@ function OwnerBookingsPage() {
 
   return (
     <div className="min-h-screen bg-[#f7f8fa]" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
-
-      {/* Navbar */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-4">
           <div className="flex items-center gap-4 h-14">
@@ -61,7 +59,6 @@ function OwnerBookingsPage() {
         </div>
       </header>
 
-      {/* Page header */}
       <div className="bg-[#1a3a5c] py-8 px-4">
         <div className="max-w-5xl mx-auto text-right">
           <h1 className="text-xl font-black text-white mb-1">حجوزات مستودعاتي</h1>
@@ -70,8 +67,6 @@ function OwnerBookingsPage() {
       </div>
 
       <main className="max-w-5xl mx-auto px-4 py-8">
-
-        {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
           {stats.map((s, i) => (
             <div key={i} className="bg-white border border-gray-200 rounded-xl p-4 text-right">
@@ -81,7 +76,6 @@ function OwnerBookingsPage() {
           ))}
         </div>
 
-        {/* Filter tabs */}
         <div className="flex gap-2 mb-5">
           {[
             { key: 'all', label: 'الكل' },
@@ -91,9 +85,7 @@ function OwnerBookingsPage() {
           ].map(f => (
             <button key={f.key} onClick={() => setFilter(f.key)}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
-                filter === f.key
-                  ? 'bg-[#1a3a5c] text-white'
-                  : 'bg-white border border-gray-200 text-gray-600 hover:border-gray-300'
+                filter === f.key ? 'bg-[#1a3a5c] text-white' : 'bg-white border border-gray-200 text-gray-600 hover:border-gray-300'
               }`}>
               {f.label}
             </button>
@@ -114,38 +106,25 @@ function OwnerBookingsPage() {
             {filtered.map((b) => {
               const status = statusConfig[b.Status] || statusConfig.pending;
               const StatusIcon = status.icon;
-
               return (
                 <div key={b.BookingID}
-                  className={`bg-white border rounded-xl p-5 transition-all ${
-                    b.Status === 'cancelled' ? 'border-gray-100 opacity-70' : 'border-gray-200'
-                  }`}>
+                  className={`bg-white border rounded-xl p-5 ${b.Status === 'cancelled' ? 'border-gray-100 opacity-70' : 'border-gray-200'}`}>
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-
-                    {/* Left - Warehouse + renter info */}
                     <div className="flex items-start gap-3 text-right">
                       <div className="w-10 h-10 rounded-lg bg-[#f0f4f8] border border-gray-200 flex items-center justify-center shrink-0">
                         <Building2 size={18} className="text-[#1a3a5c]" />
                       </div>
                       <div>
-                        <p className="font-bold text-gray-900 text-sm">
-                          {b.warehouse?.Name || `مستودع #${b.WarehouseID}`}
-                        </p>
+                        <p className="font-bold text-gray-900 text-sm">{b.warehouse?.Name || `مستودع #${b.WarehouseID}`}</p>
                         <div className="flex items-center gap-1.5 mt-1">
                           <Users size={11} className="text-gray-400" />
-                          <p className="text-xs text-gray-500">
-                            {b.renter_company?.CompanyName || `شركة #${b.RenterCompanyID}`}
-                          </p>
+                          <p className="text-xs text-gray-500">{b.renter_company?.CompanyName || `شركة #${b.RenterCompanyID}`}</p>
                         </div>
                         {b.renter_company?.CommercialRegistration && (
-                          <p className="text-xs text-gray-400 mt-0.5">
-                            سجل تجاري: {b.renter_company.CommercialRegistration}
-                          </p>
+                          <p className="text-xs text-gray-400 mt-0.5">سجل تجاري: {b.renter_company.CommercialRegistration}</p>
                         )}
                       </div>
                     </div>
-
-                    {/* Right - Status + amount */}
                     <div className="flex flex-wrap items-center gap-2 justify-end">
                       <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-md border ${status.className}`}>
                         <StatusIcon size={11} />
@@ -157,8 +136,6 @@ function OwnerBookingsPage() {
                       </span>
                     </div>
                   </div>
-
-                  {/* Dates + ID */}
                   <div className="flex flex-wrap items-center justify-between mt-4 pt-3 border-t border-gray-50 gap-2">
                     <p className="text-xs text-gray-400 font-mono">#{b.BookingID}</p>
                     <div className="flex items-center gap-1.5 text-gray-500 text-xs">
@@ -171,10 +148,7 @@ function OwnerBookingsPage() {
                 </div>
               );
             })}
-
-            <div className="text-left pt-2">
-              <p className="text-xs text-gray-400">{filtered.length} حجز</p>
-            </div>
+            <p className="text-xs text-gray-400 text-left pt-2">{filtered.length} حجز</p>
           </div>
         )}
       </main>
