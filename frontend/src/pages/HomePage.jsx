@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Building2, LogOut, Layers, Package, CheckCircle, Users, MapPin, Loader, Settings, Search, ChevronLeft, LayoutDashboard } from "lucide-react";
+import { Building2, LogOut, Layers, Package, CheckCircle, Users, MapPin, Loader, Settings, Search, ChevronLeft, LayoutDashboard, Plus } from "lucide-react";
 
 const API_URL = 'https://api.rafdi.com';
 
@@ -58,7 +58,16 @@ const WarehouseCard = ({ w, isRenter, onBook }) => (
       </div>
     </div>
     <div className="p-4">
-      <h3 className="font-bold text-gray-900 text-sm mb-2 text-right">{w.Name}</h3>
+      <h3 className="font-bold text-gray-900 text-sm mb-1 text-right">{w.Name}</h3>
+
+      {/* Company name */}
+      {w.company?.CompanyName && (
+        <div className="flex items-center justify-end gap-1.5 text-gray-400 text-xs mb-2">
+          <span>{w.company.CompanyName}</span>
+          <Users size={10} className="text-gray-300 shrink-0" />
+        </div>
+      )}
+
       <div className="flex items-center justify-end gap-1.5 text-gray-500 text-xs mb-1">
         <span>{w.Location}</span>
         <MapPin size={11} className="text-gray-400 shrink-0" />
@@ -132,11 +141,8 @@ function HomePage() {
   ];
 
   const handleNavClick = (item) => {
-    if (item.path) {
-      navigate(item.path);
-    } else {
-      setActiveTab(item.id);
-    }
+    if (item.path) navigate(item.path);
+    else setActiveTab(item.id);
   };
 
   return (
@@ -170,16 +176,27 @@ function HomePage() {
             </div>
 
             <div className="flex items-center gap-3">
+              {/* زر إضافة مستودع للمالك */}
+              {isOwner && (
+                <button onClick={() => navigate('/warehouses')}
+                  className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-[#1a3a5c] hover:bg-[#14304e] text-white text-xs font-bold rounded-lg transition-colors">
+                  <Plus size={14} />
+                  إضافة مستودع
+                </button>
+              )}
+
               <div className="hidden md:flex items-center gap-1.5">
                 {isOwner && <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-100">مالك</span>}
                 {isRenter && <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-100">مستأجر</span>}
               </div>
+
               <div className="flex items-center gap-2 border-r border-gray-200 pr-3">
                 <span className="text-sm font-semibold text-gray-700 hidden md:block max-w-[120px] truncate">{displayName}</span>
                 <div className="w-8 h-8 rounded-full bg-[#1a3a5c] flex items-center justify-center shrink-0">
                   <span className="text-white text-xs font-bold">{displayName.charAt(0)}</span>
                 </div>
               </div>
+
               <button onClick={handleLogout}
                 className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-red-600 transition-colors">
                 <LogOut size={15} />
@@ -232,24 +249,6 @@ function HomePage() {
       )}
 
       <main className="max-w-6xl mx-auto px-4 py-8">
-
-        {/* Quick actions */}
-        {activeTab === 'home' && (
-          <div className="mb-8">
-            <h2 className="text-sm font-bold text-gray-500 mb-3 text-right">وصول سريع</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {quickActions.map((a, i) => (
-                <button key={i} onClick={a.action}
-                  className="flex items-center gap-3 p-3.5 bg-white border border-gray-200 rounded-xl text-right hover:border-[#1a3a5c] transition-colors">
-                  <div className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center shrink-0">
-                    <a.icon size={15} className="text-gray-600" />
-                  </div>
-                  <span className="text-sm font-semibold text-gray-700">{a.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Warehouses listing */}
         {(activeTab === 'home' || activeTab === 'warehouses') && (
