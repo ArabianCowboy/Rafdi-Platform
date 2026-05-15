@@ -1,315 +1,163 @@
-import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
-import { Building2, LogOut, Layers, Package, CheckCircle, Users, MapPin, Loader, Settings, Search, ChevronLeft, LayoutDashboard } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ChevronLeft, Building2, Calendar, Loader, Layers, Users, CheckCircle, Clock, XCircle } from 'lucide-react';
 
 const API_URL = 'https://api.rafdi.com';
 
-const getUserRoles = () => {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) return [];
-    return JSON.parse(atob(token.split('.')[1])).roles || [];
-  } catch { return []; }
+const statusConfig = {
+  confirmed: { label: 'مؤكد', className: 'bg-emerald-50 text-emerald-700 border border-emerald-200', icon: CheckCircle },
+  pending:   { label: 'قيد الانتظار', className: 'bg-amber-50 text-amber-700 border border-amber-200', icon: Clock },
+  cancelled: { label: 'ملغي', className: 'bg-red-50 text-red-600 border border-red-200', icon: XCircle },
 };
 
-const getUserInfo = () => {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) return {};
-    return JSON.parse(atob(token.split('.')[1]));
-  } catch { return {}; }
-};
-
-const getCompanyId = () => {
-  try {
-    return JSON.parse(atob(localStorage.getItem('token').split('.')[1])).company_id;
-  } catch { return null; }
-};
-
-const StatusBadge = ({ active }) => (
-  <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-md ${
-    active ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-gray-100 text-gray-500 border border-gray-200'
-  }`}>
-    <span className={`w-1.5 h-1.5 rounded-full ${active ? 'bg-emerald-500' : 'bg-gray-400'}`} />
-    {active ? 'متاح' : 'غير متاح'}
-  </span>
-);
-
-const WarehouseCard = ({ w, isRenter, onBook }) => (
-  <div className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 transition-colors group">
-    <div className="relative h-48 bg-gray-100 overflow-hidden">
-      {w.ImagePath ? (
-        <img src={w.ImagePath} alt={w.Name}
-          className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" />
-      ) : (
-        <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-gray-50">
-          <Building2 size={32} className="text-gray-300" />
-          <span className="text-xs text-gray-400">لا توجد صورة</span>
-        </div>
-      )}
-      <div className="absolute top-3 right-3">
-        <StatusBadge active={w.IsActive} />
-      </div>
-      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/40 to-transparent px-4 py-3">
-        <p className="text-white font-bold text-lg leading-none">
-          {w.PricePerDay?.toLocaleString()}
-          <span className="text-white/70 text-sm font-normal mr-1">ر.س / يوم</span>
-        </p>
-      </div>
-    </div>
-    <div className="p-4">
-      <h3 className="font-bold text-gray-900 text-sm mb-2 text-right">{w.Name}</h3>
-      <div className="flex items-center justify-end gap-1.5 text-gray-500 text-xs mb-1">
-        <span>{w.Location}</span>
-        <MapPin size={11} className="text-gray-400 shrink-0" />
-      </div>
-      <div className="flex items-center justify-end gap-1.5 text-gray-500 text-xs">
-        <span>{w.Size?.toLocaleString()} م²</span>
-        <Package size={11} className="text-gray-400 shrink-0" />
-      </div>
-      {w.Description && (
-        <p className="text-xs text-gray-400 mt-2 text-right line-clamp-2 leading-relaxed">{w.Description}</p>
-      )}
-      {isRenter && w.IsActive && (
-        <button onClick={() => onBook(w.WarehouseID)}
-          className="w-full mt-4 py-2.5 bg-[#1a3a5c] hover:bg-[#14304e] text-white text-sm font-bold rounded-lg transition-colors">
-          احجز الآن
-        </button>
-      )}
-    </div>
-  </div>
-);
-
-function HomePage() {
+function OwnerBookingsPage() {
   const navigate = useNavigate();
-  const [warehouses, setWarehouses] = useState([]);
-  const [myWarehouses, setMyWarehouses] = useState([]);
-  const [myBookings, setMyBookings] = useState([]);
+  const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('home');
-  const [search, setSearch] = useState('');
-
-  const roles = getUserRoles();
-  const userInfo = getUserInfo();
-  const isRenter = roles.includes('renter_company');
-  const isOwner = roles.includes('warehouse_owner');
-  const displayName = userInfo.company_name || userInfo.name || userInfo.email || 'المستخدم';
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
-  };
+  const [filter, setFilter] = useState('all');
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchBookings = async () => {
       try {
         const token = localStorage.getItem('token');
-        const headers = { 'Authorization': `Bearer ${token}` };
-        const res = await fetch(`${API_URL}/warehouses/`, { headers });
-        if (res.ok) {
-          const data = await res.json();
-          setWarehouses(data);
-          if (isOwner) setMyWarehouses(data.filter(w => w.CompanyID === getCompanyId()));
-        }
-        if (isRenter) {
-          const br = await fetch(`${API_URL}/bookings/my`, { headers });
-          if (br.ok) setMyBookings(await br.json());
-        }
+        const res = await fetch(`${API_URL}/bookings/owner`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) setBookings(await res.json());
       } catch {} finally { setLoading(false); }
     };
-    fetchData();
+    fetchBookings();
   }, []);
 
-  const filteredWarehouses = warehouses.filter(w =>
-    w.Name?.includes(search) || w.Location?.includes(search)
-  );
+  const filtered = filter === 'all' ? bookings : bookings.filter(b => b.Status === filter);
 
-  const navItems = [
-    { label: 'الرئيسية', icon: LayoutDashboard, id: 'home', path: null },
-    { label: 'المستودعات', icon: Building2, id: 'warehouses', path: null },
-    ...(isRenter ? [{ label: 'حجوزاتي', icon: Layers, id: 'bookings', path: '/bookings' }] : []),
-    ...(isOwner ? [{ label: 'مستودعاتي', icon: Building2, id: 'my-warehouses', path: '/warehouses' }] : []),
-    ...(isOwner ? [{ label: 'حجوزات مستودعاتي', icon: Users, id: 'owner-bookings', path: '/owner-bookings' }] : []),
-  ];
-
-  const handleNavClick = (item) => {
-    if (item.path) {
-      navigate(item.path);
-    } else {
-      setActiveTab(item.id);
-    }
-  };
-
-  const quickActions = [
-    { label: 'استعرض المستودعات', icon: Building2, action: () => setActiveTab('warehouses') },
-    ...(isRenter ? [{ label: 'حجوزاتي', icon: Layers, action: () => navigate('/bookings') }] : []),
-    ...(isOwner ? [{ label: 'مستودعاتي', icon: Building2, action: () => navigate('/warehouses') }] : []),
-    ...(isOwner ? [{ label: 'حجوزات مستودعاتي', icon: Users, action: () => navigate('/owner-bookings') }] : []),
-    ...(isOwner ? [{ label: 'إدارة المستودعات', icon: Settings, action: () => navigate('/warehouses') }] : []),
+  const stats = [
+    { label: 'إجمالي الحجوزات', value: bookings.length, color: 'text-gray-900' },
+    { label: 'مؤكدة', value: bookings.filter(b => b.Status === 'confirmed').length, color: 'text-emerald-600' },
+    { label: 'قيد الانتظار', value: bookings.filter(b => b.Status === 'pending').length, color: 'text-amber-600' },
+    { label: 'ملغية', value: bookings.filter(b => b.Status === 'cancelled').length, color: 'text-red-500' },
   ];
 
   return (
     <div className="min-h-screen bg-[#f7f8fa]" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
-
-      {/* Navbar */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="flex items-center justify-between h-14">
-            <div className="flex items-center gap-5">
-              <div className="flex items-center gap-2 cursor-pointer" onClick={() => setActiveTab('home')}>
-                <div className="w-8 h-8 rounded-lg bg-[#1a3a5c] flex items-center justify-center">
-                  <span className="text-white font-black text-sm">ر</span>
-                </div>
-                <span className="text-[#1a3a5c] font-black text-lg">رفدي</span>
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="flex items-center gap-4 h-14">
+            <button onClick={() => navigate('/home')}
+              className="flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-gray-800 transition-colors">
+              <ChevronLeft size={16} className="rotate-180" />
+              رجوع
+            </button>
+            <div className="h-4 w-px bg-gray-200" />
+            <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/home')}>
+              <div className="w-7 h-7 rounded-lg bg-[#1a3a5c] flex items-center justify-center">
+                <span className="text-white font-black text-xs">ر</span>
               </div>
-
-              <nav className="hidden md:flex items-center gap-0.5">
-                {navItems.map(item => (
-                  <button key={item.id} onClick={() => handleNavClick(item)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors"
-                    style={{
-                      color: activeTab === item.id ? '#1a3a5c' : '#6b7280',
-                      background: activeTab === item.id ? '#eef2f7' : 'transparent'
-                    }}>
-                    <item.icon size={14} />
-                    {item.label}
-                  </button>
-                ))}
-              </nav>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className="hidden md:flex items-center gap-1.5">
-                {isOwner && <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-100">مالك</span>}
-                {isRenter && <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-100">مستأجر</span>}
-              </div>
-              <div className="flex items-center gap-2 border-r border-gray-200 pr-3">
-                <span className="text-sm font-semibold text-gray-700 hidden md:block max-w-[120px] truncate">{displayName}</span>
-                <div className="w-8 h-8 rounded-full bg-[#1a3a5c] flex items-center justify-center shrink-0">
-                  <span className="text-white text-xs font-bold">{displayName.charAt(0)}</span>
-                </div>
-              </div>
-              <button onClick={handleLogout}
-                className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-red-600 transition-colors">
-                <LogOut size={15} />
-              </button>
+              <span className="text-[#1a3a5c] font-black text-base">رفدي</span>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Hero / Search */}
-      {(activeTab === 'home' || activeTab === 'warehouses') && (
-        <div className="bg-[#1a3a5c] py-10 px-4">
-          <div className="max-w-2xl mx-auto text-center">
-            <h1 className="text-2xl font-black text-white mb-1">ابحث عن مستودعك المثالي</h1>
-            <p className="text-blue-200 text-sm mb-6">
-              {warehouses.filter(w => w.IsActive).length} مستودع متاح في مناطق متعددة
-            </p>
-            <div className="relative">
-              <input type="text" value={search} onChange={e => setSearch(e.target.value)}
-                placeholder="ابحث بالاسم أو الموقع..."
-                className="w-full py-3.5 pr-12 pl-4 rounded-xl text-sm font-medium bg-white border border-gray-200 outline-none text-gray-900 placeholder:text-gray-400" />
-              <Search size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" />
-            </div>
-          </div>
+      <div className="bg-[#1a3a5c] py-8 px-4">
+        <div className="max-w-5xl mx-auto text-right">
+          <h1 className="text-xl font-black text-white mb-1">حجوزات مستودعاتي</h1>
+          <p className="text-blue-200 text-sm">عرض جميع الحجوزات على مستودعاتك</p>
         </div>
-      )}
+      </div>
 
-      {/* Stats strip */}
-      {activeTab === 'home' && (
-        <div className="bg-white border-b border-gray-200">
-          <div className="max-w-6xl mx-auto px-4">
-            <div className="flex overflow-x-auto">
-              {[
-                { label: 'إجمالي المستودعات', value: warehouses.length, icon: Building2 },
-                { label: 'متاح للحجز', value: warehouses.filter(w => w.IsActive).length, icon: CheckCircle },
-                ...(isRenter ? [{ label: 'حجوزاتي', value: myBookings.length, icon: Layers }] : []),
-                ...(isOwner ? [{ label: 'مستودعاتي', value: myWarehouses.length, icon: Users }] : []),
-              ].map((s, i) => (
-                <div key={i} className="flex items-center gap-3 px-6 py-4 border-l border-gray-100 last:border-0 first:border-0 shrink-0">
-                  <s.icon size={18} className="text-gray-400" />
-                  <div>
-                    <p className="text-lg font-black text-gray-900 leading-none">{loading ? '—' : s.value}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">{s.label}</p>
+      <main className="max-w-5xl mx-auto px-4 py-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+          {stats.map((s, i) => (
+            <div key={i} className="bg-white border border-gray-200 rounded-xl p-4 text-right">
+              <p className={`text-2xl font-black ${s.color}`}>{loading ? '—' : s.value}</p>
+              <p className="text-xs text-gray-500 mt-0.5">{s.label}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex gap-2 mb-5">
+          {[
+            { key: 'all', label: 'الكل' },
+            { key: 'confirmed', label: 'مؤكدة' },
+            { key: 'pending', label: 'قيد الانتظار' },
+            { key: 'cancelled', label: 'ملغية' },
+          ].map(f => (
+            <button key={f.key} onClick={() => setFilter(f.key)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                filter === f.key ? 'bg-[#1a3a5c] text-white' : 'bg-white border border-gray-200 text-gray-600 hover:border-gray-300'
+              }`}>
+              {f.label}
+            </button>
+          ))}
+        </div>
+
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <Loader size={26} className="text-[#1a3a5c] animate-spin" />
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="text-center py-20 bg-white border border-dashed border-gray-300 rounded-xl">
+            <Layers size={36} className="text-gray-300 mx-auto mb-3" />
+            <p className="text-sm text-gray-500 font-medium">لا توجد حجوزات</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {filtered.map((b) => {
+              const status = statusConfig[b.Status] || statusConfig.pending;
+              const StatusIcon = status.icon;
+              return (
+                <div key={b.BookingID}
+                  className={`bg-white border rounded-xl p-5 ${b.Status === 'cancelled' ? 'border-gray-100 opacity-70' : 'border-gray-200'}`}>
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex items-start gap-3 text-right">
+                      <div className="w-10 h-10 rounded-lg bg-[#f0f4f8] border border-gray-200 flex items-center justify-center shrink-0">
+                        <Building2 size={18} className="text-[#1a3a5c]" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-gray-900 text-sm">{b.warehouse?.Name || `مستودع #${b.WarehouseID}`}</p>
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <Users size={11} className="text-gray-400" />
+                          <p className="text-xs text-gray-500">{b.renter_company?.CompanyName || `شركة #${b.RenterCompanyID}`}</p>
+                        </div>
+                        {b.renter_company?.CommercialRegistration && (
+                          <p className="text-xs text-gray-400 mt-0.5">سجل تجاري: {b.renter_company.CommercialRegistration}</p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2 justify-end">
+                      <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-md border ${status.className}`}>
+                        <StatusIcon size={11} />
+                        {status.label}
+                      </span>
+                      <span className="font-black text-gray-900 text-sm">
+                        {parseFloat(b.TotalPrice).toLocaleString()}
+                        <span className="text-xs font-normal text-gray-400 mr-1">ر.س</span>
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center justify-between mt-4 pt-3 border-t border-gray-50 gap-2">
+                    <p className="text-xs text-gray-400 font-mono">#{b.BookingID}</p>
+                    <div className="flex items-center gap-1.5 text-gray-500 text-xs">
+                      <Calendar size={11} className="text-gray-400 shrink-0" />
+                      <span className="font-mono">{b.StartDate}</span>
+                      <span className="text-gray-300 mx-1">←</span>
+                      <span className="font-mono">{b.EndDate}</span>
+                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
+              );
+            })}
+            <p className="text-xs text-gray-400 text-left pt-2">{filtered.length} حجز</p>
           </div>
-        </div>
-      )}
-
-      <main className="max-w-6xl mx-auto px-4 py-8">
-
-        {/* Quick actions */}
-        {activeTab === 'home' && (
-          <div className="mb-8">
-            <h2 className="text-sm font-bold text-gray-500 mb-3 text-right">وصول سريع</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {quickActions.map((a, i) => (
-                <button key={i} onClick={a.action}
-                  className="flex items-center gap-3 p-3.5 bg-white border border-gray-200 rounded-xl text-right hover:border-[#1a3a5c] transition-colors">
-                  <div className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center shrink-0">
-                    <a.icon size={15} className="text-gray-600" />
-                  </div>
-                  <span className="text-sm font-semibold text-gray-700">{a.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Warehouses listing */}
-        {(activeTab === 'home' || activeTab === 'warehouses') && (
-          <section>
-            <div className="flex justify-between items-center mb-5">
-              <button onClick={() => setActiveTab('warehouses')}
-                className="flex items-center gap-1 text-sm font-semibold text-[#1a3a5c] hover:underline">
-                عرض الكل ({warehouses.length})
-                <ChevronLeft size={14} />
-              </button>
-              <h2 className="text-base font-black text-gray-900">
-                {activeTab === 'home' ? 'أحدث المستودعات' : 'جميع المستودعات'}
-              </h2>
-            </div>
-
-            {loading ? (
-              <div className="flex justify-center py-16">
-                <Loader size={26} className="text-[#1a3a5c] animate-spin" />
-              </div>
-            ) : filteredWarehouses.length === 0 ? (
-              <div className="text-center py-16 bg-white border border-dashed border-gray-300 rounded-xl">
-                <Building2 size={32} className="text-gray-300 mx-auto mb-3" />
-                <p className="text-sm text-gray-500">لا توجد مستودعات مطابقة</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredWarehouses
-                  .slice(0, activeTab === 'home' ? 3 : filteredWarehouses.length)
-                  .map(w => (
-                    <WarehouseCard key={w.WarehouseID} w={w} isRenter={isRenter}
-                      onBook={id => navigate(`/booking/${id}`)} />
-                  ))}
-              </div>
-            )}
-          </section>
         )}
       </main>
 
-      <footer className="border-t border-gray-200 mt-12 py-6 bg-white">
-        <div className="max-w-6xl mx-auto px-4 flex justify-between items-center">
-          <span className="text-xs text-gray-400">© 2026 Rafdi Platform</span>
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md bg-[#1a3a5c] flex items-center justify-center">
-              <span className="text-white font-bold text-xs">ر</span>
-            </div>
-            <span className="text-xs font-bold text-gray-600">رفدي</span>
-          </div>
-        </div>
+      <footer className="border-t border-gray-200 mt-12 py-5 bg-white">
+        <p className="text-center text-xs text-gray-400">© 2026 Rafdi Platform — جميع الحقوق محفوظة</p>
       </footer>
     </div>
   );
 }
 
-export default HomePage;
+export default OwnerBookingsPage;
