@@ -20,6 +20,10 @@ class BookingRepo(BaseRepo[Booking]):
     def get_by_company(self, company_id: int) -> list[Booking]:
         return self.db.query(Booking).filter(Booking.RenterCompanyID == company_id).all()
     
+    def get_by_owner_warehouses(self, warehouse_ids: list[int]) -> list[Booking]:
+        return self.db.query(Booking).filter(
+        Booking.WarehouseID.in_(warehouse_ids)
+    ).all()
  
     def add(self, obj: BookingCreate) -> Booking:
         booking = Booking(

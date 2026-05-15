@@ -10,12 +10,6 @@ class PaymentCreate(BaseModel):
     PaymentDate: date
     Status     : PaymentStatusEnum = PaymentStatusEnum.pending
 
-class ProcessPaymentRequest(BaseModel):
-    booking_id        : int
-    moyasar_payment_id: Optional[str] = None
-    moyasar_status    : Optional[str] = None
-    payment_method    : Optional[str] = None
-
 class PaymentUpdate(BaseModel):
     Amount           : Optional[Decimal]           = None
     PaymentDate      : Optional[date]              = None

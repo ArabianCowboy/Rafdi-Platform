@@ -91,6 +91,14 @@ class BookingService:
     def get_all(self) -> list[BookingResponse]:
         bookings = self.booking_repo.get_all()
         return [BookingResponse.model_validate(b) for b in bookings]
+    
+    def get_by_owner(self, company_id: int) -> list[BookingResponse]:
+        warehouses = self.warehouse_repo.get_by_company(company_id)
+        warehouse_ids = [w.WarehouseID for w in warehouses]
+        if not warehouse_ids:
+            return []
+        bookings = self.booking_repo.get_by_owner_warehouses(warehouse_ids)
+        return [BookingResponse.model_validate(b) for b in bookings]
 
     def update_status(self, booking_id: int, data: BookingStatusUpdate) -> BookingResponse:
         try:

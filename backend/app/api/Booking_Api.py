@@ -58,6 +58,13 @@ def get_my_bookings(
 ):
     return service.get_by_company(current_user["company_id"])
 
+@router.get("/owner", response_model=list[BookingResponse])
+def get_owner_bookings(
+    service     : BookingService = Depends(get_booking_service),
+    current_user: dict           = Depends(get_current_user)
+):
+    return service.get_by_owner(current_user["company_id"])
+
 
 @router.patch("/{booking_id}/status", response_model=BookingResponse)
 def update_status(

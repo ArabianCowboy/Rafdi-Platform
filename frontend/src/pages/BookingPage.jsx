@@ -179,14 +179,6 @@ function BookingPage() {
                   </div>
                 </div>
               </div>
-
-              {/* Warning */}
-              <div className="flex items-start gap-2.5 p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-right">
-                <AlertCircle size={15} className="text-amber-600 shrink-0 mt-0.5" />
-                <p className="text-xs text-amber-700 font-semibold leading-relaxed">
-                  لا يمكن الحجز في تواريخ محجوزة مسبقاً من قبل مستأجر آخر
-                </p>
-              </div>
             </div>
 
             {/* Right - Booking Form (3/5) */}

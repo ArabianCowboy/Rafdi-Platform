@@ -1,8 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import Optional
 
-from app.Dtos.Payment_DTOs import PaymentResponse, ProcessPaymentRequest
+from app.Dtos.Payment_DTOs import PaymentResponse
 from app.Repo.Payment_Repo import PaymentRepo
 from app.Repo.Booking_Repo import BookingRepo
 from app.services.Payment_Services.Payment_Service import PaymentService
@@ -23,16 +22,14 @@ def get_payment_service(db: Session = Depends(get_db)) -> PaymentService:
 
 @router.post("/", response_model=PaymentResponse)
 def process_payment(
-    data        : ProcessPaymentRequest,
+    booking_id  : int,
     service     : PaymentService = Depends(get_payment_service),
     current_user: dict           = Depends(require_renter)
 ):
-    return service.process_payment(
-        data.booking_id,
-        data.moyasar_payment_id,
-        data.moyasar_status,
-        data.payment_method
-    )
+    try:
+        return service.process_payment(booking_id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.get("/{booking_id}", response_model=PaymentResponse)
