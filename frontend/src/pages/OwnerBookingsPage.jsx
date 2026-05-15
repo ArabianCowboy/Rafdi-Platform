@@ -3,24 +3,22 @@ import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import HomePage from './pages/HomePage';
-import WarehousesPage from './pages/WarehousesPage';
+import WarehousePage from './pages/WarehousesPage';
 import BookingsPage from './pages/BookingsPage';
 import OwnerBookingsPage from './pages/OwnerBookingsPage';
 import BookingPage from "./pages/BookingPage";
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import PaymentPage from './pages/PaymentPage';
 
-
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-         <Route path="/" element={<LandingPage />} />
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/home" element={<HomePage />} />
-        <Route path="/warehouses" element={<WarehousesPage />} />
+        <Route path="/warehouses" element={<WarehousePage />} />
         <Route path="/booking/:id" element={<BookingPage />} />
         <Route path="/bookings" element={<BookingsPage />} />
         <Route path="/owner-bookings" element={<OwnerBookingsPage />} />

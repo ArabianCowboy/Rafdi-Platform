@@ -129,6 +129,7 @@ function HomePage() {
     { label: 'المستودعات', icon: Building2, id: 'warehouses', path: null },
     ...(isRenter ? [{ label: 'حجوزاتي', icon: Layers, id: 'bookings', path: '/bookings' }] : []),
     ...(isOwner ? [{ label: 'مستودعاتي', icon: Building2, id: 'my-warehouses', path: '/warehouses' }] : []),
+    ...(isOwner ? [{ label: 'حجوزات مستودعاتي', icon: Users, id: 'owner-bookings', path: '/owner-bookings' }] : []),
   ];
 
   const handleNavClick = (item) => {
@@ -143,6 +144,7 @@ function HomePage() {
     { label: 'استعرض المستودعات', icon: Building2, action: () => setActiveTab('warehouses') },
     ...(isRenter ? [{ label: 'حجوزاتي', icon: Layers, action: () => navigate('/bookings') }] : []),
     ...(isOwner ? [{ label: 'مستودعاتي', icon: Building2, action: () => navigate('/warehouses') }] : []),
+    ...(isOwner ? [{ label: 'حجوزات مستودعاتي', icon: Users, action: () => navigate('/owner-bookings') }] : []),
     ...(isOwner ? [{ label: 'إدارة المستودعات', icon: Settings, action: () => navigate('/warehouses') }] : []),
   ];
 
