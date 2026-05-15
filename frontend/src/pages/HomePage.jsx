@@ -83,8 +83,8 @@ const WarehouseCard = ({ w, isRenter, onBook }) => (
 function HomePage() {
   const navigate = useNavigate();
   const [warehouses, setWarehouses] = useState([]);
-  const [myBookings, setMyBookings] = useState([]);
   const [myWarehouses, setMyWarehouses] = useState([]);
+  const [myBookings, setMyBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('home');
   const [search, setSearch] = useState('');
@@ -128,7 +128,7 @@ function HomePage() {
     { label: 'الرئيسية', icon: LayoutDashboard, id: 'home', path: null },
     { label: 'المستودعات', icon: Building2, id: 'warehouses', path: null },
     ...(isRenter ? [{ label: 'حجوزاتي', icon: Layers, id: 'bookings', path: '/bookings' }] : []),
-    ...(isOwner ? [{ label: 'مستودعاتي', icon: Building2, id: 'my-warehouses', path: null }] : []),
+    ...(isOwner ? [{ label: 'مستودعاتي', icon: Building2, id: 'my-warehouses', path: '/warehouses' }] : []),
   ];
 
   const handleNavClick = (item) => {
@@ -138,6 +138,13 @@ function HomePage() {
       setActiveTab(item.id);
     }
   };
+
+  const quickActions = [
+    { label: 'استعرض المستودعات', icon: Building2, action: () => setActiveTab('warehouses') },
+    ...(isRenter ? [{ label: 'حجوزاتي', icon: Layers, action: () => navigate('/bookings') }] : []),
+    ...(isOwner ? [{ label: 'مستودعاتي', icon: Building2, action: () => navigate('/warehouses') }] : []),
+    ...(isOwner ? [{ label: 'إدارة المستودعات', icon: Settings, action: () => navigate('/warehouses') }] : []),
+  ];
 
   return (
     <div className="min-h-screen bg-[#f7f8fa]" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
@@ -238,12 +245,7 @@ function HomePage() {
           <div className="mb-8">
             <h2 className="text-sm font-bold text-gray-500 mb-3 text-right">وصول سريع</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {[
-                { label: 'استعرض المستودعات', icon: Building2, action: () => setActiveTab('warehouses') },
-                ...(isRenter ? [{ label: 'حجوزاتي', icon: Layers, action: () => navigate('/bookings') }] : []),
-                ...(isOwner ? [{ label: 'مستودعاتي', icon: Building2, action: () => setActiveTab('my-warehouses') }] : []),
-                ...(isOwner ? [{ label: 'إدارة المستودعات', icon: Settings, action: () => navigate('/warehouses') }] : []),
-              ].map((a, i) => (
+              {quickActions.map((a, i) => (
                 <button key={i} onClick={a.action}
                   className="flex items-center gap-3 p-3.5 bg-white border border-gray-200 rounded-xl text-right hover:border-[#1a3a5c] transition-colors">
                   <div className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center shrink-0">
@@ -287,67 +289,6 @@ function HomePage() {
                     <WarehouseCard key={w.WarehouseID} w={w} isRenter={isRenter}
                       onBook={id => navigate(`/booking/${id}`)} />
                   ))}
-              </div>
-            )}
-          </section>
-        )}
-
-        {/* My Warehouses */}
-        {activeTab === 'my-warehouses' && isOwner && (
-          <section>
-            <div className="flex justify-between items-center mb-5">
-              <button onClick={() => navigate('/warehouses')}
-                className="flex items-center gap-1.5 px-3 py-2 bg-[#1a3a5c] text-white text-sm font-bold rounded-lg hover:bg-[#14304e] transition-colors">
-                <Settings size={14} />
-                إدارة المستودعات
-              </button>
-              <div className="text-right">
-                <h2 className="text-base font-black text-gray-900">مستودعاتي</h2>
-                <p className="text-xs text-gray-500">{myWarehouses.length} مستودع مسجل</p>
-              </div>
-            </div>
-
-            {myWarehouses.length === 0 ? (
-              <div className="text-center py-16 bg-white border border-dashed border-gray-300 rounded-xl">
-                <Building2 size={32} className="text-gray-300 mx-auto mb-3" />
-                <p className="text-sm text-gray-500 mb-4">لم تضف أي مستودع بعد</p>
-                <button onClick={() => navigate('/warehouses')}
-                  className="px-4 py-2 bg-[#1a3a5c] text-white text-sm font-bold rounded-lg">
-                  أضف مستودعك الأول
-                </button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {myWarehouses.map(w => (
-                  <div key={w.WarehouseID}
-                    className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 transition-colors">
-                    <div className="h-40 bg-gray-100 relative">
-                      {w.ImagePath ? (
-                        <img src={w.ImagePath} alt={w.Name} className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <Building2 size={28} className="text-gray-300" />
-                        </div>
-                      )}
-                      <div className="absolute top-3 right-3">
-                        <StatusBadge active={w.IsActive} />
-                      </div>
-                    </div>
-                    <div className="p-4 text-right">
-                      <h3 className="font-bold text-gray-900 text-sm mb-2">{w.Name}</h3>
-                      <div className="flex items-center justify-end gap-1.5 text-gray-500 text-xs mb-1">
-                        <span>{w.Location}</span>
-                        <MapPin size={11} className="text-gray-400" />
-                      </div>
-                      <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100">
-                        <span className="text-xs text-gray-400">{w.Size?.toLocaleString()} م²</span>
-                        <span className="text-sm font-bold text-[#1a3a5c]">
-                          {w.PricePerDay?.toLocaleString()} <span className="text-xs font-normal text-gray-400">ر.س/يوم</span>
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
               </div>
             )}
           </section>
