@@ -180,10 +180,10 @@ function HomePage() {
               {isOwner && (
                 <button onClick={() => navigate('/warehouses')}
                   className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-[#1a3a5c] hover:bg-[#14304e] text-white text-xs font-bold rounded-lg transition-colors">
-                  <Plus size={14} />
-                  إضافة مستودع
-                </button>
-              )}
+                  <Settings size={14} />
+                     إدارة المستودعات
+                  </button>
+                  )}
 
               <div className="hidden md:flex items-center gap-1.5">
                 {isOwner && <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-100">مالك</span>}
