@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'motion/react';
-import { Building2, Plus, MapPin, Package, Edit2, Power, X, Loader, ArrowLeft, Save } from 'lucide-react';
+import { Building2, Plus, MapPin, Package, Edit2, Power, X, Loader, ArrowLeft, Save, ChevronLeft } from 'lucide-react';
 
 const API_URL = 'https://api.rafdi.com';
 
@@ -9,16 +8,13 @@ const getUserRoles = () => {
   try {
     const token = localStorage.getItem('token');
     if (!token) return [];
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    return payload.roles || [];
+    return JSON.parse(atob(token.split('.')[1])).roles || [];
   } catch { return []; }
 };
 
 const getCompanyId = () => {
   try {
-    const token = localStorage.getItem('token');
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    return payload.company_id;
+    return JSON.parse(atob(localStorage.getItem('token').split('.')[1])).company_id;
   } catch { return null; }
 };
 
@@ -30,6 +26,15 @@ const parseError = (detail) => {
 };
 
 const emptyForm = { Name: '', Location: '', Size: '', PricePerDay: '', Description: '', IsActive: true, ImagePath: '' };
+
+const StatusBadge = ({ active }) => (
+  <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-md ${
+    active ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-gray-100 text-gray-500 border border-gray-200'
+  }`}>
+    <span className={`w-1.5 h-1.5 rounded-full ${active ? 'bg-emerald-500' : 'bg-gray-400'}`} />
+    {active ? 'نشط' : 'معطل'}
+  </span>
+);
 
 function WarehousesPage() {
   const navigate = useNavigate();
@@ -44,21 +49,18 @@ function WarehousesPage() {
 
   const roles = getUserRoles();
   const isOwner = roles.includes('warehouse_owner');
-
   const token = localStorage.getItem('token');
   const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
 
   useEffect(() => { fetchWarehouses(); }, []);
 
   const fetchWarehouses = async () => {
-  setLoading(true);
-  try {
-    const res = await fetch(`${API_URL}/warehouses/my`, { 
-      headers: { 'Authorization': `Bearer ${token}` } 
-    });
-    if (res.ok) setWarehouses(await res.json());
-  } catch {} finally { setLoading(false); }
-};
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/warehouses/my`, { headers: { 'Authorization': `Bearer ${token}` } });
+      if (res.ok) setWarehouses(await res.json());
+    } catch {} finally { setLoading(false); }
+  };
 
   const openCreate = () => { setForm(emptyForm); setEditWarehouse(null); setError(''); setShowModal(true); };
   const openEdit = (w) => {
@@ -85,7 +87,7 @@ function WarehousesPage() {
       const res = await fetch(url, { method, headers, body: JSON.stringify(body) });
       const data = await res.json();
       if (!res.ok) { setError(parseError(data.detail)); return; }
-      setSuccess(editWarehouse ? 'تم تعديل المستودع بنجاح ✅' : 'تم إنشاء المستودع بنجاح ✅');
+      setSuccess(editWarehouse ? 'تم تعديل المستودع بنجاح' : 'تم إنشاء المستودع بنجاح');
       setShowModal(false);
       fetchWarehouses();
       setTimeout(() => setSuccess(''), 3000);
@@ -101,262 +103,242 @@ function WarehousesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]" dir="rtl" style={{fontFamily: "'Cairo', sans-serif"}}>
+    <div className="min-h-screen bg-[#f7f8fa]" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
 
       {/* Navbar */}
-      <nav className="bg-white border-b border-gray-100 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button onClick={() => navigate('/home')}
-              className="flex items-center gap-2 text-gray-400 hover:text-[#2E5F8A] font-bold text-sm transition-colors">
-              <ArrowLeft size={18} className="rotate-180" />
-              رجوع
-            </button>
-            <div className="h-5 w-px bg-gray-200" />
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-                style={{background: 'linear-gradient(135deg, #4A8ABF, #2E5F8A)'}}>
-                <span className="text-white font-black text-sm">ر</span>
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="flex items-center justify-between h-14">
+            <div className="flex items-center gap-4">
+              <button onClick={() => navigate('/home')}
+                className="flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-gray-800 transition-colors">
+                <ChevronLeft size={16} className="rotate-180" />
+                رجوع
+              </button>
+              <div className="h-4 w-px bg-gray-200" />
+              <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/home')}>
+                <div className="w-7 h-7 rounded-lg bg-[#1a3a5c] flex items-center justify-center">
+                  <span className="text-white font-black text-xs">ر</span>
+                </div>
+                <span className="text-[#1a3a5c] font-black text-base">رفدي</span>
               </div>
-              <span className="text-[#0f2744] font-black">رفدي</span>
             </div>
+            {isOwner && (
+              <button onClick={openCreate}
+                className="flex items-center gap-2 px-4 py-2 bg-[#1a3a5c] hover:bg-[#14304e] text-white text-sm font-bold rounded-lg transition-colors">
+                <Plus size={15} />
+                إضافة مستودع
+              </button>
+            )}
           </div>
-          {isOwner && (
-            <motion.button onClick={openCreate} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-2xl font-black text-sm text-white"
-              style={{background: 'linear-gradient(135deg, #1a3f6f, #2E5F8A)', boxShadow: '0 4px 15px rgba(46,95,138,0.3)'}}>
-              <Plus size={18} />
-              إضافة مستودع
-            </motion.button>
-          )}
         </div>
-      </nav>
+      </header>
 
-      <div className="max-w-7xl mx-auto px-6 py-12">
+      <main className="max-w-6xl mx-auto px-4 py-8">
 
-        <div className="flex justify-between items-center mb-10 text-right">
+        {/* Page title */}
+        <div className="flex justify-between items-start mb-6 text-right">
           <div />
           <div>
-            <h1 className="text-3xl font-black text-[#0f2744]">إدارة المستودعات</h1>
-            <p className="text-gray-400 font-medium mt-1">إضافة وتعديل وإدارة مستودعاتك</p>
+            <h1 className="text-xl font-black text-gray-900">إدارة المستودعات</h1>
+            <p className="text-sm text-gray-500 mt-0.5">{warehouses.length} مستودع مسجل</p>
           </div>
         </div>
 
-        <AnimatePresence>
-          {success && (
-            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-              className="mb-6 p-4 rounded-2xl text-sm font-bold text-emerald-700 text-right"
-              style={{background: '#F0FDF4', border: '1px solid #86EFAC'}}>
-              {success}
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Success */}
+        {success && (
+          <div className="mb-5 p-3.5 rounded-xl text-sm flex items-center gap-2.5 bg-emerald-50 border border-emerald-200 text-right">
+            <span className="text-emerald-600 font-semibold">{success} ✓</span>
+          </div>
+        )}
 
         {loading ? (
           <div className="flex justify-center py-20">
-            <Loader size={40} className="text-[#2E5F8A] animate-spin" />
+            <Loader size={26} className="text-[#1a3a5c] animate-spin" />
           </div>
         ) : warehouses.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
-            <Building2 size={60} className="text-gray-200 mx-auto mb-4" />
-            <p className="text-gray-400 font-bold text-lg">لا توجد مستودعات</p>
+          <div className="text-center py-20 bg-white border border-dashed border-gray-300 rounded-xl">
+            <Building2 size={36} className="text-gray-300 mx-auto mb-3" />
+            <p className="text-sm text-gray-500 font-medium mb-4">لم تضف أي مستودع بعد</p>
             {isOwner && (
               <button onClick={openCreate}
-                className="mt-4 px-6 py-3 rounded-2xl font-black text-white text-sm"
-                style={{background: 'linear-gradient(135deg, #1a3f6f, #2E5F8A)'}}>
+                className="px-4 py-2 bg-[#1a3a5c] text-white text-sm font-bold rounded-lg hover:bg-[#14304e] transition-colors">
                 أضف مستودعك الأول
               </button>
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {warehouses.map((w, idx) => (
-              <motion.div key={w.WarehouseID}
-                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }}
-                whileHover={{ y: -4, boxShadow: '0 20px 40px rgba(46,95,138,0.12)' }}
-                className="bg-white rounded-3xl overflow-hidden border border-gray-100 transition-all duration-300 group">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {warehouses.map((w) => (
+              <div key={w.WarehouseID}
+                className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 hover:shadow-sm transition-all">
 
-                <div className="h-44 relative overflow-hidden"
-                  style={{background: 'linear-gradient(135deg, #1a3f6f, #2E5F8A)'}}>
+                {/* Image */}
+                <div className="h-44 relative bg-gray-100 overflow-hidden">
                   {w.ImagePath ? (
-                    <img src={w.ImagePath} alt={w.Name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <img src={w.ImagePath} alt={w.Name} className="w-full h-full object-cover" />
                   ) : (
-                    <Building2 className="absolute inset-0 m-auto text-white/10" size={80} />
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Building2 size={36} className="text-gray-300" />
+                    </div>
                   )}
-                  <div className="absolute top-4 right-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-black text-white border ${w.IsActive ? 'bg-emerald-500/30 border-emerald-400/30' : 'bg-red-500/30 border-red-400/30'}`}>
-                      {w.IsActive ? 'نشط' : 'معطل'}
-                    </span>
+                  <div className="absolute top-3 right-3">
+                    <StatusBadge active={w.IsActive} />
                   </div>
-                  <div className="absolute bottom-4 left-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl px-3 py-1.5">
-                    <p className="text-white font-black text-sm">
-                      {w.PricePerDay?.toLocaleString()} <span className="text-white/60 font-bold text-xs">ر.س/يوم</span>
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/40 to-transparent px-4 py-3">
+                    <p className="text-white font-bold text-base leading-none">
+                      {w.PricePerDay?.toLocaleString()}
+                      <span className="text-white/70 text-xs font-normal mr-1">ر.س / يوم</span>
                     </p>
                   </div>
                 </div>
 
-                <div className="p-6">
-                  <h3 className="font-black text-[#0f2744] text-right text-lg mb-3">{w.Name}</h3>
-                  <div className="space-y-2 mb-4">
-                    <div className="flex items-center justify-end gap-2 text-gray-400 text-sm">
-                      <span className="font-medium">{w.Location}</span>
-                      <MapPin size={14} className="text-[#2E5F8A]" />
+                {/* Info */}
+                <div className="p-4">
+                  <h3 className="font-bold text-gray-900 text-sm mb-2 text-right">{w.Name}</h3>
+                  <div className="space-y-1 mb-3">
+                    <div className="flex items-center justify-end gap-1.5 text-gray-500 text-xs">
+                      <span>{w.Location}</span>
+                      <MapPin size={11} className="text-gray-400 shrink-0" />
                     </div>
-                    <div className="flex items-center justify-end gap-2 text-gray-400 text-sm">
-                      <span className="font-medium">{w.Size} م²</span>
-                      <Package size={14} className="text-[#2E5F8A]" />
+                    <div className="flex items-center justify-end gap-1.5 text-gray-500 text-xs">
+                      <span>{w.Size?.toLocaleString()} م²</span>
+                      <Package size={11} className="text-gray-400 shrink-0" />
                     </div>
                   </div>
 
                   {w.Description && (
-                    <p className="text-gray-400 text-xs font-medium text-right mb-4 leading-relaxed line-clamp-2">{w.Description}</p>
+                    <p className="text-xs text-gray-400 text-right line-clamp-2 leading-relaxed mb-3">{w.Description}</p>
                   )}
 
                   {isOwner && (
-                    <div className="flex gap-2 pt-4 border-t border-gray-100">
-                      <motion.button onClick={() => openEdit(w)} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-2xl font-black text-sm transition-all border-2 border-[#2E5F8A]/20 text-[#2E5F8A] hover:bg-[#2E5F8A]/5">
-                        <Edit2 size={15} />
+                    <div className="flex gap-2 pt-3 border-t border-gray-100">
+                      <button onClick={() => openEdit(w)}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold border border-gray-200 text-gray-700 hover:border-[#1a3a5c] hover:text-[#1a3a5c] transition-colors">
+                        <Edit2 size={13} />
                         تعديل
-                      </motion.button>
-                      <motion.button onClick={() => handleToggle(w)} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-2xl font-black text-sm transition-all border-2 ${w.IsActive ? 'border-red-200 text-red-500 hover:bg-red-50' : 'border-emerald-200 text-emerald-500 hover:bg-emerald-50'}`}>
-                        <Power size={15} />
+                      </button>
+                      <button onClick={() => handleToggle(w)}
+                        className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold border transition-colors ${
+                          w.IsActive
+                            ? 'border-red-200 text-red-600 hover:bg-red-50'
+                            : 'border-emerald-200 text-emerald-600 hover:bg-emerald-50'
+                        }`}>
+                        <Power size={13} />
                         {w.IsActive ? 'تعطيل' : 'تفعيل'}
-                      </motion.button>
+                      </button>
                     </div>
                   )}
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         )}
-      </div>
+      </main>
 
       {/* Modal */}
-      <AnimatePresence>
-        {showModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              onClick={() => setShowModal(false)}
-              className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setShowModal(false)} />
 
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-3xl shadow-2xl w-full max-w-lg relative z-10 overflow-hidden max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md relative z-10 overflow-hidden max-h-[90vh] overflow-y-auto">
 
-              <div className="p-6 text-right sticky top-0 z-10"
-                style={{background: 'linear-gradient(135deg, #0f2744, #2E5F8A)'}}>
-                <div className="flex items-center justify-between">
-                  <button onClick={() => setShowModal(false)}
-                    className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-all">
-                    <X size={18} />
-                  </button>
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+              <button onClick={() => setShowModal(false)}
+                className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors">
+                <X size={15} />
+              </button>
+              <div className="text-right">
+                <h3 className="font-bold text-gray-900 text-sm">
+                  {editWarehouse ? 'تعديل المستودع' : 'إضافة مستودع جديد'}
+                </h3>
+                {editWarehouse && <p className="text-xs text-gray-400 mt-0.5">{editWarehouse.Name}</p>}
+              </div>
+            </div>
+
+            <div className="p-5">
+              {error && (
+                <div className="mb-4 p-3.5 rounded-xl text-sm flex items-start gap-2.5 bg-red-50 border border-red-200">
+                  <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center shrink-0 mt-0.5">
+                    <span className="text-red-600 text-xs font-black">!</span>
+                  </div>
+                  <p className="font-semibold text-red-700 text-right">{error}</p>
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-4 text-right">
+                {[
+                  { label: 'اسم المستودع', key: 'Name', placeholder: 'مستودع الرياض الرئيسي', type: 'text' },
+                  { label: 'الموقع', key: 'Location', placeholder: 'الرياض، حي العارض', type: 'text' },
+                  { label: 'رابط الصورة', key: 'ImagePath', placeholder: 'https://...', type: 'text' },
+                ].map((field) => (
+                  <div key={field.key}>
+                    <label className="block text-xs font-bold text-gray-600 mb-1.5">{field.label}</label>
+                    <input type={field.type} placeholder={field.placeholder}
+                      className="w-full py-2.5 px-3.5 rounded-xl text-sm font-medium text-right bg-white border border-gray-200 outline-none focus:border-[#1a3a5c] transition-colors placeholder:text-gray-400 text-gray-900"
+                      value={form[field.key]}
+                      onChange={e => { setForm({ ...form, [field.key]: e.target.value }); if (error) setError(''); }} />
+                  </div>
+                ))}
+
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <p className="text-white/60 text-xs font-bold uppercase tracking-widest mb-1">
-                      {editWarehouse ? 'تعديل المستودع' : 'إضافة مستودع جديد'}
-                    </p>
-                    <h3 className="text-xl font-black text-white">
-                      {editWarehouse ? editWarehouse.Name : 'مستودع جديد'}
-                    </h3>
+                    <label className="block text-xs font-bold text-gray-600 mb-1.5">المساحة (م²)</label>
+                    <input type="number" min="1" placeholder="500"
+                      className="w-full py-2.5 px-3.5 rounded-xl text-sm font-medium text-right bg-white border border-gray-200 outline-none focus:border-[#1a3a5c] transition-colors placeholder:text-gray-400 text-gray-900"
+                      value={form.Size}
+                      onChange={e => { setForm({ ...form, Size: e.target.value }); if (error) setError(''); }} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-600 mb-1.5">السعر اليومي (ر.س)</label>
+                    <input type="number" min="1" placeholder="500"
+                      className="w-full py-2.5 px-3.5 rounded-xl text-sm font-medium text-right bg-white border border-gray-200 outline-none focus:border-[#1a3a5c] transition-colors placeholder:text-gray-400 text-gray-900"
+                      value={form.PricePerDay}
+                      onChange={e => { setForm({ ...form, PricePerDay: e.target.value }); if (error) setError(''); }} />
                   </div>
                 </div>
-              </div>
 
-              <div className="p-6">
-                <AnimatePresence>
-                  {error && (
-                    <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                      className="mb-4 p-4 rounded-2xl text-sm flex items-center gap-3"
-                      style={{background: '#FEF2F2', border: '1px solid #FCA5A5'}}>
-                      <div className="w-7 h-7 rounded-xl bg-red-100 flex items-center justify-center shrink-0 text-red-500 font-black">!</div>
-                      <p className="font-bold text-red-700 text-right">{error}</p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                <div>
+                  <label className="block text-xs font-bold text-gray-600 mb-1.5">الوصف</label>
+                  <textarea rows={3} placeholder="وصف المستودع وما يميزه..."
+                    className="w-full py-2.5 px-3.5 rounded-xl text-sm font-medium text-right bg-white border border-gray-200 outline-none focus:border-[#1a3a5c] transition-colors placeholder:text-gray-400 text-gray-900 resize-none"
+                    value={form.Description}
+                    onChange={e => setForm({ ...form, Description: e.target.value })} />
+                </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4 text-right">
-                  {[
-                    { label: 'اسم المستودع', key: 'Name', placeholder: 'مستودع الرياض الرئيسي', type: 'text' },
-                    { label: 'الموقع', key: 'Location', placeholder: 'الرياض، حي العارض', type: 'text' },
-                    { label: 'رابط الصورة', key: 'ImagePath', placeholder: 'https://...', type: 'text' },
-                  ].map((field) => (
-                    <div key={field.key}>
-                      <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">{field.label}</label>
-                      <input type={field.type} placeholder={field.placeholder}
-                        className="w-full py-3.5 px-5 rounded-2xl font-bold outline-none transition-all bg-gray-50 border-2 border-transparent text-[#0f2744] placeholder:text-gray-300"
-                        onFocus={e => e.target.style.borderColor = '#2E5F8A'}
-                        onBlur={e => e.target.style.borderColor = 'transparent'}
-                        value={form[field.key]}
-                        onChange={e => { setForm({...form, [field.key]: e.target.value}); if(error) setError(''); }} />
-                    </div>
-                  ))}
+                {/* Toggle */}
+                <div className="flex items-center justify-between p-3.5 rounded-xl bg-gray-50 border border-gray-100">
+                  <button type="button" onClick={() => setForm({ ...form, IsActive: !form.IsActive })}
+                    className="relative w-10 h-5 rounded-full transition-colors shrink-0"
+                    style={{ background: form.IsActive ? '#1a3a5c' : '#d1d5db' }}>
+                    <span className="absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all shadow-sm"
+                      style={{ right: form.IsActive ? '2px' : 'auto', left: form.IsActive ? 'auto' : '2px' }} />
+                  </button>
+                  <span className="text-sm font-semibold text-gray-700">
+                    {form.IsActive ? 'المستودع نشط ومتاح للحجز' : 'المستودع معطل'}
+                  </span>
+                </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">المساحة (م²)</label>
-                      <input type="number" min="1" placeholder="500"
-                        className="w-full py-3.5 px-5 rounded-2xl font-bold outline-none transition-all bg-gray-50 border-2 border-transparent text-[#0f2744] placeholder:text-gray-300"
-                        onFocus={e => e.target.style.borderColor = '#2E5F8A'}
-                        onBlur={e => e.target.style.borderColor = 'transparent'}
-                        value={form.Size}
-                        onChange={e => { setForm({...form, Size: e.target.value}); if(error) setError(''); }} />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">السعر اليومي (ر.س)</label>
-                      <input type="number" min="1" placeholder="500"
-                        className="w-full py-3.5 px-5 rounded-2xl font-bold outline-none transition-all bg-gray-50 border-2 border-transparent text-[#0f2744] placeholder:text-gray-300"
-                        onFocus={e => e.target.style.borderColor = '#2E5F8A'}
-                        onBlur={e => e.target.style.borderColor = 'transparent'}
-                        value={form.PricePerDay}
-                        onChange={e => { setForm({...form, PricePerDay: e.target.value}); if(error) setError(''); }} />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">الوصف</label>
-                    <textarea rows={3} placeholder="وصف المستودع وما يميزه..."
-                      className="w-full py-3.5 px-5 rounded-2xl font-bold outline-none transition-all bg-gray-50 border-2 border-transparent text-[#0f2744] placeholder:text-gray-300 resize-none"
-                      onFocus={e => e.target.style.borderColor = '#2E5F8A'}
-                      onBlur={e => e.target.style.borderColor = 'transparent'}
-                      value={form.Description}
-                      onChange={e => setForm({...form, Description: e.target.value})} />
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 rounded-2xl bg-gray-50">
-                    <button type="button" onClick={() => setForm({...form, IsActive: !form.IsActive})}
-                      className="relative w-12 h-6 rounded-full transition-all"
-                      style={{background: form.IsActive ? '#2E5F8A' : '#D1D5DB'}}>
-                      <span className="absolute top-1 w-4 h-4 rounded-full bg-white transition-all"
-                        style={{right: form.IsActive ? '4px' : 'auto', left: form.IsActive ? 'auto' : '4px'}} />
-                    </button>
-                    <span className="font-black text-sm text-[#0f2744]">
-                      {form.IsActive ? 'المستودع نشط ومتاح للحجز' : 'المستودع معطل'}
+                <button type="submit" disabled={submitting}
+                  className="w-full py-3 rounded-xl font-bold text-white text-sm bg-[#1a3a5c] hover:bg-[#14304e] disabled:opacity-60 transition-colors flex items-center justify-center gap-2">
+                  {submitting ? (
+                    <span className="flex items-center gap-2">
+                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin block" />
+                      جاري الحفظ...
                     </span>
-                  </div>
-
-                  <motion.button type="submit" disabled={submitting}
-                    whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}
-                    className="w-full py-4 rounded-2xl font-black text-white text-lg flex items-center justify-center gap-3 disabled:opacity-70"
-                    style={{background: submitting ? '#93b4d4' : 'linear-gradient(135deg, #1a3f6f, #2E5F8A)', boxShadow: '0 8px 32px rgba(46,95,138,0.35)'}}>
-                    {submitting ? (
-                      <span className="flex items-center gap-2">
-                        <motion.span animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                          className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full block" />
-                        جاري الحفظ...
-                      </span>
-                    ) : (
-                      <>
-                        <Save size={20} />
-                        {editWarehouse ? 'حفظ التعديلات' : 'إنشاء المستودع'}
-                      </>
-                    )}
-                  </motion.button>
-                </form>
-              </div>
-            </motion.div>
+                  ) : (
+                    <>
+                      <Save size={15} />
+                      {editWarehouse ? 'حفظ التعديلات' : 'إنشاء المستودع'}
+                    </>
+                  )}
+                </button>
+              </form>
+            </div>
           </div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
     </div>
   );
 }
