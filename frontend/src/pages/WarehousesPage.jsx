@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, Plus, MapPin, Package, Edit2, Power, X, Loader, ArrowLeft, Save, ChevronLeft } from 'lucide-react';
+import { Building2, Plus, MapPin, Package, Edit2, Power, X, Loader, Save, ChevronLeft, ImagePlus, CheckCircle } from 'lucide-react';
 
 const API_URL = 'https://api.rafdi.com';
+const CLOUDINARY_CLOUD = 'dnhn19zp';
+const CLOUDINARY_PRESET = 'Rafdi_Image';
 
 const getUserRoles = () => {
   try {
@@ -44,6 +46,7 @@ function WarehousesPage() {
   const [editWarehouse, setEditWarehouse] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [submitting, setSubmitting] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -66,6 +69,36 @@ function WarehousesPage() {
   const openEdit = (w) => {
     setForm({ Name: w.Name, Location: w.Location, Size: w.Size, PricePerDay: w.PricePerDay, Description: w.Description || '', IsActive: w.IsActive, ImagePath: w.ImagePath || '' });
     setEditWarehouse(w); setError(''); setShowModal(true);
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { setError('يرجى اختيار صورة صحيحة'); return; }
+    if (file.size > 5 * 1024 * 1024) { setError('حجم الصورة يجب أن يكون أقل من 5MB'); return; }
+
+    setUploading(true);
+    setError('');
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', CLOUDINARY_PRESET);
+
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.secure_url) {
+        setForm(prev => ({ ...prev, ImagePath: data.secure_url }));
+      } else {
+        setError('فشل رفع الصورة، حاول مرة أخرى');
+      }
+    } catch {
+      setError('حدث خطأ أثناء رفع الصورة');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -105,7 +138,6 @@ function WarehousesPage() {
   return (
     <div className="min-h-screen bg-[#f7f8fa]" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
 
-      {/* Navbar */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex items-center justify-between h-14">
@@ -135,8 +167,6 @@ function WarehousesPage() {
       </header>
 
       <main className="max-w-6xl mx-auto px-4 py-8">
-
-        {/* Page title */}
         <div className="flex justify-between items-start mb-6 text-right">
           <div />
           <div>
@@ -145,10 +175,10 @@ function WarehousesPage() {
           </div>
         </div>
 
-        {/* Success */}
         {success && (
-          <div className="mb-5 p-3.5 rounded-xl text-sm flex items-center gap-2.5 bg-emerald-50 border border-emerald-200 text-right">
-            <span className="text-emerald-600 font-semibold">{success} ✓</span>
+          <div className="mb-5 p-3.5 rounded-xl text-sm flex items-center gap-2.5 bg-emerald-50 border border-emerald-200">
+            <CheckCircle size={15} className="text-emerald-600 shrink-0" />
+            <span className="text-emerald-600 font-semibold">{success}</span>
           </div>
         )}
 
@@ -172,8 +202,6 @@ function WarehousesPage() {
             {warehouses.map((w) => (
               <div key={w.WarehouseID}
                 className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 hover:shadow-sm transition-all">
-
-                {/* Image */}
                 <div className="h-44 relative bg-gray-100 overflow-hidden">
                   {w.ImagePath ? (
                     <img src={w.ImagePath} alt={w.Name} className="w-full h-full object-cover" />
@@ -192,8 +220,6 @@ function WarehousesPage() {
                     </p>
                   </div>
                 </div>
-
-                {/* Info */}
                 <div className="p-4">
                   <h3 className="font-bold text-gray-900 text-sm mb-2 text-right">{w.Name}</h3>
                   <div className="space-y-1 mb-3">
@@ -206,11 +232,9 @@ function WarehousesPage() {
                       <Package size={11} className="text-gray-400 shrink-0" />
                     </div>
                   </div>
-
                   {w.Description && (
                     <p className="text-xs text-gray-400 text-right line-clamp-2 leading-relaxed mb-3">{w.Description}</p>
                   )}
-
                   {isOwner && (
                     <div className="flex gap-2 pt-3 border-t border-gray-100">
                       <button onClick={() => openEdit(w)}
@@ -220,9 +244,7 @@ function WarehousesPage() {
                       </button>
                       <button onClick={() => handleToggle(w)}
                         className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold border transition-colors ${
-                          w.IsActive
-                            ? 'border-red-200 text-red-600 hover:bg-red-50'
-                            : 'border-emerald-200 text-emerald-600 hover:bg-emerald-50'
+                          w.IsActive ? 'border-red-200 text-red-600 hover:bg-red-50' : 'border-emerald-200 text-emerald-600 hover:bg-emerald-50'
                         }`}>
                         <Power size={13} />
                         {w.IsActive ? 'تعطيل' : 'تفعيل'}
@@ -240,10 +262,8 @@ function WarehousesPage() {
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/50" onClick={() => setShowModal(false)} />
-
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md relative z-10 overflow-hidden max-h-[90vh] overflow-y-auto">
 
-            {/* Modal Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
               <button onClick={() => setShowModal(false)}
                 className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors">
@@ -268,10 +288,50 @@ function WarehousesPage() {
               )}
 
               <form onSubmit={handleSubmit} className="space-y-4 text-right">
+
+                {/* Image Upload */}
+                <div>
+                  <label className="block text-xs font-bold text-gray-600 mb-1.5">صورة المستودع</label>
+                  <div className="relative">
+                    {/* Preview */}
+                    {form.ImagePath ? (
+                      <div className="relative h-36 rounded-xl overflow-hidden border border-gray-200 mb-2">
+                        <img src={form.ImagePath} alt="preview" className="w-full h-full object-cover" />
+                        <button type="button"
+                          onClick={() => setForm(prev => ({ ...prev, ImagePath: '' }))}
+                          className="absolute top-2 left-2 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-colors">
+                          <X size={12} />
+                        </button>
+                        <div className="absolute bottom-2 right-2 bg-emerald-500 text-white text-xs font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
+                          <CheckCircle size={11} />
+                          تم الرفع
+                        </div>
+                      </div>
+                    ) : (
+                      <label className={`flex flex-col items-center justify-center h-36 rounded-xl border-2 border-dashed cursor-pointer transition-colors ${
+                        uploading ? 'border-blue-300 bg-blue-50' : 'border-gray-200 hover:border-[#1a3a5c] hover:bg-gray-50'
+                      }`}>
+                        <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploading} />
+                        {uploading ? (
+                          <div className="flex flex-col items-center gap-2">
+                            <Loader size={24} className="text-[#1a3a5c] animate-spin" />
+                            <span className="text-xs text-gray-500 font-medium">جاري الرفع...</span>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center gap-2">
+                            <ImagePlus size={24} className="text-gray-300" />
+                            <span className="text-xs text-gray-500 font-medium">اضغط لرفع صورة</span>
+                            <span className="text-xs text-gray-400">PNG, JPG حتى 5MB</span>
+                          </div>
+                        )}
+                      </label>
+                    )}
+                  </div>
+                </div>
+
                 {[
                   { label: 'اسم المستودع', key: 'Name', placeholder: 'مستودع الرياض الرئيسي', type: 'text' },
                   { label: 'الموقع', key: 'Location', placeholder: 'الرياض، حي العارض', type: 'text' },
-                  { label: 'رابط الصورة', key: 'ImagePath', placeholder: 'https://...', type: 'text' },
                 ].map((field) => (
                   <div key={field.key}>
                     <label className="block text-xs font-bold text-gray-600 mb-1.5">{field.label}</label>
@@ -307,7 +367,6 @@ function WarehousesPage() {
                     onChange={e => setForm({ ...form, Description: e.target.value })} />
                 </div>
 
-                {/* Toggle */}
                 <div className="flex items-center justify-between p-3.5 rounded-xl bg-gray-50 border border-gray-100">
                   <button type="button" onClick={() => setForm({ ...form, IsActive: !form.IsActive })}
                     className="relative w-10 h-5 rounded-full transition-colors shrink-0"
@@ -320,7 +379,7 @@ function WarehousesPage() {
                   </span>
                 </div>
 
-                <button type="submit" disabled={submitting}
+                <button type="submit" disabled={submitting || uploading}
                   className="w-full py-3 rounded-xl font-bold text-white text-sm bg-[#1a3a5c] hover:bg-[#14304e] disabled:opacity-60 transition-colors flex items-center justify-center gap-2">
                   {submitting ? (
                     <span className="flex items-center gap-2">
