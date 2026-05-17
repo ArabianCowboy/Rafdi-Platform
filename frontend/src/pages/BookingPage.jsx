@@ -173,8 +173,7 @@ function BookingPage() {
                   </div>
                 </div>
               </div>
-              
-              </div>
+
 
               <div className="bg-white border border-gray-200 rounded-xl p-4 text-right">
                 <h4 className="text-xs font-bold text-gray-600 mb-3">رسوم المنصة</h4>
