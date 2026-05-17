@@ -40,7 +40,6 @@ function BookingPage() {
     fetchData();
   }, [id]);
 
-  // تحويل الفترات المحجوزة لـ disabled ranges
   const disabledDays = [
     { before: today },
     ...bookedDates.map(({ start, end }) => ({
@@ -174,24 +173,7 @@ function BookingPage() {
                   </div>
                 </div>
               </div>
-
-              {/* Legend */}
-              <div className="bg-white border border-gray-200 rounded-xl p-4 text-right">
-                <h4 className="text-xs font-bold text-gray-600 mb-3">دليل التقويم</h4>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-end gap-2 text-xs text-gray-500">
-                    <span>أيام محجوزة (غير متاحة)</span>
-                    <div className="w-4 h-4 rounded bg-red-100 border border-red-300" />
-                  </div>
-                  <div className="flex items-center justify-end gap-2 text-xs text-gray-500">
-                    <span>الفترة المختارة</span>
-                    <div className="w-4 h-4 rounded bg-[#1a3a5c]" />
-                  </div>
-                  <div className="flex items-center justify-end gap-2 text-xs text-gray-500">
-                    <span>متاح للحجز</span>
-                    <div className="w-4 h-4 rounded bg-gray-100 border border-gray-200" />
-                  </div>
-                </div>
+              
               </div>
 
               <div className="bg-white border border-gray-200 rounded-xl p-4 text-right">
