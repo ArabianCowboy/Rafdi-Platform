@@ -9,6 +9,7 @@ function BookingPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [warehouse, setWarehouse] = useState(null);
+  const [bookedDates, setBookedDates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -17,22 +18,56 @@ function BookingPage() {
   const [endDate, setEndDate] = useState('');
 
   useEffect(() => {
-    const fetchWarehouse = async () => {
+    const fetchData = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch(`${API_URL}/warehouses/${id}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (!res.ok) throw new Error();
-        setWarehouse(await res.json());
+        const headers = { 'Authorization': `Bearer ${token}` };
+
+        const [warehouseRes, datesRes] = await Promise.all([
+          fetch(`${API_URL}/warehouses/${id}`, { headers }),
+          fetch(`${API_URL}/bookings/booked-dates/${id}`, { headers }),
+        ]);
+
+        if (!warehouseRes.ok) throw new Error();
+        setWarehouse(await warehouseRes.json());
+
+        if (datesRes.ok) setBookedDates(await datesRes.json());
       } catch {
         setError('حدث خطأ في تحميل بيانات المستودع');
       } finally {
         setLoading(false);
       }
     };
-    fetchWarehouse();
+    fetchData();
   }, [id]);
+
+  // يحول التواريخ المحجوزة لـ Set من كل يوم محجوز
+  const getBookedDaysSet = () => {
+    const days = new Set();
+    bookedDates.forEach(({ start, end }) => {
+      const s = new Date(start);
+      const e = new Date(end);
+      for (let d = new Date(s); d <= e; d.setDate(d.getDate() + 1)) {
+        days.add(d.toISOString().split('T')[0]);
+      }
+    });
+    return days;
+  };
+
+  const bookedDaysSet = getBookedDaysSet();
+
+  // يتحقق إذا الفترة المختارة تتعارض مع حجز موجود
+  const hasConflict = (start, end) => {
+    if (!start || !end) return false;
+    const s = new Date(start);
+    const e = new Date(end);
+    for (let d = new Date(s); d <= e; d.setDate(d.getDate() + 1)) {
+      if (bookedDaysSet.has(d.toISOString().split('T')[0])) return true;
+    }
+    return false;
+  };
+
+  const conflict = hasConflict(startDate, endDate);
 
   const calcDays = () => {
     if (!startDate || !endDate) return 0;
@@ -58,6 +93,7 @@ function BookingPage() {
     if (!startDate) { setError('يرجى اختيار تاريخ البداية'); return; }
     if (!endDate) { setError('يرجى اختيار تاريخ النهاية'); return; }
     if (new Date(endDate) <= new Date(startDate)) { setError('تاريخ النهاية يجب أن يكون بعد تاريخ البداية'); return; }
+    if (conflict) { setError('الفترة المختارة تتعارض مع حجز موجود، يرجى اختيار تواريخ أخرى'); return; }
 
     setSubmitting(true);
     try {
@@ -90,7 +126,6 @@ function BookingPage() {
   return (
     <div className="min-h-screen bg-[#f7f8fa]" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
 
-      {/* Navbar */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-4">
           <div className="flex items-center gap-4 h-14">
@@ -122,10 +157,8 @@ function BookingPage() {
         <div className="max-w-5xl mx-auto px-4 py-8">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
 
-            {/* Left - Warehouse Info (2/5) */}
+            {/* Left */}
             <div className="lg:col-span-2 space-y-4">
-
-              {/* Warehouse Card */}
               <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
                 <div className="h-48 relative bg-gray-100">
                   {warehouse?.ImagePath ? (
@@ -143,7 +176,6 @@ function BookingPage() {
                     </span>
                   </div>
                 </div>
-
                 <div className="p-4 text-right">
                   <h2 className="font-bold text-gray-900 mb-3">{warehouse?.Name}</h2>
                   <div className="space-y-2 mb-4">
@@ -165,7 +197,21 @@ function BookingPage() {
                 </div>
               </div>
 
-              {/* Commission note */}
+              {/* Booked dates legend */}
+              {bookedDates.length > 0 && (
+                <div className="bg-white border border-gray-200 rounded-xl p-4 text-right">
+                  <h4 className="text-xs font-bold text-gray-600 mb-3">الفترات المحجوزة</h4>
+                  <div className="space-y-2">
+                    {bookedDates.map((b, i) => (
+                      <div key={i} className="flex justify-between items-center text-xs">
+                        <span className="font-mono text-red-500">{b.start} ← {b.end}</span>
+                        <span className="w-2 h-2 rounded-full bg-red-400 shrink-0" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="bg-white border border-gray-200 rounded-xl p-4 text-right">
                 <h4 className="text-xs font-bold text-gray-600 mb-3">رسوم المنصة</h4>
                 <div className="space-y-2">
@@ -181,11 +227,9 @@ function BookingPage() {
               </div>
             </div>
 
-            {/* Right - Booking Form (3/5) */}
+            {/* Right */}
             <div className="lg:col-span-3">
               <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-
-                {/* Header */}
                 <div className="px-5 py-4 border-b border-gray-100 text-right">
                   <h3 className="font-bold text-gray-900">إتمام الحجز</h3>
                   <p className="text-xs text-gray-500 mt-0.5">اختر فترة الإيجار وأكد الحجز</p>
@@ -211,8 +255,6 @@ function BookingPage() {
 
                   {!success && (
                     <form onSubmit={handleBooking} className="space-y-4 text-right">
-
-                      {/* Dates */}
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label className="block text-xs font-bold text-gray-600 mb-1.5">تاريخ البداية</label>
@@ -236,8 +278,19 @@ function BookingPage() {
                         </div>
                       </div>
 
+                      {/* Conflict warning */}
+                      {conflict && startDate && endDate && (
+                        <div className="flex items-start gap-2.5 p-3.5 bg-red-50 border border-red-200 rounded-xl text-right">
+                          <AlertCircle size={15} className="text-red-500 shrink-0 mt-0.5" />
+                          <div>
+                            <p className="text-xs font-bold text-red-700">هذه الفترة محجوزة مسبقاً</p>
+                            <p className="text-xs text-red-500 mt-0.5">يرجى اختيار تواريخ أخرى غير متعارضة مع الفترات المحجوزة</p>
+                          </div>
+                        </div>
+                      )}
+
                       {/* Price breakdown */}
-                      {days > 0 && (
+                      {days > 0 && !conflict && (
                         <div className="bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
                           <div className="px-4 py-3 border-b border-gray-100">
                             <p className="text-xs font-bold text-gray-600 text-right">ملخص التكلفة</p>
@@ -245,9 +298,7 @@ function BookingPage() {
                           <div className="px-4 py-3 space-y-2.5 text-right">
                             <div className="flex justify-between items-center text-sm">
                               <span className="font-semibold text-gray-900">{basePrice.toLocaleString()} ر.س</span>
-                              <span className="text-gray-500 text-xs">
-                                {days} يوم × {warehouse?.PricePerDay?.toLocaleString()} ر.س
-                              </span>
+                              <span className="text-gray-500 text-xs">{days} يوم × {warehouse?.PricePerDay?.toLocaleString()} ر.س</span>
                             </div>
                             <div className="flex justify-between items-center text-sm">
                               <span className="font-semibold text-blue-700">+{commission.toLocaleString()} ر.س</span>
@@ -261,15 +312,14 @@ function BookingPage() {
                         </div>
                       )}
 
-                      {/* Duration info */}
-                      {days > 0 && (
+                      {days > 0 && !conflict && (
                         <div className="flex items-center justify-between text-xs text-gray-500 bg-blue-50 border border-blue-100 rounded-xl px-4 py-2.5">
                           <span className="font-semibold text-blue-700">{days} يوم</span>
                           <span>مدة الحجز</span>
                         </div>
                       )}
 
-                      <button type="submit" disabled={submitting}
+                      <button type="submit" disabled={submitting || conflict}
                         className="w-full py-3 rounded-xl font-bold text-white text-sm bg-[#1a3a5c] hover:bg-[#14304e] disabled:opacity-60 transition-colors flex items-center justify-center gap-2">
                         {submitting ? (
                           <span className="flex items-center gap-2">
@@ -279,7 +329,7 @@ function BookingPage() {
                         ) : (
                           <>
                             <CheckCircle size={15} />
-                            {days > 0 ? `تأكيد الحجز — ${totalPrice.toLocaleString()} ر.س` : 'تأكيد الحجز'}
+                            {days > 0 && !conflict ? `تأكيد الحجز — ${totalPrice.toLocaleString()} ر.س` : 'تأكيد الحجز'}
                           </>
                         )}
                       </button>

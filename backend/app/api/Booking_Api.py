@@ -34,6 +34,21 @@ def get_booking_service(db: Session = Depends(get_db)) -> BookingService:
         notification_trigger = NotificationTriggerService(notification_service),
     )
 
+@router.get("/booked-dates/{warehouse_id}")
+def get_booked_dates(
+    warehouse_id: int,
+    db          : Session = Depends(get_db),
+    current_user: dict    = Depends(get_current_user)
+):
+    booking_repo = BookingRepo(db)
+    bookings = booking_repo.get_confirmed_by_warehouse(warehouse_id)
+    return [
+        {
+            "start": b.StartDate.isoformat(),
+            "end": b.EndDate.isoformat(),
+        }
+        for b in bookings
+    ]
 
 @router.post("/", response_model=BookingResponse)
 def create(

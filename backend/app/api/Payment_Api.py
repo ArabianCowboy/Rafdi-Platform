@@ -22,12 +22,20 @@ def get_payment_service(db: Session = Depends(get_db)) -> PaymentService:
 
 @router.post("/", response_model=PaymentResponse)
 def process_payment(
-    booking_id  : int,
-    service     : PaymentService = Depends(get_payment_service),
-    current_user: dict           = Depends(require_renter)
+    booking_id         : int,
+    moyasar_payment_id : str = None,
+    moyasar_status     : str = None,
+    payment_method     : str = None,
+    service            : PaymentService = Depends(get_payment_service),
+    current_user       : dict           = Depends(require_renter)
 ):
     try:
-        return service.process_payment(booking_id)
+        return service.process_payment(
+            booking_id          = booking_id,
+            moyasar_payment_id  = moyasar_payment_id,
+            moyasar_status      = moyasar_status,
+            payment_method      = payment_method,
+        )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
