@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Building2, Plus, MapPin, Package, Edit2, Power, X, Loader, Save, ChevronLeft, ImagePlus, CheckCircle } from 'lucide-react';
 
 const API_URL = 'https://api.rafdi.com';
-const CLOUDINARY_CLOUD = 'dnhn19zp';
+const CLOUDINARY_CLOUD = 'dnhn19zpj';
 const CLOUDINARY_PRESET = 'Rafdi_Image';
 
 const getUserRoles = () => {
