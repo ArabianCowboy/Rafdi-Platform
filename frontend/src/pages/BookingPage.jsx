@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Building2, Calendar, ChevronLeft, CheckCircle, Loader, MapPin, Package, AlertCircle } from 'lucide-react';
+import { Building2, ChevronLeft, CheckCircle, Loader, MapPin, Package, AlertCircle } from 'lucide-react';
+import { DayPicker } from 'react-day-picker';
+import 'react-day-picker/dist/style.css';
 
 const API_URL = 'https://api.rafdi.com';
-const today = new Date().toISOString().split('T')[0];
+const today = new Date();
+today.setHours(0, 0, 0, 0);
 
 function BookingPage() {
   const { id } = useParams();
@@ -14,23 +17,19 @@ function BookingPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [range, setRange] = useState({ from: undefined, to: undefined });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const token = localStorage.getItem('token');
         const headers = { 'Authorization': `Bearer ${token}` };
-
         const [warehouseRes, datesRes] = await Promise.all([
           fetch(`${API_URL}/warehouses/${id}`, { headers }),
           fetch(`${API_URL}/bookings/booked-dates/${id}`, { headers }),
         ]);
-
         if (!warehouseRes.ok) throw new Error();
         setWarehouse(await warehouseRes.json());
-
         if (datesRes.ok) setBookedDates(await datesRes.json());
       } catch {
         setError('حدث خطأ في تحميل بيانات المستودع');
@@ -41,44 +40,25 @@ function BookingPage() {
     fetchData();
   }, [id]);
 
-  // يحول التواريخ المحجوزة لـ Set من كل يوم محجوز
-  const getBookedDaysSet = () => {
-    const days = new Set();
-    bookedDates.forEach(({ start, end }) => {
-      const s = new Date(start);
-      const e = new Date(end);
-      for (let d = new Date(s); d <= e; d.setDate(d.getDate() + 1)) {
-        days.add(d.toISOString().split('T')[0]);
-      }
-    });
-    return days;
-  };
+  // تحويل الفترات المحجوزة لـ disabled ranges
+  const disabledDays = [
+    { before: today },
+    ...bookedDates.map(({ start, end }) => ({
+      from: new Date(start),
+      to: new Date(end),
+    }))
+  ];
 
-  const bookedDaysSet = getBookedDaysSet();
+  const days = range?.from && range?.to
+    ? Math.ceil((range.to - range.from) / 86400000)
+    : 0;
 
-  // يتحقق إذا الفترة المختارة تتعارض مع حجز موجود
-  const hasConflict = (start, end) => {
-    if (!start || !end) return false;
-    const s = new Date(start);
-    const e = new Date(end);
-    for (let d = new Date(s); d <= e; d.setDate(d.getDate() + 1)) {
-      if (bookedDaysSet.has(d.toISOString().split('T')[0])) return true;
-    }
-    return false;
-  };
-
-  const conflict = hasConflict(startDate, endDate);
-
-  const calcDays = () => {
-    if (!startDate || !endDate) return 0;
-    const d = Math.ceil((new Date(endDate) - new Date(startDate)) / 86400000);
-    return d > 0 ? d : 0;
-  };
-
-  const days = calcDays();
   const basePrice = days > 0 && warehouse ? Math.ceil(days * warehouse.PricePerDay) : 0;
   const commission = Math.ceil(basePrice * 0.05);
   const totalPrice = basePrice + commission;
+
+  const startDate = range?.from?.toISOString().split('T')[0];
+  const endDate = range?.to?.toISOString().split('T')[0];
 
   const parseError = (detail) => {
     if (!detail) return 'حدث خطأ';
@@ -90,10 +70,8 @@ function BookingPage() {
   const handleBooking = async (e) => {
     e.preventDefault();
     setError('');
-    if (!startDate) { setError('يرجى اختيار تاريخ البداية'); return; }
-    if (!endDate) { setError('يرجى اختيار تاريخ النهاية'); return; }
-    if (new Date(endDate) <= new Date(startDate)) { setError('تاريخ النهاية يجب أن يكون بعد تاريخ البداية'); return; }
-    if (conflict) { setError('الفترة المختارة تتعارض مع حجز موجود، يرجى اختيار تواريخ أخرى'); return; }
+    if (!range?.from) { setError('يرجى اختيار تاريخ البداية'); return; }
+    if (!range?.to) { setError('يرجى اختيار تاريخ النهاية'); return; }
 
     setSubmitting(true);
     try {
@@ -197,20 +175,24 @@ function BookingPage() {
                 </div>
               </div>
 
-              {/* Booked dates legend */}
-              {bookedDates.length > 0 && (
-                <div className="bg-white border border-gray-200 rounded-xl p-4 text-right">
-                  <h4 className="text-xs font-bold text-gray-600 mb-3">الفترات المحجوزة</h4>
-                  <div className="space-y-2">
-                    {bookedDates.map((b, i) => (
-                      <div key={i} className="flex justify-between items-center text-xs">
-                        <span className="font-mono text-red-500">{b.start} ← {b.end}</span>
-                        <span className="w-2 h-2 rounded-full bg-red-400 shrink-0" />
-                      </div>
-                    ))}
+              {/* Legend */}
+              <div className="bg-white border border-gray-200 rounded-xl p-4 text-right">
+                <h4 className="text-xs font-bold text-gray-600 mb-3">دليل التقويم</h4>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-end gap-2 text-xs text-gray-500">
+                    <span>أيام محجوزة (غير متاحة)</span>
+                    <div className="w-4 h-4 rounded bg-red-100 border border-red-300" />
+                  </div>
+                  <div className="flex items-center justify-end gap-2 text-xs text-gray-500">
+                    <span>الفترة المختارة</span>
+                    <div className="w-4 h-4 rounded bg-[#1a3a5c]" />
+                  </div>
+                  <div className="flex items-center justify-end gap-2 text-xs text-gray-500">
+                    <span>متاح للحجز</span>
+                    <div className="w-4 h-4 rounded bg-gray-100 border border-gray-200" />
                   </div>
                 </div>
-              )}
+              </div>
 
               <div className="bg-white border border-gray-200 rounded-xl p-4 text-right">
                 <h4 className="text-xs font-bold text-gray-600 mb-3">رسوم المنصة</h4>
@@ -232,12 +214,12 @@ function BookingPage() {
               <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
                 <div className="px-5 py-4 border-b border-gray-100 text-right">
                   <h3 className="font-bold text-gray-900">إتمام الحجز</h3>
-                  <p className="text-xs text-gray-500 mt-0.5">اختر فترة الإيجار وأكد الحجز</p>
+                  <p className="text-xs text-gray-500 mt-0.5">اختر فترة الإيجار من التقويم</p>
                 </div>
 
                 <div className="p-5">
                   {error && (
-                    <div className="mb-5 p-3.5 rounded-xl text-sm flex items-start gap-2.5 bg-red-50 border border-red-200">
+                    <div className="mb-4 p-3.5 rounded-xl text-sm flex items-start gap-2.5 bg-red-50 border border-red-200">
                       <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center shrink-0 mt-0.5">
                         <span className="text-red-600 text-xs font-black">!</span>
                       </div>
@@ -254,43 +236,48 @@ function BookingPage() {
                   )}
 
                   {!success && (
-                    <form onSubmit={handleBooking} className="space-y-4 text-right">
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-xs font-bold text-gray-600 mb-1.5">تاريخ البداية</label>
-                          <div className="relative">
-                            <input type="date" min={today}
-                              className="w-full py-2.5 px-3.5 pr-9 rounded-xl text-sm bg-white border border-gray-200 outline-none focus:border-[#1a3a5c] transition-colors text-gray-900"
-                              value={startDate}
-                              onChange={e => { setStartDate(e.target.value); setEndDate(''); if (error) setError(''); }} />
-                            <Calendar size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block text-xs font-bold text-gray-600 mb-1.5">تاريخ النهاية</label>
-                          <div className="relative">
-                            <input type="date" min={startDate || today}
-                              className="w-full py-2.5 px-3.5 pr-9 rounded-xl text-sm bg-white border border-gray-200 outline-none focus:border-[#1a3a5c] transition-colors text-gray-900"
-                              value={endDate}
-                              onChange={e => { setEndDate(e.target.value); if (error) setError(''); }} />
-                            <Calendar size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                          </div>
-                        </div>
-                      </div>
+                    <form onSubmit={handleBooking} className="space-y-4">
 
-                      {/* Conflict warning */}
-                      {conflict && startDate && endDate && (
-                        <div className="flex items-start gap-2.5 p-3.5 bg-red-50 border border-red-200 rounded-xl text-right">
-                          <AlertCircle size={15} className="text-red-500 shrink-0 mt-0.5" />
-                          <div>
-                            <p className="text-xs font-bold text-red-700">هذه الفترة محجوزة مسبقاً</p>
-                            <p className="text-xs text-red-500 mt-0.5">يرجى اختيار تواريخ أخرى غير متعارضة مع الفترات المحجوزة</p>
+                      {/* Selected range display */}
+                      {(range?.from || range?.to) && (
+                        <div className="flex justify-between items-center bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-right">
+                          <button type="button" onClick={() => setRange({ from: undefined, to: undefined })}
+                            className="text-xs text-gray-400 hover:text-red-500 transition-colors">
+                            مسح
+                          </button>
+                          <div className="flex items-center gap-3 text-xs font-mono">
+                            <span className="text-gray-500">{range?.to ? endDate : '...'}</span>
+                            <span className="text-gray-300">←</span>
+                            <span className="text-gray-700 font-bold">{startDate}</span>
                           </div>
                         </div>
                       )}
 
+                      {/* Calendar */}
+                      <div className="flex justify-center">
+                        <style>{`
+                          .rdp { --rdp-accent-color: #1a3a5c; --rdp-background-color: #eef2f7; font-family: 'Cairo', sans-serif; }
+                          .rdp-day_disabled { background-color: #fee2e2 !important; color: #ef4444 !important; text-decoration: line-through; opacity: 1 !important; border-radius: 4px; }
+                          .rdp-day_selected { background-color: #1a3a5c !important; color: white !important; }
+                          .rdp-day_range_middle { background-color: #eef2f7 !important; color: #1a3a5c !important; }
+                          .rdp-day_range_start, .rdp-day_range_end { background-color: #1a3a5c !important; color: white !important; }
+                          .rdp-day:hover:not(.rdp-day_disabled) { background-color: #eef2f7; }
+                          .rdp-head_cell { color: #6b7280; font-size: 0.75rem; }
+                          .rdp-caption_label { color: #1a3a5c; font-weight: 800; }
+                          .rdp-nav_button { color: #1a3a5c; }
+                        `}</style>
+                        <DayPicker
+                          mode="range"
+                          selected={range}
+                          onSelect={setRange}
+                          disabled={disabledDays}
+                          numberOfMonths={1}
+                          showOutsideDays={false}
+                        />
+                      </div>
+
                       {/* Price breakdown */}
-                      {days > 0 && !conflict && (
+                      {days > 0 && (
                         <div className="bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
                           <div className="px-4 py-3 border-b border-gray-100">
                             <p className="text-xs font-bold text-gray-600 text-right">ملخص التكلفة</p>
@@ -312,15 +299,15 @@ function BookingPage() {
                         </div>
                       )}
 
-                      {days > 0 && !conflict && (
-                        <div className="flex items-center justify-between text-xs text-gray-500 bg-blue-50 border border-blue-100 rounded-xl px-4 py-2.5">
+                      {days > 0 && (
+                        <div className="flex items-center justify-between text-xs bg-blue-50 border border-blue-100 rounded-xl px-4 py-2.5">
                           <span className="font-semibold text-blue-700">{days} يوم</span>
-                          <span>مدة الحجز</span>
+                          <span className="text-gray-500">مدة الحجز</span>
                         </div>
                       )}
 
-                      <button type="submit" disabled={submitting || conflict}
-                        className="w-full py-3 rounded-xl font-bold text-white text-sm bg-[#1a3a5c] hover:bg-[#14304e] disabled:opacity-60 transition-colors flex items-center justify-center gap-2">
+                      <button type="submit" disabled={submitting || !range?.from || !range?.to}
+                        className="w-full py-3 rounded-xl font-bold text-white text-sm bg-[#1a3a5c] hover:bg-[#14304e] disabled:opacity-50 transition-colors flex items-center justify-center gap-2">
                         {submitting ? (
                           <span className="flex items-center gap-2">
                             <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin block" />
@@ -329,7 +316,7 @@ function BookingPage() {
                         ) : (
                           <>
                             <CheckCircle size={15} />
-                            {days > 0 && !conflict ? `تأكيد الحجز — ${totalPrice.toLocaleString()} ر.س` : 'تأكيد الحجز'}
+                            {days > 0 ? `تأكيد الحجز — ${totalPrice.toLocaleString()} ر.س` : 'اختر فترة الحجز'}
                           </>
                         )}
                       </button>
