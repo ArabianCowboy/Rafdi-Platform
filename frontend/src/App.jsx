@@ -9,6 +9,7 @@ import OwnerBookingsPage from './pages/OwnerBookingsPage';
 import BookingPage from "./pages/BookingPage";
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import PaymentPage from './pages/PaymentPage';
+import AdminPage from './pages/AdminPage';
 
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
         <Route path="/owner-bookings" element={<OwnerBookingsPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/payment" element={<PaymentPage />} />
+        <Route path="/admin" element={<AdminPage />} />
       </Routes>
     </BrowserRouter>
   );
