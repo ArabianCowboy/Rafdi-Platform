@@ -1,5 +1,5 @@
 from typing import Optional
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.Repo.Base_Repo import BaseRepo
 from app.models import Warehouse
@@ -18,7 +18,7 @@ class WarehouseRepo(BaseRepo[Warehouse]):
         return self.db.query(Warehouse).filter(Warehouse.IsActive == True).all()
 
     def get_all_admin(self) -> list[Warehouse]:
-        return self.db.query(Warehouse).all()
+        return self.db.query(Warehouse).options(joinedload(Warehouse.company)).all()
 
     def get_by_company(self, company_id: int) -> list[Warehouse]:
         return self.db.query(Warehouse).filter(Warehouse.CompanyID == company_id).all()
@@ -68,6 +68,16 @@ class WarehouseRepo(BaseRepo[Warehouse]):
         if not warehouse:
             return None
         warehouse.IsActive = not warehouse.IsActive
+        self.db.commit()
+        self.db.refresh(warehouse)
+        return warehouse
+
+    def update_status(self, id: int, is_active: bool) -> Optional[Warehouse]:
+        warehouse = self.get_by_id(id)
+        if not warehouse:
+            return None
+
+        warehouse.IsActive = is_active
         self.db.commit()
         self.db.refresh(warehouse)
         return warehouse

@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from decimal import Decimal
 from datetime import datetime
+from typing import Optional
 
 class DashboardResponse(BaseModel):
     total_companies  : int
@@ -20,5 +21,15 @@ class AdminCompanyResponse(BaseModel):
     total_warehouses           : int
     total_bookings_as_renter   : int
     total_bookings_on_warehouses: int
+
+    model_config = {"from_attributes": True}
+
+
+class AdminUserResponse(BaseModel):
+    UserID     : int
+    CompanyID  : Optional[int] = None
+    Email      : str
+    CompanyName: Optional[str] = None
+    Roles      : list[str]
 
     model_config = {"from_attributes": True}

@@ -1,8 +1,8 @@
 from typing import Optional
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.Repo.Base_Repo import BaseRepo
-from app.models import User
+from app.models import User, User_Role
 from app.Dtos.User_DTOs import UserUpdate
 from app.Dtos.Auth_DTOs import RegisterCreate
 
@@ -23,6 +23,28 @@ class UserRepo(BaseRepo[User]):
 
     def get_all(self) -> list[User]:
         return self.db.query(User).all()
+
+    def get_all_admin(self) -> list[dict]:
+        users = (
+            self.db.query(User)
+            .options(
+                joinedload(User.company),
+                joinedload(User.user_roles).joinedload(User_Role.role),
+            )
+            .order_by(User.UserID.asc())
+            .all()
+        )
+
+        return [
+            {
+                "UserID": user.UserID,
+                "CompanyID": user.CompanyID,
+                "Email": user.Email,
+                "CompanyName": user.company.Name if user.company else None,
+                "Roles": [user_role.role.RoleName for user_role in user.user_roles if user_role.role],
+            }
+            for user in users
+        ]
 
 
 

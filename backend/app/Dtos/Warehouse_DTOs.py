@@ -43,3 +43,7 @@ class WarehouseToggleResponse(BaseModel):
     IsActive   : bool
 
     model_config = {"from_attributes": True}
+
+
+class WarehouseStatusUpdate(BaseModel):
+    IsActive: bool

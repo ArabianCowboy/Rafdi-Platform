@@ -1,8 +1,12 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app.Dtos.Admin_DTOs import AdminCompanyResponse
+from app.Dtos.Admin_DTOs import AdminCompanyResponse, AdminUserResponse, DashboardResponse
+from app.Dtos.Company_DTOs import CompanyResponse, CompanyStatusUpdate
+from app.Dtos.Warehouse_DTOs import WarehouseResponse, WarehouseStatusUpdate, WarehouseToggleResponse
 from app.Repo.Companey_Repo import CompanyRepo
+from app.Repo.WarehouseRepo import WarehouseRepo
+from app.Repo.user_repo import UserRepo
 from app.api.Auth_middleware import require_admin
 from app.config import get_db
 
@@ -16,3 +20,58 @@ def get_all_companies(
 ):
     company_repo = CompanyRepo(db)
     return company_repo.get_all_admin()
+
+
+@router.get("/dashboard", response_model=DashboardResponse)
+def get_dashboard(
+    current_user: dict = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    company_repo = CompanyRepo(db)
+    return company_repo.get_dashboard_stats()
+
+
+@router.patch("/companies/{id}/status", response_model=CompanyResponse)
+def update_company_status(
+    id: int,
+    data: CompanyStatusUpdate,
+    current_user: dict = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    company_repo = CompanyRepo(db)
+    company = company_repo.update_status(id, data.Status)
+    if not company:
+        raise HTTPException(status_code=404, detail="الشركة غير موجودة")
+    return company
+
+
+@router.get("/warehouses", response_model=list[WarehouseResponse])
+def get_all_warehouses(
+    current_user: dict = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    warehouse_repo = WarehouseRepo(db)
+    return warehouse_repo.get_all_admin()
+
+
+@router.patch("/warehouses/{id}/status", response_model=WarehouseToggleResponse)
+def update_warehouse_status(
+    id: int,
+    data: WarehouseStatusUpdate,
+    current_user: dict = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    warehouse_repo = WarehouseRepo(db)
+    warehouse = warehouse_repo.update_status(id, data.IsActive)
+    if not warehouse:
+        raise HTTPException(status_code=404, detail="المستودع غير موجود")
+    return warehouse
+
+
+@router.get("/users", response_model=list[AdminUserResponse])
+def get_all_users(
+    current_user: dict = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    user_repo = UserRepo(db)
+    return user_repo.get_all_admin()

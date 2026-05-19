@@ -1,16 +1,15 @@
 from __future__ import annotations
 
-from typing import Optional
-from sqlalchemy.orm import Session
-from sqlalchemy import func
+from decimal import Decimal
+from typing import Optional, TYPE_CHECKING
 
+from sqlalchemy import func, select
+from sqlalchemy.orm import Session
 
 from app.Repo.Base_Repo import BaseRepo
 from app.models import Company
 from app.Dtos.Company_DTOs import CompanyUpdate
 from app.Dtos.Auth_DTOs import RegisterCreate
-
-from typing import Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from app.models.User_Model import User
@@ -30,6 +29,38 @@ class CompanyRepo(BaseRepo[Company]):
 
     def get_all(self) -> list[Company]:
         return self.db.query(Company).all()
+
+    def get_dashboard_stats(self) -> dict:
+        from app.models import Booking, Payment, Warehouse
+
+        total_companies = select(func.count(Company.CompanyID)).scalar_subquery()
+        total_warehouses = select(func.count(Warehouse.WarehouseID)).scalar_subquery()
+        active_warehouses = (
+            select(func.count(Warehouse.WarehouseID))
+            .where(Warehouse.IsActive == True)
+            .scalar_subquery()
+        )
+        total_bookings = select(func.count(Booking.BookingID)).scalar_subquery()
+        # Keep the existing DTO name even though this is total revenue from payments.
+        total_payments = select(func.coalesce(func.sum(Payment.Amount), 0)).scalar_subquery()
+
+        row = self.db.execute(
+            select(
+                total_companies.label("total_companies"),
+                total_warehouses.label("total_warehouses"),
+                total_bookings.label("total_bookings"),
+                total_payments.label("total_payments"),
+                active_warehouses.label("active_warehouses"),
+            )
+        ).one()
+
+        return {
+            "total_companies": row.total_companies,
+            "total_warehouses": row.total_warehouses,
+            "total_bookings": row.total_bookings,
+            "total_payments": row.total_payments or Decimal("0.00"),
+            "active_warehouses": row.active_warehouses,
+        }
 
     def get_all_admin(self) -> list[dict]:
         from app.models import User, Warehouse, Booking
@@ -138,6 +169,16 @@ class CompanyRepo(BaseRepo[Company]):
         if obj.CommercialRegistration:
             company.CommercialRegistration = obj.CommercialRegistration
 
+        self.db.commit()
+        self.db.refresh(company)
+        return company
+
+    def update_status(self, id: int, status: bool) -> Optional[Company]:
+        company = self.get_by_id(id)
+        if not company:
+            return None
+
+        company.Status = status
         self.db.commit()
         self.db.refresh(company)
         return company
