@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Optional
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 
 
 from app.Repo.Base_Repo import BaseRepo
@@ -29,6 +30,87 @@ class CompanyRepo(BaseRepo[Company]):
 
     def get_all(self) -> list[Company]:
         return self.db.query(Company).all()
+
+    def get_all_admin(self) -> list[dict]:
+        from app.models import User, Warehouse, Booking
+
+        user_counts = (
+            self.db.query(
+                User.CompanyID.label("CompanyID"),
+                func.count(User.UserID).label("total_users"),
+            )
+            .group_by(User.CompanyID)
+            .subquery()
+        )
+
+        warehouse_counts = (
+            self.db.query(
+                Warehouse.CompanyID.label("CompanyID"),
+                func.count(Warehouse.WarehouseID).label("total_warehouses"),
+            )
+            .group_by(Warehouse.CompanyID)
+            .subquery()
+        )
+
+        renter_booking_counts = (
+            self.db.query(
+                Booking.RenterCompanyID.label("CompanyID"),
+                func.count(Booking.BookingID).label("total_bookings_as_renter"),
+            )
+            .group_by(Booking.RenterCompanyID)
+            .subquery()
+        )
+
+        warehouse_booking_counts = (
+            self.db.query(
+                Warehouse.CompanyID.label("CompanyID"),
+                func.count(Booking.BookingID).label("total_bookings_on_warehouses"),
+            )
+            .join(Booking, Booking.WarehouseID == Warehouse.WarehouseID)
+            .group_by(Warehouse.CompanyID)
+            .subquery()
+        )
+
+        rows = (
+            self.db.query(
+                Company.CompanyID,
+                Company.Name,
+                Company.CommercialRegistration,
+                Company.Status,
+                Company.CreatedAt,
+                func.coalesce(user_counts.c.total_users, 0).label("total_users"),
+                func.coalesce(warehouse_counts.c.total_warehouses, 0).label("total_warehouses"),
+                func.coalesce(
+                    renter_booking_counts.c.total_bookings_as_renter,
+                    0,
+                ).label("total_bookings_as_renter"),
+                func.coalesce(
+                    warehouse_booking_counts.c.total_bookings_on_warehouses,
+                    0,
+                ).label("total_bookings_on_warehouses"),
+            )
+            .outerjoin(user_counts, user_counts.c.CompanyID == Company.CompanyID)
+            .outerjoin(warehouse_counts, warehouse_counts.c.CompanyID == Company.CompanyID)
+            .outerjoin(renter_booking_counts, renter_booking_counts.c.CompanyID == Company.CompanyID)
+            .outerjoin(warehouse_booking_counts, warehouse_booking_counts.c.CompanyID == Company.CompanyID)
+            .order_by(Company.CreatedAt.desc())
+            .all()
+        )
+
+        return [
+            {
+                "CompanyID": row.CompanyID,
+                "Name": row.Name,
+                "CommercialRegistration": row.CommercialRegistration,
+                "Status": row.Status,
+                "CreatedAt": row.CreatedAt,
+                "total_users": row.total_users,
+                "total_warehouses": row.total_warehouses,
+                "total_bookings_as_renter": row.total_bookings_as_renter,
+                "total_bookings_on_warehouses": row.total_bookings_on_warehouses,
+            }
+            for row in rows
+        ]
 
     def get_by_commercial_registration(self, CommercialRegistration: str) -> Optional[Company]:
         return self.db.query(Company).filter(Company.CommercialRegistration == CommercialRegistration).first()

@@ -1,4 +1,6 @@
 venv/
+backend/.venv/
+backend/tests/
 __pycache__/
 *.pyc
 .env
@@ -8,3 +10,5 @@ opencode.json
 .claude/
 .kiro/
 skills-lock.json
+docs/
+.DS_Store

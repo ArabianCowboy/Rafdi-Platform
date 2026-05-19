@@ -8,6 +8,7 @@ from app.api.Auth_Api         import router as auth_router
 from app.api.WareHouse_Api    import router as warehouse_router
 from app.api.Booking_Api      import router as booking_router
 from app.api.Payment_Api      import router as payment_router
+from app.api.Admin_Api       import router as admin_router
 
 app = FastAPI(title="Rafdi Platform")
 
@@ -29,3 +30,4 @@ app.include_router(auth_router)
 app.include_router(warehouse_router)
 app.include_router(booking_router)
 app.include_router(payment_router)
+app.include_router(admin_router)
