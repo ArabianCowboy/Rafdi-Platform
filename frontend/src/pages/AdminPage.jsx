@@ -12,6 +12,7 @@ import {
   Users,
   Wallet,
 } from 'lucide-react';
+import NotificationBell from '../components/NotificationBell';
 
 const API_URL = 'https://api.rafdi.com';
 
@@ -314,6 +315,7 @@ function AdminPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            <NotificationBell />
             <div className="hidden items-center gap-2 border-r border-gray-200 pr-3 md:flex">
               <span className="max-w-[180px] truncate text-sm font-semibold text-gray-700">{companyName}</span>
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#1a3a5c]">

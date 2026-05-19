@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Building2, LogOut, Layers, Package, CheckCircle, Users, MapPin, Loader, Settings, Search, ChevronLeft, LayoutDashboard, Plus } from "lucide-react";
+import NotificationBell from "../components/NotificationBell";
 
 const API_URL = 'https://api.rafdi.com';
 
@@ -184,6 +185,8 @@ function HomePage() {
                      إدارة المستودعات
                   </button>
                   )}
+
+              <NotificationBell />
 
               <div className="hidden md:flex items-center gap-1.5">
                 {isOwner && <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-100">مالك</span>}

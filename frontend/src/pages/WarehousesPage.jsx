@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Building2, Plus, MapPin, Package, Edit2, Power, X, Loader, Save, ChevronLeft, ImagePlus, CheckCircle } from 'lucide-react';
+import NotificationBell from '../components/NotificationBell';
 
 const API_URL = 'https://api.rafdi.com';
 const CLOUDINARY_CLOUD = 'dnhn19zpj';
@@ -155,13 +156,16 @@ function WarehousesPage() {
                 <span className="text-[#1a3a5c] font-black text-base">رفدي</span>
               </div>
             </div>
-            {isOwner && (
-              <button onClick={openCreate}
-                className="flex items-center gap-2 px-4 py-2 bg-[#1a3a5c] hover:bg-[#14304e] text-white text-sm font-bold rounded-lg transition-colors">
-                <Plus size={15} />
-                إضافة مستودع
-              </button>
-            )}
+            <div className="flex items-center gap-3">
+              <NotificationBell />
+              {isOwner && (
+                <button onClick={openCreate}
+                  className="flex items-center gap-2 px-4 py-2 bg-[#1a3a5c] hover:bg-[#14304e] text-white text-sm font-bold rounded-lg transition-colors">
+                  <Plus size={15} />
+                  إضافة مستودع
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </header>

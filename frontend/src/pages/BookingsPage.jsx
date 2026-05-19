@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Building2, Calendar, CreditCard, Loader, Layers, X, AlertTriangle } from 'lucide-react';
+import NotificationBell from '../components/NotificationBell';
 
 const API_URL = 'https://api.rafdi.com';
 
@@ -67,19 +68,23 @@ function BookingsPage() {
       {/* Navbar */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-4">
-          <div className="flex items-center gap-4 h-14">
-            <button onClick={() => navigate('/home')}
-              className="flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-gray-800 transition-colors">
-              <ChevronLeft size={16} className="rotate-180" />
-              رجوع
-            </button>
-            <div className="h-4 w-px bg-gray-200" />
-            <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/home')}>
-              <div className="w-7 h-7 rounded-lg bg-[#1a3a5c] flex items-center justify-center">
-                <span className="text-white font-black text-xs">ر</span>
+          <div className="flex items-center justify-between h-14 gap-4">
+            <div className="flex items-center gap-4">
+              <button onClick={() => navigate('/home')}
+                className="flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-gray-800 transition-colors">
+                <ChevronLeft size={16} className="rotate-180" />
+                رجوع
+              </button>
+              <div className="h-4 w-px bg-gray-200" />
+              <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/home')}>
+                <div className="w-7 h-7 rounded-lg bg-[#1a3a5c] flex items-center justify-center">
+                  <span className="text-white font-black text-xs">ر</span>
+                </div>
+                <span className="text-[#1a3a5c] font-black text-base">رفدي</span>
               </div>
-              <span className="text-[#1a3a5c] font-black text-base">رفدي</span>
             </div>
+
+            <NotificationBell />
           </div>
         </div>
       </header>
