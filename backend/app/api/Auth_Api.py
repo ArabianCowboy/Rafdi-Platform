@@ -7,6 +7,7 @@ from app.Dtos.Auth_DTOs import ForgotPasswordRequest, ResetPasswordRequest
 from app.Dtos.Company_DTOs import CompanyResponse
 from app.Repo.user_repo import UserRepo
 from app.Repo.Companey_Repo import CompanyRepo
+from app.Repo.Notification_Repo import NotificationRepo
 from app.Repo.UserRoleRepo import UserRoleRepo
 from app.Repo.Role_Repo import RoleRepo
 from app.services.User_services.auth_service import AuthService
@@ -18,6 +19,8 @@ from app.services.Jwt_Services.Jwt_service import JWTService
 from app.services.User_services.Otp_Service import OTPService
 from app.services.User_services.Email_Service import EmailService
 from app.services.User_services.Forgot_Password_service import ForgotPasswordService
+from app.services.Notification_Services.Notification_Service import NotificationService
+from app.services.Notification_Services.NotificationTrigger_Service import NotificationTriggerService
 from app.api.Auth_middleware import get_current_user
 from app.config import get_db
 
@@ -37,6 +40,7 @@ def get_auth_service(db: Session = Depends(get_db)) -> AuthService:
     company_repo   = CompanyRepo(db)
     user_role_repo = UserRoleRepo(db)
     role_repo      = RoleRepo(db)
+    notification_service = NotificationService(NotificationRepo(db))
     return AuthService(
         user_repo          = user_repo,
         company_repo       = company_repo,
@@ -45,6 +49,7 @@ def get_auth_service(db: Session = Depends(get_db)) -> AuthService:
         validation_service = ValidationService(user_repo, company_repo),
         role_service       = RoleAssignmentService(user_role_repo, role_repo),
         jwt_service        = JWTService(),
+        notification_trigger = NotificationTriggerService(notification_service),
     )
 
 def get_profile_service(db: Session = Depends(get_db)) -> UserProfileService:

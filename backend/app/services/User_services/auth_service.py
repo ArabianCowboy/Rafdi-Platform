@@ -7,6 +7,7 @@ from app.services.User_services.validation_service import ValidationService
 from app.services.User_services.role_assignment_service import RoleAssignmentService
 from app.services.Jwt_Services.Jwt_service import JWTService
 from app.Repo import CompanyRepo, UserRepo
+from app.services.Notification_Services.NotificationTrigger_Service import NotificationTriggerService
 
 
 class AuthService:
@@ -21,6 +22,7 @@ class AuthService:
         validation_service : ValidationService,
         role_service       : RoleAssignmentService,
         jwt_service        : JWTService,
+        notification_trigger: NotificationTriggerService = None,
     ):
         self.user_repo          = user_repo
         self.company_repo       = company_repo
@@ -29,6 +31,7 @@ class AuthService:
         self.validation_service = validation_service
         self.role_service       = role_service
         self.jwt_service        = jwt_service
+        self.notification_trigger = notification_trigger
 
     def register(self, data: RegisterCreate) -> UserResponse:
         try:
@@ -43,6 +46,18 @@ class AuthService:
             self.role_service.assign_roles(user.UserID, data.account_types)
 
             self.user_repo.db.commit()
+
+            if self.notification_trigger:
+                try:
+                    admins = self.user_repo.get_all_admin()
+                    for admin in admins:
+                        if "admin" in admin["Roles"]:
+                            self.notification_trigger.on_company_registered(
+                                admin["UserID"],
+                                company.Name,
+                            )
+                except Exception:
+                    pass
 
             return UserResponse.model_validate(user)
 

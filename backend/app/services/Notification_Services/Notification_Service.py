@@ -27,9 +27,9 @@ class NotificationService:
     def mark_as_read(self, notification_id: int, user_id: int) -> NotificationResponse:
         notification = self.notification_repo.get_by_id(notification_id)
         if not notification:
-            raise ValueError("الإشعار غير موجود")
+            raise LookupError("الإشعار غير موجود")
         if notification.UserID != user_id:
-            raise ValueError("ما عندك صلاحية لهذا الإشعار")
+            raise PermissionError("ما عندك صلاحية لهذا الإشعار")
 
         notification.IsRead = True
         self.notification_repo.db.commit()

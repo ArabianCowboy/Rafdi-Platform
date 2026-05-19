@@ -1,3 +1,4 @@
+from datetime import datetime
 from pydantic import BaseModel
 from typing import Optional
 from app.Enums.EnumTypes import NotificationTypeEnum
@@ -22,6 +23,7 @@ class NotificationResponse(BaseModel):
     Type          : NotificationTypeEnum
     Message       : str
     IsRead        : bool
+    CreatedAt     : datetime
     user          : Optional[UserResponse] = None
  
     model_config = {"from_attributes": True}

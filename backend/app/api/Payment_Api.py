@@ -4,8 +4,13 @@ from sqlalchemy.orm import Session
 from app.Dtos.Payment_DTOs import PaymentResponse
 from app.Repo.Payment_Repo import PaymentRepo
 from app.Repo.Booking_Repo import BookingRepo
+from app.Repo.user_repo import UserRepo
+from app.Repo.WarehouseRepo import WarehouseRepo
+from app.Repo.Notification_Repo import NotificationRepo
 from app.services.Payment_Services.Payment_Service import PaymentService
 from app.services.Payment_Services.Commission_Service import CommissionService
+from app.services.Notification_Services.Notification_Service import NotificationService
+from app.services.Notification_Services.NotificationTrigger_Service import NotificationTriggerService
 from app.api.Auth_middleware import get_current_user, require_renter
 from app.config import get_db
 
@@ -13,10 +18,14 @@ router = APIRouter(prefix="/payments", tags=["Payments"])
 
 
 def get_payment_service(db: Session = Depends(get_db)) -> PaymentService:
+    notification_service = NotificationService(NotificationRepo(db))
     return PaymentService(
         payment_repo       = PaymentRepo(db),
         booking_repo       = BookingRepo(db),
         commission_service = CommissionService(),
+        notification_trigger = NotificationTriggerService(notification_service),
+        user_repo          = UserRepo(db),
+        warehouse_repo     = WarehouseRepo(db),
     )
 
 

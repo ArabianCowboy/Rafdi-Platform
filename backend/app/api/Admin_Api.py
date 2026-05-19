@@ -6,7 +6,10 @@ from app.Dtos.Company_DTOs import CompanyResponse, CompanyStatusUpdate
 from app.Dtos.Warehouse_DTOs import WarehouseResponse, WarehouseStatusUpdate, WarehouseToggleResponse
 from app.Repo.Companey_Repo import CompanyRepo
 from app.Repo.WarehouseRepo import WarehouseRepo
+from app.Repo.Notification_Repo import NotificationRepo
 from app.Repo.user_repo import UserRepo
+from app.services.Notification_Services.Notification_Service import NotificationService
+from app.services.Notification_Services.NotificationTrigger_Service import NotificationTriggerService
 from app.api.Auth_middleware import require_admin
 from app.config import get_db
 
@@ -42,6 +45,17 @@ def update_company_status(
     company = company_repo.update_status(id, data.Status)
     if not company:
         raise HTTPException(status_code=404, detail="الشركة غير موجودة")
+
+    if data.Status == False:
+        try:
+            user = UserRepo(db).get_by_company_id(id)
+            if user:
+                notification_service = NotificationService(NotificationRepo(db))
+                trigger = NotificationTriggerService(notification_service)
+                trigger.on_company_disabled(user.UserID)
+        except Exception:
+            pass
+
     return company
 
 

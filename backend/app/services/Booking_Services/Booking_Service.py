@@ -3,6 +3,7 @@ from datetime import date
 from app.Repo import WarehouseRepo
 from app.Dtos.Booking_DTOs import BookingCreate, BookingStatusUpdate, BookingResponse
 from app.Dtos.Payment_DTOs import PaymentCreate
+from app.Enums.EnumTypes import BookingStatusEnum
 from app.services.Booking_Services.BookingOverlap_Service import BookingOverlapService
 from app.services.Booking_Services.BookingPrice_Service import BookingPriceService
 from app.services.Notification_Services import NotificationTrigger_Service
@@ -108,6 +109,19 @@ class BookingService:
 
             updated = self.booking_repo.update(booking_id, data)
             self.booking_repo.db.commit()
+
+            if data.Status == BookingStatusEnum.cancelled:
+                try:
+                    renter_user = self.user_repo.get_by_company_id(booking.RenterCompanyID)
+                    warehouse = self.warehouse_repo.get_by_id(booking.WarehouseID)
+
+                    if renter_user and warehouse:
+                        self.notification_trigger.on_booking_cancelled(
+                            renter_user.UserID,
+                            warehouse.Name,
+                        )
+                except Exception:
+                    pass
 
             return BookingResponse.model_validate(updated)
 
