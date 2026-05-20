@@ -139,7 +139,7 @@ function OwnerBookingsPage() {
                         <div className="flex items-center gap-1.5 mt-1">
                           <Users size={11} className="text-gray-400" />
                           <p className="text-xs text-gray-500">
-                            {b.renter_company?.CompanyName || `شركة #${b.RenterCompanyID}`}
+                            {b.renter_company?.CompanyName || `شركة #${b.CompanyName}`}
                           </p>
                         </div>
                         {b.renter_company?.CommercialRegistration && (
