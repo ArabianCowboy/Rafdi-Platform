@@ -29,14 +29,14 @@ function BookingsPage() {
   const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
 
   const fetchBookings = async () => {
-  try {
-    const res = await fetch(`${API_URL}/bookings/my`, { headers: { 'Authorization': `Bearer ${token}` } });
-    if (res.ok) {
-      const data = await res.json();
-      setBookings(data.reverse());
-    }
-  } catch {} finally { setLoading(false); }
-};
+    try {
+      const res = await fetch(`${API_URL}/bookings/my`, { headers: { 'Authorization': `Bearer ${token}` } });
+      if (res.ok) {
+        const data = await res.json();
+        setBookings(data.reverse());
+      }
+    } catch {} finally { setLoading(false); }
+  };
 
   useEffect(() => { fetchBookings(); }, []);
 
@@ -86,7 +86,6 @@ function BookingsPage() {
                 <span className="text-[#1a3a5c] font-black text-base">رفدي</span>
               </div>
             </div>
-
             <NotificationBell />
           </div>
         </div>
@@ -101,7 +100,6 @@ function BookingsPage() {
       </div>
 
       <main className="max-w-5xl mx-auto px-4 py-8">
-
         {loading ? (
           <div className="flex justify-center py-20">
             <Loader size={26} className="text-[#1a3a5c] animate-spin" />
@@ -124,31 +122,17 @@ function BookingsPage() {
 
               return (
                 <div key={b.BookingID}
-                    onClick={() => navigate(`/booking-detail/${b.BookingID}`)}
-                      className={`bg-white border rounded-xl overflow-hidden transition-all cursor-pointer ${
-                        b.Status === 'cancelled' ? 'border-gray-100 opacity-70' : 'border-gray-200 hover:border-[#1a3a5c]'
+                  onClick={() => navigate(`/booking-detail/${b.BookingID}`)}
+                  className={`bg-white border rounded-xl overflow-hidden transition-all cursor-pointer ${
+                    b.Status === 'cancelled' ? 'border-gray-100 opacity-70' : 'border-gray-200 hover:border-[#1a3a5c]'
                   }`}>
 
-                  <div className="p-5">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="p-5 text-right">
+                    {/* Row 1: warehouse info + badges */}
+                    <div className="flex items-start justify-between gap-4">
 
-                      {/* Warehouse info */}
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-[#f0f4f8] border border-gray-200 flex items-center justify-center shrink-0">
-                          <Building2 size={18} className="text-[#1a3a5c]" />
-                        </div>
-                        <div className="text-right">
-                          <p className="font-bold text-gray-900 text-sm">
-                            {b.warehouse?.Name || `مستودع #${b.WarehouseID}`}
-                          </p>
-                          {b.warehouse?.Location && (
-                            <p className="text-xs text-gray-400 mt-0.5">{b.warehouse.Location}</p>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Badges + amount */}
-                      <div className="flex flex-wrap items-center gap-2 justify-end">
+                      {/* Badges — يمين */}
+                      <div className="flex flex-wrap items-center gap-2">
                         <span className={`text-xs font-semibold px-2.5 py-1 rounded-md border ${status.className}`}>
                           {status.label}
                         </span>
@@ -156,31 +140,52 @@ function BookingsPage() {
                           <CreditCard size={11} />
                           {payment.label}
                         </span>
-                        <span className="font-black text-gray-900 text-sm">
-                          {parseFloat(b.TotalPrice).toLocaleString()}
-                          <span className="text-xs font-normal text-gray-400 mr-1">ر.س</span>
-                        </span>
+                      </div>
+
+                      {/* Warehouse + company — يسار */}
+                      <div className="flex items-center gap-3">
+                        <div className="text-right">
+                          <p className="font-bold text-gray-900 text-sm">
+                            {b.warehouse?.Name || `مستودع #${b.WarehouseID}`}
+                          </p>
+                          {b.warehouse?.company?.CompanyName && (
+                            <p className="text-xs text-[#1a3a5c] font-semibold mt-0.5">
+                              {b.warehouse.company.CompanyName}
+                            </p>
+                          )}
+                          {b.warehouse?.Location && (
+                            <p className="text-xs text-gray-400 mt-0.5">{b.warehouse.Location}</p>
+                          )}
+                        </div>
+                        <div className="w-10 h-10 rounded-lg bg-[#f0f4f8] border border-gray-200 flex items-center justify-center shrink-0">
+                          <Building2 size={18} className="text-[#1a3a5c]" />
+                        </div>
                       </div>
                     </div>
 
-                    {/* Dates + booking ID */}
-                    <div className="flex flex-wrap items-center justify-between mt-4 pt-3 border-t border-gray-50 gap-2">
-                      <div className="flex items-center gap-1.5 text-gray-400 text-xs">
-                        <span className="text-gray-300">#</span>
-                        <span className="font-mono">{b.BookingID}</span>
-                      </div>
+                    {/* Row 2: amount */}
+                    <div className="mt-3 text-right">
+                      <span className="font-black text-gray-900 text-sm">
+                        {parseFloat(b.TotalPrice).toLocaleString()}
+                        <span className="text-xs font-normal text-gray-400 mr-1">ر.س</span>
+                      </span>
+                    </div>
+
+                    {/* Row 3: dates + ID */}
+                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-50 gap-2">
+                      <p className="text-xs text-gray-400 font-mono">{b.BookingID}#</p>
                       <div className="flex items-center gap-1.5 text-gray-500 text-xs">
-                        <Calendar size={11} className="text-gray-400 shrink-0" />
-                        <span className="font-mono">{b.StartDate}</span>
-                        <span className="text-gray-300 mx-1">←</span>
                         <span className="font-mono">{b.EndDate}</span>
+                        <span className="text-gray-300 mx-1">←</span>
+                        <span className="font-mono">{b.StartDate}</span>
+                        <Calendar size={11} className="text-gray-400 shrink-0" />
                       </div>
                     </div>
                   </div>
 
-                  {/* Cancel button — only for pending */}
+                  {/* Cancel button */}
                   {canCancel(b) && (
-                    <div className="px-5 pb-4">
+                    <div className="px-5 pb-4" onClick={e => e.stopPropagation()}>
                       {cancelError && cancellingId === null && confirmCancel === b.BookingID && (
                         <p className="text-xs text-red-600 font-semibold text-right mb-2">{cancelError}</p>
                       )}
@@ -193,9 +198,7 @@ function BookingsPage() {
                           </button>
                           <button onClick={() => handleCancel(b.BookingID)} disabled={isCancelling}
                             className="px-3 py-1.5 text-xs font-bold text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors disabled:opacity-60 flex items-center gap-1.5">
-                            {isCancelling ? (
-                              <span className="w-3 h-3 border border-white/30 border-t-white rounded-full animate-spin block" />
-                            ) : <X size={12} />}
+                            {isCancelling ? <span className="w-3 h-3 border border-white/30 border-t-white rounded-full animate-spin block" /> : <X size={12} />}
                             نعم، إلغاء الحجز
                           </button>
                         </div>
@@ -214,8 +217,8 @@ function BookingsPage() {
               );
             })}
 
-            {/* Summary footer */}
-            <div className="flex justify-between items-center pt-2 text-right">
+            {/* Summary */}
+            <div className="flex justify-between items-center pt-2">
               <span className="text-xs text-gray-400">
                 {bookings.filter(b => b.Status === 'confirmed').length} مؤكد •{' '}
                 {bookings.filter(b => b.Status === 'pending').length} قيد الانتظار •{' '}
@@ -227,7 +230,7 @@ function BookingsPage() {
         )}
       </main>
 
-      {/* Cancel confirmation modal */}
+      {/* Cancel modal */}
       {confirmCancel && (
         <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40" onClick={() => setConfirmCancel(null)} />
@@ -245,9 +248,7 @@ function BookingsPage() {
             <div className="flex gap-2">
               <button onClick={() => handleCancel(confirmCancel)} disabled={!!cancellingId}
                 className="flex-1 py-2.5 text-sm font-bold text-white bg-red-500 hover:bg-red-600 rounded-xl transition-colors disabled:opacity-60 flex items-center justify-center gap-1.5">
-                {cancellingId ? (
-                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin block" />
-                ) : null}
+                {cancellingId ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin block" /> : null}
                 نعم، إلغاء
               </button>
               <button onClick={() => { setConfirmCancel(null); setCancelError(''); }}
