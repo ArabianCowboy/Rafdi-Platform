@@ -7,6 +7,7 @@ import WarehousesPage from './pages/WarehousesPage';
 import BookingsPage from './pages/BookingsPage';
 import OwnerBookingsPage from './pages/OwnerBookingsPage';
 import BookingPage from "./pages/BookingPage";
+import BookingDetailPage from './pages/BookingDetailPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import PaymentPage from './pages/PaymentPage';
 import AdminPage from './pages/AdminPage';
@@ -24,6 +25,7 @@ function App() {
         <Route path="/warehouses" element={<WarehousesPage />} />
         <Route path="/booking/:id" element={<BookingPage />} />
         <Route path="/bookings" element={<BookingsPage />} />
+        <Route path="/booking-detail/:id" element={<BookingDetailPage />} />
         <Route path="/owner-bookings" element={<OwnerBookingsPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/payment" element={<PaymentPage />} />

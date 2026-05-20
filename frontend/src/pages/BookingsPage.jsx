@@ -124,8 +124,9 @@ function BookingsPage() {
 
               return (
                 <div key={b.BookingID}
-                  className={`bg-white border rounded-xl overflow-hidden transition-all ${
-                    b.Status === 'cancelled' ? 'border-gray-100 opacity-70' : 'border-gray-200 hover:border-gray-300'
+                    onClick={() => navigate(`/booking-detail/${b.BookingID}`)}
+                      className={`bg-white border rounded-xl overflow-hidden transition-all cursor-pointer ${
+                        b.Status === 'cancelled' ? 'border-gray-100 opacity-70' : 'border-gray-200 hover:border-[#1a3a5c]'
                   }`}>
 
                   <div className="p-5">
