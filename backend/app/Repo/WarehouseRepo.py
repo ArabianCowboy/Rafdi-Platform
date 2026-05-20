@@ -12,10 +12,10 @@ class WarehouseRepo(BaseRepo[Warehouse]):
         super().__init__(db)
 
     def get_by_id(self, id: int) -> Optional[Warehouse]:
-        return self.db.query(Warehouse).filter(Warehouse.WarehouseID == id).first()
+        return self.db.query(Warehouse).options(joinedload(Warehouse.company)).filter(Warehouse.WarehouseID == id).first()
 
     def get_all(self) -> list[Warehouse]:
-        return self.db.query(Warehouse).filter(Warehouse.IsActive == True).all()
+        return self.db.query(Warehouse).options(joinedload(Warehouse.company)).filter(Warehouse.IsActive == True).all()
 
     def get_all_admin(self) -> list[Warehouse]:
         return self.db.query(Warehouse).options(joinedload(Warehouse.company)).all()
