@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Building2, LogOut, Layers, Package, CheckCircle, Users, MapPin, Loader, Settings, Search, ChevronLeft, LayoutDashboard, Plus } from "lucide-react";
+import { Building2, LogOut, Layers, Package, CheckCircle, Users, MapPin, Loader, Settings, Search, ChevronLeft, LayoutDashboard } from "lucide-react";
 import NotificationBell from "../components/NotificationBell";
 
 const API_URL = 'https://api.rafdi.com';
@@ -60,15 +60,12 @@ const WarehouseCard = ({ w, isRenter, onBook }) => (
     </div>
     <div className="p-4">
       <h3 className="font-bold text-gray-900 text-sm mb-1 text-right">{w.Name}</h3>
-
-      {/* Company name */}
       {w.company?.CompanyName && (
         <div className="flex items-center justify-end gap-1.5 text-gray-400 text-xs mb-2">
           <span>{w.company.CompanyName}</span>
           <Users size={10} className="text-gray-300 shrink-0" />
         </div>
       )}
-
       <div className="flex items-center justify-end gap-1.5 text-gray-500 text-xs mb-1">
         <span>{w.Location}</span>
         <MapPin size={11} className="text-gray-400 shrink-0" />
@@ -177,14 +174,13 @@ function HomePage() {
             </div>
 
             <div className="flex items-center gap-3">
-              {/* زر إضافة مستودع للمالك */}
               {isOwner && (
                 <button onClick={() => navigate('/warehouses')}
                   className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-[#1a3a5c] hover:bg-[#14304e] text-white text-xs font-bold rounded-lg transition-colors">
                   <Settings size={14} />
-                     إدارة المستودعات
-                  </button>
-                  )}
+                  إدارة المستودعات
+                </button>
+              )}
 
               <NotificationBell />
 
@@ -193,9 +189,13 @@ function HomePage() {
                 {isRenter && <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-100">مستأجر</span>}
               </div>
 
-              <div className="flex items-center gap-2 border-r border-gray-200 pr-3">
-                <span className="text-sm font-semibold text-gray-700 hidden md:block max-w-[120px] truncate">{displayName}</span>
-                <div className="w-8 h-8 rounded-full bg-[#1a3a5c] flex items-center justify-center shrink-0">
+              {/* Avatar — يوجه لصفحة البروفايل */}
+              <div className="flex items-center gap-2 border-r border-gray-200 pr-3 cursor-pointer"
+                onClick={() => navigate('/profile')}>
+                <span className="text-sm font-semibold text-gray-700 hidden md:block max-w-[120px] truncate hover:text-[#1a3a5c] transition-colors">
+                  {displayName}
+                </span>
+                <div className="w-8 h-8 rounded-full bg-[#1a3a5c] hover:bg-[#14304e] flex items-center justify-center shrink-0 transition-colors">
                   <span className="text-white text-xs font-bold">{displayName.charAt(0)}</span>
                 </div>
               </div>
@@ -252,8 +252,6 @@ function HomePage() {
       )}
 
       <main className="max-w-6xl mx-auto px-4 py-8">
-
-        {/* Warehouses listing */}
         {(activeTab === 'home' || activeTab === 'warehouses') && (
           <section>
             <div className="flex justify-between items-center mb-5">

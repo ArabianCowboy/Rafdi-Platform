@@ -94,7 +94,7 @@ def update_email(
 def update_company(
     data        : ProfileUpdate,
     service     : UserProfileService = Depends(get_profile_service),
-    current_user: dict                     = Depends(get_current_user)
+    current_user: dict               = Depends(get_current_user)
 ):
     try:
         return service.update_company_name(current_user["company_id"], data)

@@ -27,7 +27,7 @@ const arabicNumber = new Intl.NumberFormat('ar-SA');
 function formatRelativeTime(value) {
   if (!value) return 'الآن';
 
-  const date = new Date(value);
+  const date = new Date(value.endsWith('Z') ? value : value + 'Z');
   if (Number.isNaN(date.getTime())) return 'الآن';
 
   const diffMs = Date.now() - date.getTime();

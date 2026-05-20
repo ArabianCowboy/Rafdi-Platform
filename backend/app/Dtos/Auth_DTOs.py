@@ -5,7 +5,6 @@ from app.Enums.EnumTypes import AccountTypeEnum
 
 class ProfileUpdate(BaseModel):
     company_name            : Optional[str]      = None
-    commercial_registration : Optional[str]      = None
     email                   : Optional[EmailStr] = None
 
 class RegisterCreate(BaseModel):

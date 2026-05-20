@@ -9,6 +9,7 @@ import OwnerBookingsPage from './pages/OwnerBookingsPage';
 import BookingPage from "./pages/BookingPage";
 import BookingDetailPage from './pages/BookingDetailPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ProfilePage from './pages/ProfilePage';
 import PaymentPage from './pages/PaymentPage';
 import AdminPage from './pages/AdminPage';
 
@@ -21,6 +22,7 @@ function App() {
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
         <Route path="/home" element={<HomePage />} />
         <Route path="/warehouses" element={<WarehousesPage />} />
         <Route path="/booking/:id" element={<BookingPage />} />
