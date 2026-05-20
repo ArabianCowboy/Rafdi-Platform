@@ -29,11 +29,14 @@ function BookingsPage() {
   const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
 
   const fetchBookings = async () => {
-    try {
-      const res = await fetch(`${API_URL}/bookings/my`, { headers: { 'Authorization': `Bearer ${token}` } });
-      if (res.ok) setBookings(await res.json());
-    } catch {} finally { setLoading(false); }
-  };
+  try {
+    const res = await fetch(`${API_URL}/bookings/my`, { headers: { 'Authorization': `Bearer ${token}` } });
+    if (res.ok) {
+      const data = await res.json();
+      setBookings(data.reverse());
+    }
+  } catch {} finally { setLoading(false); }
+};
 
   useEffect(() => { fetchBookings(); }, []);
 
