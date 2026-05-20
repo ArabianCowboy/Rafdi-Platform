@@ -101,6 +101,16 @@ def update_company(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     
+@router.get("/me", response_model=UserResponse)
+def get_me(
+    db          : Session = Depends(get_db),
+    current_user: dict    = Depends(get_current_user)
+):
+    user = UserRepo(db).get_by_id_with_company(current_user["user_id"])
+    if not user:
+        raise HTTPException(status_code=404, detail="المستخدم غير موجود")
+    return user
+    
 @router.post("/forgot-password")
 def forgot_password(
     data   : ForgotPasswordRequest,

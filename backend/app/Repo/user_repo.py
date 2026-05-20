@@ -47,6 +47,8 @@ class UserRepo(BaseRepo[User]):
         ]
 
 
+    def get_by_id_with_company(self, id: int) -> Optional[User]:
+        return self.db.query(User).options(joinedload(User.company)).filter(User.UserID == id).first()
 
     def add(self, obj: RegisterCreate, password_hash: str, company_id: int) -> User:
         user = User(
