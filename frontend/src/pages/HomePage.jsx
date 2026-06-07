@@ -2,8 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Building2, Layers, Package, CheckCircle, Users, MapPin, Loader, Search, ChevronLeft } from "lucide-react";
 import Navbar from "../components/Navbar";
-
-const API_URL = 'https://api.rafdi.com';
+import { API_URL, getHeaders } from '../config/api';
 
 const getUserRoles = () => {
   try {
@@ -95,16 +94,14 @@ function HomePage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const headers = { 'Authorization': `Bearer ${token}` };
-        const res = await fetch(`${API_URL}/warehouses/`, { headers });
+        const res = await fetch(`${API_URL}/warehouses/`, { headers: getHeaders(false) });
         if (res.ok) {
           const data = await res.json();
           setWarehouses(data);
           if (isOwner) setMyWarehouses(data.filter(w => w.CompanyID === getCompanyId()));
         }
         if (isRenter) {
-          const br = await fetch(`${API_URL}/bookings/my`, { headers });
+          const br = await fetch(`${API_URL}/bookings/my`, { headers: getHeaders(false) });
           if (br.ok) setMyBookings(await br.json());
         }
       } catch {} finally { setLoading(false); }
@@ -121,18 +118,15 @@ function HomePage() {
 
       <Navbar />
 
-      {/* Hero / Search */}
+      {/* Hero */}
       <div style={{ background: '#0d1b3e', position: 'relative', overflow: 'hidden' }} className="py-16 px-4">
-        {/* dot grid */}
         <div style={{
           position: 'absolute', inset: 0,
           backgroundImage: 'radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px)',
-          backgroundSize: '22px 22px',
-          opacity: 0.7,
+          backgroundSize: '22px 22px', opacity: 0.7,
           maskImage: 'radial-gradient(ellipse at center, #000 40%, transparent 80%)',
           WebkitMaskImage: 'radial-gradient(ellipse at center, #000 40%, transparent 80%)',
         }} />
-        {/* glow */}
         <div style={{
           position: 'absolute', top: -180, left: '50%', transform: 'translateX(-50%)',
           width: 900, height: 600,
@@ -146,9 +140,7 @@ function HomePage() {
             padding: '7px 14px 7px 12px',
             background: 'rgba(255,255,255,0.06)',
             border: '1px solid rgba(255,255,255,0.12)',
-            borderRadius: 100,
-            fontSize: 13, fontWeight: 500, color: '#cbd5e1',
-            marginBottom: 18,
+            borderRadius: 100, fontSize: 13, fontWeight: 500, color: '#cbd5e1', marginBottom: 18,
           }}>
             <span style={{
               width: 8, height: 8, borderRadius: '50%', background: '#60a5fa',
@@ -164,7 +156,6 @@ function HomePage() {
             {warehouses.filter(w => w.IsActive).length} مستودع متاح في مناطق متعددة
           </p>
 
-          {/* Search box */}
           <div style={{
             background: '#fff', borderRadius: 14, display: 'flex', alignItems: 'center',
             padding: '6px 6px 6px 18px',
@@ -181,20 +172,19 @@ function HomePage() {
                 color: '#0f172a', direction: 'rtl',
               }}
             />
-            <button
-              style={{
-                background: '#2563eb', color: '#fff', padding: '11px 22px',
-                borderRadius: 10, fontWeight: 700, fontSize: 15, border: 'none',
-                cursor: 'pointer', fontFamily: 'inherit',
-                boxShadow: '0 6px 14px -6px rgba(37,99,235,0.6)',
-              }}>
+            <button style={{
+              background: '#2563eb', color: '#fff', padding: '11px 22px',
+              borderRadius: 10, fontWeight: 700, fontSize: 15, border: 'none',
+              cursor: 'pointer', fontFamily: 'inherit',
+              boxShadow: '0 6px 14px -6px rgba(37,99,235,0.6)',
+            }}>
               بحث
             </button>
           </div>
         </div>
       </div>
 
-      {/* Stats strip */}
+      {/* Stats */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex overflow-x-auto justify-end">
@@ -229,7 +219,7 @@ function HomePage() {
             <ChevronLeft size={14} />
           </button>
           <h2 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 26, letterSpacing: '-0.01em', color: '#0f172a' }}>
-            {activeTab === 'home' ? 'أحدث المستودعات' : 'جميع المستودعات'}
+            أحدث المستودعات
           </h2>
         </div>
 
