@@ -1,21 +1,23 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cairo:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #2E5F8A;
-  --color-primary-dark: #1E3F5C;
-  --color-primary-light: #4A8ABF;
-  --color-background: #F9FAFB;
-  --color-success: #059669;
-  --color-error: #991B1B;
-  --color-warning: #D97706;
-  --font-sans: "Inter", "Cairo", ui-sans-serif, system-ui, sans-serif;
-  --font-cairo: "Cairo", sans-serif;
+  --color-primary: #2563eb;
+  --color-primary-dark: #1d4ed8;
+  --color-primary-light: #3b82f6;
+  --color-navy: #0d1b3e;
+  --color-background: #f8fafc;
+  --color-success: #10b981;
+  --color-error: #ef4444;
+  --color-warning: #f59e0b;
+  --font-sans: "IBM Plex Sans Arabic", "Tajawal", ui-sans-serif, system-ui, sans-serif;
+  --font-tajawal: "Tajawal", sans-serif;
 }
 
 @layer base {
   body {
     @apply bg-background text-gray-900 antialiased;
+    font-family: "IBM Plex Sans Arabic", "Tajawal", system-ui, sans-serif;
   }
 }
 
