@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ChevronLeft, CheckCircle, ShieldCheck, Loader, Lock, CreditCard } from 'lucide-react';
+import { CheckCircle, ShieldCheck, Loader, Lock, CreditCard } from 'lucide-react';
+import Navbar from '../components/Navbar';
+import { API_URL, getHeaders } from '../config/api';
 
-const API_URL = 'https://api.rafdi.com';
 const MOYASAR_KEY = 'pk_test_xZj2Ucqc3pVSkktyUTZLs1ER6JhSKxj4Pnwvt8Ds';
 
 function PaymentPage() {
@@ -34,7 +35,6 @@ function PaymentPage() {
     processingRef.current = true;
     setProcessing(true);
     try {
-      const token = localStorage.getItem('token');
       const currentBookingId = bookingIdFromState || localStorage.getItem('paymentBookingId');
       const params = new URLSearchParams({
         booking_id: currentBookingId,
@@ -44,7 +44,7 @@ function PaymentPage() {
       });
       const res = await fetch(`${API_URL}/payments/?${params}`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers: getHeaders(false),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.detail || 'حدث خطأ أثناء تأكيد الدفع'); return; }
@@ -118,63 +118,47 @@ function PaymentPage() {
   }, [bookingId]);
 
   return (
-    <div className="min-h-screen bg-[#f7f8fa]" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
+    <div className="min-h-screen bg-[#f8fafc]" dir="rtl" style={{ fontFamily: "'IBM Plex Sans Arabic', 'Tajawal', sans-serif" }}>
 
-      {/* Navbar */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="flex items-center gap-4 h-14">
-            <button onClick={() => navigate(-1)}
-              className="flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-gray-800 transition-colors">
-              <ChevronLeft size={16} className="rotate-180" />
-              رجوع
-            </button>
-            <div className="h-4 w-px bg-gray-200" />
-            <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/home')}>
-              <div className="w-7 h-7 rounded-lg bg-[#1a3a5c] flex items-center justify-center">
-                <span className="text-white font-black text-xs">ر</span>
-              </div>
-              <span className="text-[#1a3a5c] font-black text-base">رفدي</span>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
 
-          {/* Left - Summary (2/5) */}
+          {/* Left - Summary */}
           <div className="lg:col-span-2 space-y-4">
 
-            {/* Order Summary */}
-            <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-              <div className="px-5 py-4 border-b border-gray-100 bg-[#1a3a5c] text-right">
-                <p className="text-blue-200 text-xs font-semibold mb-0.5">ملخص الطلب</p>
-                <h3 className="font-bold text-white text-sm">{warehouseName}</h3>
+            <div className="bg-white border border-gray-200 rounded-xl overflow-hidden"
+              style={{ boxShadow: '0 1px 2px rgba(15,23,42,0.04)' }}>
+              <div className="px-5 py-4 border-b border-gray-100 text-right" style={{ background: '#0d1b3e' }}>
+                <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: 12, fontWeight: 500, marginBottom: 3 }}>ملخص الطلب</p>
+                <h3 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 700, fontSize: 15, color: '#fff' }}>
+                  {warehouseName}
+                </h3>
               </div>
               <div className="p-5 text-right space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="font-black text-gray-900 text-xl">
+                  <span style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 22, color: '#0f172a' }}>
                     {estimatedPrice.toLocaleString()}
-                    <span className="text-sm font-normal text-gray-400 mr-1">ر.س</span>
+                    <span style={{ fontSize: 13, fontWeight: 400, color: '#94a3b8', marginRight: 4 }}>ر.س</span>
                   </span>
-                  <span className="text-xs text-gray-500">المبلغ الإجمالي</span>
+                  <span style={{ fontSize: 12, color: '#64748b' }}>المبلغ الإجمالي</span>
                 </div>
-                <div className="flex justify-between items-center pt-3 border-t border-gray-100 text-xs">
-                  <span className="flex items-center gap-1 text-emerald-600 font-semibold">
+                <div className="flex justify-between items-center pt-3 border-t border-gray-100">
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: '#10b981', fontWeight: 600 }}>
                     <Lock size={11} />
                     آمن ومشفر
                   </span>
-                  <span className="text-gray-400">حالة الدفع</span>
+                  <span style={{ fontSize: 12, color: '#94a3b8' }}>حالة الدفع</span>
                 </div>
               </div>
             </div>
 
-            {/* Security */}
-            <div className="bg-white border border-gray-200 rounded-xl p-4 text-right">
+            <div className="bg-white border border-gray-200 rounded-xl p-4 text-right"
+              style={{ boxShadow: '0 1px 2px rgba(15,23,42,0.04)' }}>
               <div className="flex items-center justify-end gap-2 mb-3">
-                <h4 className="text-xs font-bold text-gray-600">معلومات الأمان</h4>
-                <ShieldCheck size={14} className="text-[#1a3a5c]" />
+                <h4 style={{ fontSize: 12, fontWeight: 700, color: '#475569' }}>معلومات الأمان</h4>
+                <ShieldCheck size={14} color="#2563eb" />
               </div>
               <div className="space-y-2">
                 {[
@@ -183,71 +167,79 @@ function PaymentPage() {
                   'بيانات بطاقتك لا تُخزن',
                   'يدعم Apple Pay',
                 ].map((item, i) => (
-                  <div key={i} className="flex items-center justify-end gap-2 text-xs text-gray-500">
+                  <div key={i} className="flex items-center justify-end gap-2" style={{ fontSize: 12, color: '#64748b' }}>
                     <span>{item}</span>
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#10b981', flexShrink: 0 }} />
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Moyasar logo note */}
             <div className="flex items-center justify-end gap-2 px-1">
-              <span className="text-xs text-gray-400">الدفع مؤمّن عبر</span>
-              <span className="text-xs font-bold text-gray-600">Moyasar</span>
-              <CreditCard size={13} className="text-gray-400" />
+              <span style={{ fontSize: 12, color: '#94a3b8' }}>الدفع مؤمّن عبر</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: '#475569' }}>Moyasar</span>
+              <CreditCard size={13} color="#94a3b8" />
             </div>
           </div>
 
-          {/* Right - Payment Form (3/5) */}
+          {/* Right - Payment Form */}
           <div className="lg:col-span-3">
-            <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+            <div className="bg-white border border-gray-200 rounded-xl overflow-hidden"
+              style={{ boxShadow: '0 1px 2px rgba(15,23,42,0.04)' }}>
 
-              {/* Header */}
               <div className="px-5 py-4 border-b border-gray-100 text-right">
-                <h3 className="font-bold text-gray-900 text-sm">إتمام الدفع</h3>
-                <p className="text-xs text-gray-500 mt-0.5">ادفع بأمان عبر بوابة ميسر</p>
+                <h3 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 17, color: '#0f172a' }}>
+                  إتمام الدفع
+                </h3>
+                <p style={{ fontSize: 12, color: '#64748b', marginTop: 3 }}>ادفع بأمان عبر بوابة ميسر</p>
               </div>
 
               <div className="p-5">
-
                 {processing && (
                   <div className="mb-5 p-5 rounded-xl text-center bg-blue-50 border border-blue-100">
-                    <Loader size={28} className="text-[#1a3a5c] animate-spin mx-auto mb-2" />
-                    <p className="text-sm font-semibold text-[#1a3a5c]">جاري تأكيد الدفع...</p>
-                    <p className="text-xs text-gray-500 mt-1">يرجى الانتظار</p>
+                    <Loader size={28} color="#2563eb" className="animate-spin mx-auto mb-2" />
+                    <p style={{ fontSize: 14, fontWeight: 600, color: '#2563eb' }}>جاري تأكيد الدفع...</p>
+                    <p style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>يرجى الانتظار</p>
                   </div>
                 )}
 
                 {error && (
-                  <div className="mb-5 p-3.5 rounded-xl text-sm flex items-start gap-2.5 bg-red-50 border border-red-200">
+                  <div className="mb-5 p-3.5 rounded-xl flex items-start gap-2.5 bg-red-50 border border-red-200">
                     <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center shrink-0 mt-0.5">
                       <span className="text-red-600 text-xs font-black">!</span>
                     </div>
-                    <p className="font-semibold text-red-700 text-right leading-relaxed">{error}</p>
+                    <p style={{ fontSize: 13, fontWeight: 600, color: '#b91c1c' }}>{error}</p>
                   </div>
                 )}
 
                 {success && (
                   <div className="p-6 rounded-xl text-center bg-emerald-50 border border-emerald-200">
-                    <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-3">
-                      <CheckCircle size={24} className="text-emerald-600" />
+                    <div style={{ width: 52, height: 52, borderRadius: '50%', background: '#d1fae5', display: 'grid', placeItems: 'center', margin: '0 auto 14px' }}>
+                      <CheckCircle size={26} color="#10b981" />
                     </div>
-                    <p className="font-bold text-emerald-800 text-base mb-1">تم الدفع بنجاح</p>
-                    <p className="text-emerald-600 text-xs mb-4">جاري تحويلك للصفحة الرئيسية...</p>
+                    <p style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 17, color: '#065f46', marginBottom: 6 }}>
+                      تم الدفع بنجاح
+                    </p>
+                    <p style={{ fontSize: 12, color: '#059669', marginBottom: 18 }}>جاري تحويلك للصفحة الرئيسية...</p>
                     {paymentData && (
                       <div className="bg-white border border-emerald-100 rounded-xl p-3.5 text-right space-y-2">
-                        <div className="flex justify-between items-center text-xs">
-                          <span className="text-emerald-700 font-mono font-semibold">#{paymentData.PaymentID}</span>
-                          <span className="text-gray-500">رقم العملية</span>
+                        <div className="flex justify-between items-center">
+                          <span style={{ fontSize: 12, color: '#059669', fontFamily: 'monospace', fontWeight: 600 }}>
+                            #{paymentData.PaymentID}
+                          </span>
+                          <span style={{ fontSize: 12, color: '#94a3b8' }}>رقم العملية</span>
                         </div>
-                        <div className="flex justify-between items-center text-xs">
-                          <span className="text-emerald-700 font-semibold">{paymentData.PaymentMethod || 'بطاقة ائتمانية'}</span>
-                          <span className="text-gray-500">طريقة الدفع</span>
+                        <div className="flex justify-between items-center">
+                          <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>
+                            {paymentData.PaymentMethod || 'بطاقة ائتمانية'}
+                          </span>
+                          <span style={{ fontSize: 12, color: '#94a3b8' }}>طريقة الدفع</span>
                         </div>
-                        <div className="flex justify-between items-center text-xs pt-2 border-t border-emerald-100">
-                          <span className="font-black text-gray-900">{parseFloat(paymentData.Amount).toLocaleString()} ر.س</span>
-                          <span className="text-gray-500">المبلغ المدفوع</span>
+                        <div className="flex justify-between items-center pt-2 border-t border-emerald-100">
+                          <span style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 16, color: '#0f172a' }}>
+                            {parseFloat(paymentData.Amount).toLocaleString()} ر.س
+                          </span>
+                          <span style={{ fontSize: 12, color: '#94a3b8' }}>المبلغ المدفوع</span>
                         </div>
                       </div>
                     )}
@@ -263,8 +255,10 @@ function PaymentPage() {
         </div>
       </main>
 
-      <footer className="border-t border-gray-200 mt-12 py-5 bg-white">
-        <p className="text-center text-xs text-gray-400">© 2026 Rafdi Platform — جميع الحقوق محفوظة</p>
+      <footer className="bg-white border-t border-gray-200 mt-12">
+        <div className="max-w-4xl mx-auto px-4 py-5 text-center">
+          <span style={{ color: '#64748b', fontSize: 13 }}>© Rafdi Platform 2026</span>
+        </div>
       </footer>
     </div>
   );
