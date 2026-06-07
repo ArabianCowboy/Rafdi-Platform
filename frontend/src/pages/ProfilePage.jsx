@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Building2, Mail, ShieldCheck, Save, CheckCircle, KeyRound, Loader } from 'lucide-react';
-
-const API_URL = 'https://api.rafdi.com';
+import { Building2, Mail, ShieldCheck, Save, CheckCircle, KeyRound, Loader } from 'lucide-react';
+import Navbar from '../components/Navbar';
+import { API_URL, getHeaders } from '../config/api';
 
 const getUserInfo = () => {
   try {
@@ -25,9 +25,6 @@ function ProfilePage() {
   const [loadingEmail, setLoadingEmail] = useState(false);
   const [loadingCompany, setLoadingCompany] = useState(false);
 
-  const token = localStorage.getItem('token');
-  const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
-
   const roles = userInfo.roles || [];
   const isOwner = roles.includes('warehouse_owner');
   const isRenter = roles.includes('renter_company');
@@ -38,7 +35,7 @@ function ProfilePage() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await fetch(`${API_URL}/auth/me`, { headers });
+        const res = await fetch(`${API_URL}/auth/me`, { headers: getHeaders(false) });
         if (res.ok) {
           const data = await res.json();
           setProfile(data);
@@ -57,7 +54,7 @@ function ProfilePage() {
     setLoadingCompany(true);
     try {
       const res = await fetch(`${API_URL}/auth/profile/company`, {
-        method: 'PATCH', headers,
+        method: 'PATCH', headers: getHeaders(),
         body: JSON.stringify({ company_name: companyName }),
       });
       const data = await res.json();
@@ -74,7 +71,7 @@ function ProfilePage() {
     setLoadingEmail(true);
     try {
       const res = await fetch(`${API_URL}/auth/profile/email`, {
-        method: 'PATCH', headers,
+        method: 'PATCH', headers: getHeaders(),
         body: JSON.stringify({ email }),
       });
       const data = await res.json();
@@ -89,39 +86,45 @@ function ProfilePage() {
   const displayEmail = profile?.Email || userInfo.email || '—';
   const displayCR = profile?.company?.CommercialRegistration || '—';
 
-  return (
-    <div className="min-h-screen bg-[#f7f8fa]" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
+  const inputStyle = {
+    width: '100%', padding: '10px 14px', borderRadius: 10,
+    border: '1px solid #e2e8f0', outline: 'none', background: '#fff',
+    fontSize: 14, color: '#0f172a', direction: 'rtl', fontFamily: 'inherit',
+    boxSizing: 'border-box', transition: 'border-color .15s',
+  };
 
-      {/* Navbar */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-3xl mx-auto px-4">
-          <div className="flex items-center gap-4 h-14">
-            <button onClick={() => navigate('/home')}
-              className="flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-gray-800 transition-colors">
-              <ChevronLeft size={16} className="rotate-180" />
-              رجوع
-            </button>
-            <div className="h-4 w-px bg-gray-200" />
-            <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/home')}>
-              <div className="w-7 h-7 rounded-lg bg-[#1a3a5c] flex items-center justify-center">
-                <span className="text-white font-black text-xs">ر</span>
-              </div>
-              <span className="text-[#1a3a5c] font-black text-base">رفدي</span>
-            </div>
-          </div>
-        </div>
-      </header>
+  const btnStyle = (loading) => ({
+    display: 'flex', alignItems: 'center', gap: 8,
+    padding: '9px 18px', borderRadius: 9, border: 'none', cursor: 'pointer',
+    background: loading ? '#93c5fd' : '#2563eb', color: '#fff',
+    fontWeight: 600, fontSize: 14, fontFamily: 'inherit',
+    boxShadow: '0 6px 14px -6px rgba(37,99,235,0.5)',
+    opacity: loading ? 0.7 : 1,
+  });
+
+  return (
+    <div className="min-h-screen bg-[#f8fafc]" dir="rtl" style={{ fontFamily: "'IBM Plex Sans Arabic', 'Tajawal', sans-serif" }}>
+
+      <Navbar />
 
       {/* Header */}
-      <div className="bg-[#1a3a5c] py-8 px-4">
+      <div style={{ background: '#0d1b3e' }} className="py-8 px-4">
         <div className="max-w-3xl mx-auto text-right">
           <div className="flex items-center justify-end gap-4">
             <div>
-              <h1 className="text-xl font-black text-white">{displayName}</h1>
-              <p className="text-blue-200 text-sm mt-0.5">{displayEmail}</p>
+              <h1 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 22, color: '#fff' }}>
+                {displayName}
+              </h1>
+              <p style={{ color: 'rgba(255,255,255,0.62)', fontSize: 14, marginTop: 4 }}>{displayEmail}</p>
             </div>
-            <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center">
-              <span className="text-white font-black text-2xl">{displayName.charAt(0)}</span>
+            <div style={{
+              width: 52, height: 52, borderRadius: 14,
+              background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)',
+              display: 'grid', placeItems: 'center',
+            }}>
+              <span style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 22, color: '#fff' }}>
+                {displayName.charAt(0)}
+              </span>
             </div>
           </div>
         </div>
@@ -131,57 +134,59 @@ function ProfilePage() {
 
         {/* Alerts */}
         {successMsg && (
-          <div className="p-3.5 rounded-xl flex items-center gap-2.5 bg-emerald-50 border border-emerald-200 text-right">
+          <div className="p-3.5 rounded-xl flex items-center gap-2.5 bg-emerald-50 border border-emerald-200">
             <CheckCircle size={16} className="text-emerald-600 shrink-0" />
-            <p className="text-sm font-semibold text-emerald-700">{successMsg}</p>
+            <p style={{ fontSize: 13, fontWeight: 600, color: '#059669' }}>{successMsg}</p>
           </div>
         )}
         {errorMsg && (
-          <div className="p-3.5 rounded-xl flex items-start gap-2.5 bg-red-50 border border-red-200 text-right">
+          <div className="p-3.5 rounded-xl flex items-start gap-2.5 bg-red-50 border border-red-200">
             <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center shrink-0 mt-0.5">
               <span className="text-red-600 text-xs font-black">!</span>
             </div>
-            <p className="text-sm font-semibold text-red-700">{errorMsg}</p>
+            <p style={{ fontSize: 13, fontWeight: 600, color: '#b91c1c' }}>{errorMsg}</p>
           </div>
         )}
 
         {loadingProfile ? (
           <div className="flex justify-center py-16">
-            <Loader size={26} className="text-[#1a3a5c] animate-spin" />
+            <Loader size={26} color="#2563eb" className="animate-spin" />
           </div>
         ) : (
           <>
             {/* Company Info */}
-            <div className="bg-white border border-gray-200 rounded-xl p-5 text-right">
+            <div className="bg-white border border-gray-200 rounded-xl p-5 text-right"
+              style={{ boxShadow: '0 1px 2px rgba(15,23,42,0.04)' }}>
               <div className="flex items-center justify-end gap-2 mb-4">
-                <h2 className="font-bold text-gray-900 text-sm">بيانات الشركة</h2>
-                <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
-                  <Building2 size={15} className="text-[#1a3a5c]" />
+                <h2 style={{ fontWeight: 700, fontSize: 15, color: '#0f172a' }}>بيانات الشركة</h2>
+                <div style={{ width: 32, height: 32, borderRadius: 8, background: '#eff6ff', display: 'grid', placeItems: 'center' }}>
+                  <Building2 size={15} color="#2563eb" />
                 </div>
               </div>
 
-              {/* البيانات الحالية */}
-              <div className="space-y-2 mb-5 p-3.5 bg-gray-50 rounded-xl border border-gray-100">
+              <div className="space-y-2 mb-5 p-3.5 rounded-xl" style={{ background: '#f8fafc', border: '1px solid #f1f5f9' }}>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-700 font-semibold">{displayName}</span>
-                  <span className="text-xs text-gray-400">اسم الشركة الحالي</span>
+                  <span style={{ fontSize: 14, color: '#0f172a', fontWeight: 600 }}>{displayName}</span>
+                  <span style={{ fontSize: 12, color: '#94a3b8' }}>اسم الشركة الحالي</span>
                 </div>
                 <div className="flex justify-between items-center pt-2 border-t border-gray-100">
-                  <span className="text-sm text-gray-500 font-mono">{displayCR}</span>
-                  <span className="text-xs text-gray-400">السجل التجاري</span>
+                  <span style={{ fontSize: 13, color: '#64748b', fontFamily: 'monospace' }}>{displayCR}</span>
+                  <span style={{ fontSize: 12, color: '#94a3b8' }}>السجل التجاري</span>
                 </div>
               </div>
 
-              <form onSubmit={handleUpdateCompany} className="space-y-4">
+              <form onSubmit={handleUpdateCompany} className="space-y-3">
                 <div>
-                  <label className="block text-xs font-bold text-gray-600 mb-1.5">تعديل اسم الشركة</label>
-                  <input type="text" value={companyName}
-                    onChange={e => { setCompanyName(e.target.value); setErrorMsg(''); }}
-                    className="w-full py-2.5 px-3.5 rounded-xl text-sm font-medium text-right bg-white border border-gray-200 outline-none focus:border-[#1a3a5c] transition-colors text-gray-900"
-                    placeholder="اسم الشركة" />
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 6 }}>
+                    تعديل اسم الشركة
+                  </label>
+                  <input type="text" value={companyName} placeholder="اسم الشركة"
+                    style={inputStyle}
+                    onFocus={e => e.target.style.borderColor = '#2563eb'}
+                    onBlur={e => e.target.style.borderColor = '#e2e8f0'}
+                    onChange={e => { setCompanyName(e.target.value); setErrorMsg(''); }} />
                 </div>
-                <button type="submit" disabled={loadingCompany}
-                  className="flex items-center gap-2 px-4 py-2 bg-[#1a3a5c] hover:bg-[#14304e] text-white text-sm font-bold rounded-lg transition-colors disabled:opacity-60">
+                <button type="submit" disabled={loadingCompany} style={btnStyle(loadingCompany)}>
                   {loadingCompany ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin block" /> : <Save size={14} />}
                   حفظ اسم الشركة
                 </button>
@@ -189,31 +194,34 @@ function ProfilePage() {
             </div>
 
             {/* Email */}
-            <div className="bg-white border border-gray-200 rounded-xl p-5 text-right">
+            <div className="bg-white border border-gray-200 rounded-xl p-5 text-right"
+              style={{ boxShadow: '0 1px 2px rgba(15,23,42,0.04)' }}>
               <div className="flex items-center justify-end gap-2 mb-4">
-                <h2 className="font-bold text-gray-900 text-sm">البريد الإلكتروني</h2>
-                <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
-                  <Mail size={15} className="text-[#1a3a5c]" />
+                <h2 style={{ fontWeight: 700, fontSize: 15, color: '#0f172a' }}>البريد الإلكتروني</h2>
+                <div style={{ width: 32, height: 32, borderRadius: 8, background: '#eff6ff', display: 'grid', placeItems: 'center' }}>
+                  <Mail size={15} color="#2563eb" />
                 </div>
               </div>
 
-              <div className="mb-5 p-3.5 bg-gray-50 rounded-xl border border-gray-100">
+              <div className="mb-5 p-3.5 rounded-xl" style={{ background: '#f8fafc', border: '1px solid #f1f5f9' }}>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-700 font-semibold">{displayEmail}</span>
-                  <span className="text-xs text-gray-400">البريد الحالي</span>
+                  <span style={{ fontSize: 14, color: '#0f172a', fontWeight: 600 }}>{displayEmail}</span>
+                  <span style={{ fontSize: 12, color: '#94a3b8' }}>البريد الحالي</span>
                 </div>
               </div>
 
-              <form onSubmit={handleUpdateEmail} className="space-y-4">
+              <form onSubmit={handleUpdateEmail} className="space-y-3">
                 <div>
-                  <label className="block text-xs font-bold text-gray-600 mb-1.5">تعديل البريد الإلكتروني</label>
-                  <input type="email" value={email}
-                    onChange={e => { setEmail(e.target.value); setErrorMsg(''); }}
-                    className="w-full py-2.5 px-3.5 rounded-xl text-sm font-medium text-right bg-white border border-gray-200 outline-none focus:border-[#1a3a5c] transition-colors text-gray-900"
-                    placeholder="name@company.com" />
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 6 }}>
+                    تعديل البريد الإلكتروني
+                  </label>
+                  <input type="email" value={email} placeholder="name@company.com"
+                    style={inputStyle}
+                    onFocus={e => e.target.style.borderColor = '#2563eb'}
+                    onBlur={e => e.target.style.borderColor = '#e2e8f0'}
+                    onChange={e => { setEmail(e.target.value); setErrorMsg(''); }} />
                 </div>
-                <button type="submit" disabled={loadingEmail}
-                  className="flex items-center gap-2 px-4 py-2 bg-[#1a3a5c] hover:bg-[#14304e] text-white text-sm font-bold rounded-lg transition-colors disabled:opacity-60">
+                <button type="submit" disabled={loadingEmail} style={btnStyle(loadingEmail)}>
                   {loadingEmail ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin block" /> : <Save size={14} />}
                   حفظ البريد الإلكتروني
                 </button>
@@ -221,40 +229,57 @@ function ProfilePage() {
             </div>
 
             {/* Account Info */}
-            <div className="bg-white border border-gray-200 rounded-xl p-5 text-right">
+            <div className="bg-white border border-gray-200 rounded-xl p-5 text-right"
+              style={{ boxShadow: '0 1px 2px rgba(15,23,42,0.04)' }}>
               <div className="flex items-center justify-end gap-2 mb-4">
-                <h2 className="font-bold text-gray-900 text-sm">معلومات الحساب</h2>
-                <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
-                  <ShieldCheck size={15} className="text-[#1a3a5c]" />
+                <h2 style={{ fontWeight: 700, fontSize: 15, color: '#0f172a' }}>معلومات الحساب</h2>
+                <div style={{ width: 32, height: 32, borderRadius: 8, background: '#eff6ff', display: 'grid', placeItems: 'center' }}>
+                  <ShieldCheck size={15} color="#2563eb" />
                 </div>
               </div>
 
-              <div className="space-y-3 mb-4">
-                <div className="flex justify-between items-center py-2 border-b border-gray-50">
+              <div className="space-y-0 divide-y divide-gray-50 mb-4">
+                <div className="flex justify-between items-center py-2.5">
                   <div className="flex gap-1.5">
-                    {isOwner && <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-100">مالك مستودع</span>}
-                    {isRenter && <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-100">مستأجر</span>}
+                    {isOwner && (
+                      <span style={{ fontSize: 12, fontWeight: 600, padding: '3px 10px', borderRadius: 6, background: '#eff6ff', color: '#1d4ed8', border: '1px solid #dbeafe' }}>
+                        مالك مستودع
+                      </span>
+                    )}
+                    {isRenter && (
+                      <span style={{ fontSize: 12, fontWeight: 600, padding: '3px 10px', borderRadius: 6, background: '#ecfdf5', color: '#059669', border: '1px solid #a7f3d0' }}>
+                        مستأجر
+                      </span>
+                    )}
                   </div>
-                  <span className="text-xs text-gray-400">نوع الحساب</span>
+                  <span style={{ fontSize: 12, color: '#94a3b8' }}>نوع الحساب</span>
                 </div>
-                <div className="flex justify-between items-center py-2 border-b border-gray-50">
-                  <span className="text-sm font-mono text-gray-600">{userInfo.user_id}</span>
-                  <span className="text-xs text-gray-400">رقم المستخدم</span>
+                <div className="flex justify-between items-center py-2.5">
+                  <span style={{ fontSize: 13, color: '#64748b', fontFamily: 'monospace' }}>{userInfo.user_id}</span>
+                  <span style={{ fontSize: 12, color: '#94a3b8' }}>رقم المستخدم</span>
                 </div>
-                <div className="flex justify-between items-center py-2">
-                  <span className="text-sm font-mono text-gray-500">{userInfo.company_id}</span>
-                  <span className="text-xs text-gray-400">رقم الشركة</span>
+                <div className="flex justify-between items-center py-2.5">
+                  <span style={{ fontSize: 13, color: '#64748b', fontFamily: 'monospace' }}>{userInfo.company_id}</span>
+                  <span style={{ fontSize: 12, color: '#94a3b8' }}>رقم الشركة</span>
                 </div>
               </div>
 
               <div className="pt-4 border-t border-gray-100">
                 <div className="flex items-center justify-between">
                   <button onClick={() => navigate('/forgot-password')}
-                    className="flex items-center gap-1.5 px-4 py-2 border border-gray-200 rounded-lg text-sm font-semibold text-gray-700 hover:border-[#1a3a5c] hover:text-[#1a3a5c] transition-colors">
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 6,
+                      padding: '9px 16px', borderRadius: 9,
+                      border: '1px solid #e2e8f0', background: '#fff',
+                      fontSize: 13, fontWeight: 600, color: '#475569',
+                      cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = '#2563eb'; e.currentTarget.style.color = '#2563eb'; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = '#475569'; }}>
                     <KeyRound size={14} />
                     تغيير كلمة المرور
                   </button>
-                  <span className="text-xs text-gray-400">الأمان</span>
+                  <span style={{ fontSize: 12, color: '#94a3b8' }}>الأمان</span>
                 </div>
               </div>
             </div>
@@ -262,8 +287,10 @@ function ProfilePage() {
         )}
       </main>
 
-      <footer className="border-t border-gray-200 mt-12 py-5 bg-white">
-        <p className="text-center text-xs text-gray-400">© 2026 Rafdi Platform — جميع الحقوق محفوظة</p>
+      <footer className="bg-white border-t border-gray-200 mt-12">
+        <div className="max-w-3xl mx-auto px-4 py-5 text-center">
+          <span style={{ color: '#64748b', fontSize: 13 }}>© Rafdi Platform 2026</span>
+        </div>
       </footer>
     </div>
   );
