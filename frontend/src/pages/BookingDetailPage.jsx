@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ChevronLeft, Building2, MapPin, Package, Calendar, CreditCard, CheckCircle, Clock, XCircle, Loader } from 'lucide-react';
-
-const API_URL = 'https://api.rafdi.com';
+import { Building2, MapPin, Package, Calendar, CreditCard, CheckCircle, Clock, XCircle, Loader } from 'lucide-react';
+import Navbar from '../components/Navbar';
+import { API_URL, getHeaders } from '../config/api';
 
 const statusConfig = {
   confirmed: { label: 'مؤكد', className: 'bg-emerald-50 text-emerald-700 border border-emerald-200', icon: CheckCircle },
@@ -27,20 +27,15 @@ function BookingDetailPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const headers = { 'Authorization': `Bearer ${token}` };
-
-        const bookingsRes = await fetch(`${API_URL}/bookings/my`, { headers });
+        const bookingsRes = await fetch(`${API_URL}/bookings/my`, { headers: getHeaders(false) });
         if (bookingsRes.ok) {
           const bookings = await bookingsRes.json();
           const found = bookings.find(b => b.BookingID === parseInt(id));
           if (found) setBooking(found);
           else { setError('الحجز غير موجود'); return; }
         }
-
-        const paymentRes = await fetch(`${API_URL}/payments/${id}`, { headers });
+        const paymentRes = await fetch(`${API_URL}/payments/${id}`, { headers: getHeaders(false) });
         if (paymentRes.ok) setPayment(await paymentRes.json());
-
       } catch {
         setError('حدث خطأ في تحميل البيانات');
       } finally {
@@ -55,38 +50,24 @@ function BookingDetailPage() {
     : 0;
 
   return (
-    <div className="min-h-screen bg-[#f7f8fa]" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
+    <div className="min-h-screen bg-[#f8fafc]" dir="rtl" style={{ fontFamily: "'IBM Plex Sans Arabic', 'Tajawal', sans-serif" }}>
 
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-3xl mx-auto px-4">
-          <div className="flex items-center gap-4 h-14">
-            <button onClick={() => navigate('/bookings')}
-              className="flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-gray-800 transition-colors">
-              <ChevronLeft size={16} className="rotate-180" />
-              رجوع
-            </button>
-            <div className="h-4 w-px bg-gray-200" />
-            <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/home')}>
-              <div className="w-7 h-7 rounded-lg bg-[#1a3a5c] flex items-center justify-center">
-                <span className="text-white font-black text-xs">ر</span>
-              </div>
-              <span className="text-[#1a3a5c] font-black text-base">رفدي</span>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
-      <div className="bg-[#1a3a5c] py-8 px-4">
+      {/* Page header */}
+      <div style={{ background: '#0d1b3e' }} className="py-8 px-4">
         <div className="max-w-3xl mx-auto text-right">
-          <h1 className="text-xl font-black text-white mb-1">تفاصيل الحجز</h1>
-          <p className="text-blue-200 text-sm">#{id}</p>
+          <h1 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 26, color: '#fff', marginBottom: 4 }}>
+            تفاصيل الحجز
+          </h1>
+          <p style={{ color: 'rgba(255,255,255,0.62)', fontSize: 14, fontFamily: 'monospace' }}>#{id}</p>
         </div>
       </div>
 
       <main className="max-w-3xl mx-auto px-4 py-8">
         {loading ? (
           <div className="flex justify-center py-20">
-            <Loader size={26} className="text-[#1a3a5c] animate-spin" />
+            <Loader size={26} color="#2563eb" className="animate-spin" />
           </div>
         ) : error ? (
           <div className="text-center py-20 bg-white border border-dashed border-gray-300 rounded-xl">
@@ -96,71 +77,73 @@ function BookingDetailPage() {
           <div className="space-y-4">
 
             {/* Booking Status */}
-            <div className="bg-white border border-gray-200 rounded-xl p-5 text-right">
+            <div className="bg-white border border-gray-200 rounded-xl p-5 text-right"
+              style={{ boxShadow: '0 1px 2px rgba(15,23,42,0.04)' }}>
               <div className="flex justify-between items-center mb-4">
-                <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg border ${
-                  statusConfig[booking.Status]?.className
-                }`}>
+                <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg border ${statusConfig[booking.Status]?.className}`}>
                   {booking.Status === 'confirmed' ? <CheckCircle size={13} /> : booking.Status === 'pending' ? <Clock size={13} /> : <XCircle size={13} />}
                   {statusConfig[booking.Status]?.label}
                 </span>
-                <h2 className="font-black text-gray-900">حالة الحجز</h2>
+                <h2 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 17, color: '#0f172a' }}>
+                  حالة الحجز
+                </h2>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-gray-50 rounded-xl p-3 text-right">
-                  <p className="text-xs text-gray-400 mb-1">تاريخ البداية</p>
-                  <p className="font-bold text-gray-900 text-sm font-mono">{booking.StartDate}</p>
-                </div>
-                <div className="bg-gray-50 rounded-xl p-3 text-right">
-                  <p className="text-xs text-gray-400 mb-1">تاريخ النهاية</p>
-                  <p className="font-bold text-gray-900 text-sm font-mono">{booking.EndDate}</p>
-                </div>
-                <div className="bg-gray-50 rounded-xl p-3 text-right">
-                  <p className="text-xs text-gray-400 mb-1">مدة الإيجار</p>
-                  <p className="font-bold text-gray-900 text-sm">{days} يوم</p>
-                </div>
-                <div className="bg-gray-50 rounded-xl p-3 text-right">
-                  <p className="text-xs text-gray-400 mb-1">إجمالي الحجز</p>
-                  <p className="font-bold text-[#1a3a5c] text-sm">{parseFloat(booking.TotalPrice).toLocaleString()} ر.س</p>
-                </div>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { label: 'تاريخ البداية', value: booking.StartDate, mono: true },
+                  { label: 'تاريخ النهاية', value: booking.EndDate, mono: true },
+                  { label: 'مدة الإيجار', value: `${days} يوم` },
+                  { label: 'إجمالي الحجز', value: `${parseFloat(booking.TotalPrice).toLocaleString()} ر.س`, blue: true },
+                ].map((item, i) => (
+                  <div key={i} className="bg-gray-50 rounded-xl p-3 text-right">
+                    <p style={{ fontSize: 11, color: '#94a3b8', marginBottom: 4 }}>{item.label}</p>
+                    <p style={{
+                      fontWeight: 700, fontSize: 14,
+                      color: item.blue ? '#2563eb' : '#0f172a',
+                      fontFamily: item.mono ? 'monospace' : 'inherit',
+                    }}>
+                      {item.value}
+                    </p>
+                  </div>
+                ))}
               </div>
             </div>
 
             {/* Warehouse Info */}
             {booking.warehouse && (
-              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden"
+                style={{ boxShadow: '0 1px 2px rgba(15,23,42,0.04)' }}>
                 {booking.warehouse.ImagePath ? (
-                  <img src={booking.warehouse.ImagePath} alt={booking.warehouse.Name} className="w-full h-40 object-cover" />
+                  <img src={booking.warehouse.ImagePath} alt={booking.warehouse.Name} className="w-full h-44 object-cover" />
                 ) : (
-                  <div className="h-40 bg-gray-50 flex items-center justify-center">
-                    <Building2 size={36} className="text-gray-300" />
+                  <div className="h-44 flex items-center justify-center" style={{ background: '#f1f5f9' }}>
+                    <Building2 size={40} color="#cbd5e1" />
                   </div>
                 )}
                 <div className="p-5 text-right">
-                  <h3 className="font-black text-gray-900 mb-3">بيانات المستودع</h3>
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-semibold text-gray-700">{booking.warehouse.Name}</span>
-                      <span className="text-xs text-gray-400">الاسم</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-sm text-gray-600">{booking.warehouse.Location}</span>
-                        <MapPin size={13} className="text-gray-400" />
+                  <h3 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 17, color: '#0f172a', marginBottom: 14 }}>
+                    بيانات المستودع
+                  </h3>
+                  <div className="space-y-3">
+                    {[
+                      { label: 'الاسم', value: booking.warehouse.Name },
+                      { label: 'الموقع', value: booking.warehouse.Location, icon: <MapPin size={13} color="#94a3b8" /> },
+                      { label: 'المساحة', value: `${booking.warehouse.Size?.toLocaleString()} م²`, icon: <Package size={13} color="#94a3b8" /> },
+                    ].map((item, i) => (
+                      <div key={i} className="flex justify-between items-center py-2 border-b border-gray-50 last:border-0">
+                        <div className="flex items-center gap-1.5">
+                          {item.icon}
+                          <span style={{ fontSize: 14, color: '#475569' }}>{item.value}</span>
+                        </div>
+                        <span style={{ fontSize: 12, color: '#94a3b8' }}>{item.label}</span>
                       </div>
-                      <span className="text-xs text-gray-400">الموقع</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-sm text-gray-600">{booking.warehouse.Size?.toLocaleString()} م²</span>
-                        <Package size={13} className="text-gray-400" />
-                      </div>
-                      <span className="text-xs text-gray-400">المساحة</span>
-                    </div>
+                    ))}
                     <div className="flex justify-between items-center pt-2 border-t border-gray-100">
-                      <span className="text-sm font-bold text-[#1a3a5c]">{parseFloat(booking.warehouse.PricePerDay).toLocaleString()} ر.س/يوم</span>
-                      <span className="text-xs text-gray-400">السعر اليومي</span>
+                      <span style={{ fontSize: 14, fontWeight: 700, color: '#2563eb' }}>
+                        {parseFloat(booking.warehouse.PricePerDay).toLocaleString()} ر.س/يوم
+                      </span>
+                      <span style={{ fontSize: 12, color: '#94a3b8' }}>السعر اليومي</span>
                     </div>
                   </div>
                 </div>
@@ -168,54 +151,63 @@ function BookingDetailPage() {
             )}
 
             {/* Payment Info */}
-            <div className="bg-white border border-gray-200 rounded-xl p-5 text-right">
-              <h3 className="font-black text-gray-900 mb-4">بيانات الدفع</h3>
+            <div className="bg-white border border-gray-200 rounded-xl p-5 text-right"
+              style={{ boxShadow: '0 1px 2px rgba(15,23,42,0.04)' }}>
+              <h3 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 17, color: '#0f172a', marginBottom: 16 }}>
+                بيانات الدفع
+              </h3>
               {payment ? (
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
+                <div className="space-y-0 divide-y divide-gray-50">
+                  <div className="flex justify-between items-center py-3">
                     <span className={`text-xs font-bold px-2.5 py-1 rounded-lg border ${paymentStatusConfig[payment.Status]?.className}`}>
                       {paymentStatusConfig[payment.Status]?.label}
                     </span>
-                    <span className="text-xs text-gray-400">حالة الدفع</span>
+                    <span style={{ fontSize: 12, color: '#94a3b8' }}>حالة الدفع</span>
                   </div>
-                  <div className="flex justify-between items-center py-2 border-t border-gray-50">
-                    <span className="text-sm font-semibold text-gray-700">{parseFloat(payment.Amount).toLocaleString()} ر.س</span>
-                    <span className="text-xs text-gray-400">المبلغ المدفوع</span>
+                  <div className="flex justify-between items-center py-3">
+                    <span style={{ fontSize: 14, fontWeight: 600, color: '#0f172a' }}>
+                      {parseFloat(payment.Amount).toLocaleString()} ر.س
+                    </span>
+                    <span style={{ fontSize: 12, color: '#94a3b8' }}>المبلغ المدفوع</span>
                   </div>
-                  <div className="flex justify-between items-center py-2 border-t border-gray-50">
-                    <span className="text-sm font-mono text-gray-600">{payment.PaymentDate}</span>
-                    <span className="text-xs text-gray-400">تاريخ الدفع</span>
+                  <div className="flex justify-between items-center py-3">
+                    <span style={{ fontSize: 14, color: '#475569', fontFamily: 'monospace' }}>{payment.PaymentDate}</span>
+                    <span style={{ fontSize: 12, color: '#94a3b8' }}>تاريخ الدفع</span>
                   </div>
                   {payment.PaymentMethod && (
-                    <div className="flex justify-between items-center py-2 border-t border-gray-50">
-                      <span className="text-sm text-gray-600 flex items-center gap-1.5">
-                        <CreditCard size={13} className="text-gray-400" />
+                    <div className="flex justify-between items-center py-3">
+                      <span style={{ fontSize: 14, color: '#475569', display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <CreditCard size={13} color="#94a3b8" />
                         {payment.PaymentMethod}
                       </span>
-                      <span className="text-xs text-gray-400">طريقة الدفع</span>
+                      <span style={{ fontSize: 12, color: '#94a3b8' }}>طريقة الدفع</span>
                     </div>
                   )}
                   {payment.MoyasarPaymentID && (
-                    <div className="flex justify-between items-center py-2 border-t border-gray-50">
-                      <span className="text-xs font-mono text-gray-500">{payment.MoyasarPaymentID}</span>
-                      <span className="text-xs text-gray-400">رقم العملية</span>
+                    <div className="flex justify-between items-center py-3">
+                      <span style={{ fontSize: 12, color: '#64748b', fontFamily: 'monospace' }}>{payment.MoyasarPaymentID}</span>
+                      <span style={{ fontSize: 12, color: '#94a3b8' }}>رقم العملية</span>
                     </div>
                   )}
-                  <div className="grid grid-cols-2 gap-3 pt-2 border-t border-gray-100">
+                  <div className="grid grid-cols-2 gap-3 pt-3">
                     <div className="bg-gray-50 rounded-xl p-3 text-right">
-                      <p className="text-xs text-gray-400 mb-1">عمولة المنصة</p>
-                      <p className="font-bold text-gray-700 text-sm">{parseFloat(payment.commission_amount).toLocaleString()} ر.س</p>
+                      <p style={{ fontSize: 11, color: '#94a3b8', marginBottom: 4 }}>عمولة المنصة</p>
+                      <p style={{ fontWeight: 700, fontSize: 14, color: '#0f172a' }}>
+                        {parseFloat(payment.commission_amount).toLocaleString()} ر.س
+                      </p>
                     </div>
                     <div className="bg-gray-50 rounded-xl p-3 text-right">
-                      <p className="text-xs text-gray-400 mb-1">صافي المبلغ</p>
-                      <p className="font-bold text-gray-700 text-sm">{parseFloat(payment.net_amount).toLocaleString()} ر.س</p>
+                      <p style={{ fontSize: 11, color: '#94a3b8', marginBottom: 4 }}>صافي المبلغ</p>
+                      <p style={{ fontWeight: 700, fontSize: 14, color: '#0f172a' }}>
+                        {parseFloat(payment.net_amount).toLocaleString()} ر.س
+                      </p>
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="text-center py-6 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                  <CreditCard size={24} className="text-gray-300 mx-auto mb-2" />
-                  <p className="text-xs text-gray-400">لا يوجد دفع مسجل لهذا الحجز</p>
+                <div className="text-center py-8 rounded-xl border border-dashed border-gray-200" style={{ background: '#f8fafc' }}>
+                  <CreditCard size={28} color="#cbd5e1" className="mx-auto mb-2" />
+                  <p style={{ fontSize: 13, color: '#94a3b8' }}>لا يوجد دفع مسجل لهذا الحجز</p>
                 </div>
               )}
             </div>
@@ -223,8 +215,10 @@ function BookingDetailPage() {
         )}
       </main>
 
-      <footer className="border-t border-gray-200 mt-12 py-5 bg-white">
-        <p className="text-center text-xs text-gray-400">© 2026 Rafdi Platform — جميع الحقوق محفوظة</p>
+      <footer className="bg-white border-t border-gray-200 mt-12">
+        <div className="max-w-3xl mx-auto px-4 py-5 text-center">
+          <span style={{ color: '#64748b', fontSize: 13 }}>© Rafdi Platform 2026</span>
+        </div>
       </footer>
     </div>
   );
