@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Building2, Calendar, CreditCard, Loader, Layers, X, AlertTriangle } from 'lucide-react';
-import NotificationBell from '../components/NotificationBell';
-
-const API_URL = 'https://api.rafdi.com';
+import { Building2, Calendar, CreditCard, Loader, Layers, X, AlertTriangle } from 'lucide-react';
+import Navbar from '../components/Navbar';
+import { API_URL, getHeaders } from '../config/api';
 
 const statusConfig = {
   confirmed: { label: 'مؤكد', className: 'bg-emerald-50 text-emerald-700 border border-emerald-200' },
@@ -25,12 +24,9 @@ function BookingsPage() {
   const [confirmCancel, setConfirmCancel] = useState(null);
   const [cancelError, setCancelError] = useState('');
 
-  const token = localStorage.getItem('token');
-  const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
-
   const fetchBookings = async () => {
     try {
-      const res = await fetch(`${API_URL}/bookings/my`, { headers: { 'Authorization': `Bearer ${token}` } });
+      const res = await fetch(`${API_URL}/bookings/my`, { headers: getHeaders(false) });
       if (res.ok) {
         const data = await res.json();
         setBookings(data.reverse());
@@ -46,7 +42,7 @@ function BookingsPage() {
     try {
       const res = await fetch(`${API_URL}/bookings/${bookingId}/status`, {
         method: 'PATCH',
-        headers,
+        headers: getHeaders(),
         body: JSON.stringify({ Status: 'cancelled' })
       });
       if (res.ok) {
@@ -66,50 +62,29 @@ function BookingsPage() {
   const canCancel = (booking) => booking.Status === 'pending';
 
   return (
-    <div className="min-h-screen bg-[#f7f8fa]" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
+    <div className="min-h-screen bg-[#f8fafc]" dir="rtl" style={{ fontFamily: "'IBM Plex Sans Arabic', 'Tajawal', sans-serif" }}>
 
-      {/* Navbar */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-5xl mx-auto px-4">
-          <div className="flex items-center justify-between h-14 gap-4">
-            <div className="flex items-center gap-4">
-              <button onClick={() => navigate('/home')}
-                className="flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-gray-800 transition-colors">
-                <ChevronLeft size={16} className="rotate-180" />
-                رجوع
-              </button>
-              <div className="h-4 w-px bg-gray-200" />
-              <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/home')}>
-                <div className="w-7 h-7 rounded-lg bg-[#1a3a5c] flex items-center justify-center">
-                  <span className="text-white font-black text-xs">ر</span>
-                </div>
-                <span className="text-[#1a3a5c] font-black text-base">رفدي</span>
-              </div>
-            </div>
-            <NotificationBell />
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       {/* Page header */}
-      <div className="bg-[#1a3a5c] py-8 px-4">
+      <div style={{ background: '#0d1b3e' }} className="py-8 px-4">
         <div className="max-w-5xl mx-auto text-right">
-          <h1 className="text-xl font-black text-white mb-1">حجوزاتي</h1>
-          <p className="text-blue-200 text-sm">متابعة جميع حجوزاتك وحالة الدفع</p>
+          <h1 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 26, color: '#fff', marginBottom: 4 }}>حجوزاتي</h1>
+          <p style={{ color: 'rgba(255,255,255,0.62)', fontSize: 15 }}>متابعة جميع حجوزاتك وحالة الدفع</p>
         </div>
       </div>
 
       <main className="max-w-5xl mx-auto px-4 py-8">
         {loading ? (
           <div className="flex justify-center py-20">
-            <Loader size={26} className="text-[#1a3a5c] animate-spin" />
+            <Loader size={26} color="#2563eb" className="animate-spin" />
           </div>
         ) : bookings.length === 0 ? (
           <div className="text-center py-20 bg-white border border-dashed border-gray-300 rounded-xl">
             <Layers size={36} className="text-gray-300 mx-auto mb-3" />
             <p className="text-sm text-gray-500 font-medium mb-4">لا توجد حجوزات حتى الآن</p>
             <button onClick={() => navigate('/home')}
-              className="px-4 py-2 bg-[#1a3a5c] text-white text-sm font-bold rounded-lg hover:bg-[#14304e] transition-colors">
+              style={{ background: '#2563eb', color: '#fff', padding: '8px 18px', borderRadius: 9, fontWeight: 600, fontSize: 14, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>
               ابحث عن مستودع
             </button>
           </div>
@@ -124,14 +99,14 @@ function BookingsPage() {
                 <div key={b.BookingID}
                   onClick={() => navigate(`/booking-detail/${b.BookingID}`)}
                   className={`bg-white border rounded-xl overflow-hidden transition-all cursor-pointer ${
-                    b.Status === 'cancelled' ? 'border-gray-100 opacity-70' : 'border-gray-200 hover:border-[#1a3a5c]'
-                  }`}>
-
+                    b.Status === 'cancelled' ? 'border-gray-100 opacity-70' : 'border-gray-200'
+                  }`}
+                  style={{ boxShadow: '0 1px 2px rgba(15,23,42,0.04)' }}
+                  onMouseEnter={e => { if (b.Status !== 'cancelled') e.currentTarget.style.borderColor = '#2563eb'; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = b.Status === 'cancelled' ? '#f3f4f6' : '#e2e8f0'; }}
+                >
                   <div className="p-5 text-right">
-                    {/* Row 1: warehouse info + badges */}
                     <div className="flex items-start justify-between gap-4">
-
-                      {/* Badges — يمين */}
                       <div className="flex flex-wrap items-center gap-2">
                         <span className={`text-xs font-semibold px-2.5 py-1 rounded-md border ${status.className}`}>
                           {status.label}
@@ -142,14 +117,13 @@ function BookingsPage() {
                         </span>
                       </div>
 
-                      {/* Warehouse + company — يسار */}
                       <div className="flex items-center gap-3">
                         <div className="text-right">
                           <p className="font-bold text-gray-900 text-sm">
                             {b.warehouse?.Name || `مستودع #${b.WarehouseID}`}
                           </p>
                           {b.warehouse?.company?.CompanyName && (
-                            <p className="text-xs text-[#1a3a5c] font-semibold mt-0.5">
+                            <p className="text-xs font-semibold mt-0.5" style={{ color: '#2563eb' }}>
                               {b.warehouse.company.CompanyName}
                             </p>
                           )}
@@ -157,21 +131,20 @@ function BookingsPage() {
                             <p className="text-xs text-gray-400 mt-0.5">{b.warehouse.Location}</p>
                           )}
                         </div>
-                        <div className="w-10 h-10 rounded-lg bg-[#f0f4f8] border border-gray-200 flex items-center justify-center shrink-0">
-                          <Building2 size={18} className="text-[#1a3a5c]" />
+                        <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+                          style={{ background: '#eff6ff', border: '1px solid #dbeafe' }}>
+                          <Building2 size={18} color="#2563eb" />
                         </div>
                       </div>
                     </div>
 
-                    {/* Row 2: amount */}
                     <div className="mt-3 text-right">
-                      <span className="font-black text-gray-900 text-sm">
+                      <span style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 16, color: '#0f172a' }}>
                         {parseFloat(b.TotalPrice).toLocaleString()}
-                        <span className="text-xs font-normal text-gray-400 mr-1">ر.س</span>
+                        <span style={{ fontSize: 12, fontWeight: 400, color: '#94a3b8', marginRight: 4 }}>ر.س</span>
                       </span>
                     </div>
 
-                    {/* Row 3: dates + ID */}
                     <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-50 gap-2">
                       <p className="text-xs text-gray-400 font-mono">{b.BookingID}#</p>
                       <div className="flex items-center gap-1.5 text-gray-500 text-xs">
@@ -183,7 +156,6 @@ function BookingsPage() {
                     </div>
                   </div>
 
-                  {/* Cancel button */}
                   {canCancel(b) && (
                     <div className="px-5 pb-4" onClick={e => e.stopPropagation()}>
                       {cancelError && cancellingId === null && confirmCancel === b.BookingID && (
@@ -217,7 +189,6 @@ function BookingsPage() {
               );
             })}
 
-            {/* Summary */}
             <div className="flex justify-between items-center pt-2">
               <span className="text-xs text-gray-400">
                 {bookings.filter(b => b.Status === 'confirmed').length} مؤكد •{' '}
@@ -260,8 +231,10 @@ function BookingsPage() {
         </div>
       )}
 
-      <footer className="border-t border-gray-200 mt-12 py-5 bg-white">
-        <p className="text-center text-xs text-gray-400">© 2026 Rafdi Platform — جميع الحقوق محفوظة</p>
+      <footer className="bg-white border-t border-gray-200 mt-12">
+        <div className="max-w-5xl mx-auto px-4 py-5 text-center">
+          <span style={{ color: '#64748b', fontSize: 13 }}>© Rafdi Platform 2026</span>
+        </div>
       </footer>
     </div>
   );

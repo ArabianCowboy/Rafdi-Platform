@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Building2, ChevronLeft, CheckCircle, Loader, MapPin, Package, AlertCircle } from 'lucide-react';
+import { Building2, CheckCircle, Loader, MapPin, Package } from 'lucide-react';
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
+import Navbar from '../components/Navbar';
+import { API_URL, getHeaders } from '../config/api';
 
-const API_URL = 'https://api.rafdi.com';
 const today = new Date();
 today.setHours(0, 0, 0, 0);
 
@@ -22,11 +23,9 @@ function BookingPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const headers = { 'Authorization': `Bearer ${token}` };
         const [warehouseRes, datesRes] = await Promise.all([
-          fetch(`${API_URL}/warehouses/${id}`, { headers }),
-          fetch(`${API_URL}/bookings/booked-dates/${id}`, { headers }),
+          fetch(`${API_URL}/warehouses/${id}`, { headers: getHeaders(false) }),
+          fetch(`${API_URL}/bookings/booked-dates/${id}`, { headers: getHeaders(false) }),
         ]);
         if (!warehouseRes.ok) throw new Error();
         setWarehouse(await warehouseRes.json());
@@ -42,20 +41,13 @@ function BookingPage() {
 
   const disabledDays = [
     { before: today },
-    ...bookedDates.map(({ start, end }) => ({
-      from: new Date(start),
-      to: new Date(end),
-    }))
+    ...bookedDates.map(({ start, end }) => ({ from: new Date(start), to: new Date(end) }))
   ];
 
-  const days = range?.from && range?.to
-    ? Math.ceil((range.to - range.from) / 86400000)
-    : 0;
-
+  const days = range?.from && range?.to ? Math.ceil((range.to - range.from) / 86400000) : 0;
   const basePrice = days > 0 && warehouse ? Math.ceil(days * warehouse.PricePerDay) : 0;
   const commission = Math.ceil(basePrice * 0.05);
   const totalPrice = basePrice + commission;
-
   const startDate = range?.from?.toISOString().split('T')[0];
   const endDate = range?.to?.toISOString().split('T')[0];
 
@@ -74,10 +66,9 @@ function BookingPage() {
 
     setSubmitting(true);
     try {
-      const token = localStorage.getItem('token');
       const res = await fetch(`${API_URL}/bookings/`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        headers: getHeaders(),
         body: JSON.stringify({ WarehouseID: parseInt(id), StartDate: startDate, EndDate: endDate }),
       });
       const data = await res.json();
@@ -101,30 +92,13 @@ function BookingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f7f8fa]" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
+    <div className="min-h-screen bg-[#f8fafc]" dir="rtl" style={{ fontFamily: "'IBM Plex Sans Arabic', 'Tajawal', sans-serif" }}>
 
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-5xl mx-auto px-4">
-          <div className="flex items-center gap-4 h-14">
-            <button onClick={() => navigate('/home')}
-              className="flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-gray-800 transition-colors">
-              <ChevronLeft size={16} className="rotate-180" />
-              رجوع
-            </button>
-            <div className="h-4 w-px bg-gray-200" />
-            <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/home')}>
-              <div className="w-7 h-7 rounded-lg bg-[#1a3a5c] flex items-center justify-center">
-                <span className="text-white font-black text-xs">ر</span>
-              </div>
-              <span className="text-[#1a3a5c] font-black text-base">رفدي</span>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       {loading ? (
         <div className="flex justify-center items-center py-32">
-          <Loader size={28} className="text-[#1a3a5c] animate-spin" />
+          <Loader size={28} color="#2563eb" className="animate-spin" />
         </div>
       ) : error && !warehouse ? (
         <div className="text-center py-32">
@@ -136,7 +110,7 @@ function BookingPage() {
 
             {/* Left */}
             <div className="lg:col-span-2 space-y-4">
-              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden" style={{ boxShadow: '0 1px 2px rgba(15,23,42,0.04)' }}>
                 <div className="h-48 relative bg-gray-100">
                   {warehouse?.ImagePath ? (
                     <img src={warehouse.ImagePath} alt={warehouse.Name} className="w-full h-full object-cover" />
@@ -152,10 +126,18 @@ function BookingPage() {
                       {warehouse?.IsActive ? 'متاح' : 'غير متاح'}
                     </span>
                   </div>
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/40 to-transparent px-4 py-3">
+                    <p className="text-white font-bold text-base leading-none">
+                      {warehouse?.PricePerDay?.toLocaleString()}
+                      <span className="text-white/70 text-xs font-normal mr-1">ر.س / يوم</span>
+                    </p>
+                  </div>
                 </div>
                 <div className="p-4 text-right">
-                  <h2 className="font-bold text-gray-900 mb-3">{warehouse?.Name}</h2>
-                  <div className="space-y-2 mb-4">
+                  <h2 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 700, fontSize: 17, color: '#0f172a', marginBottom: 10 }}>
+                    {warehouse?.Name}
+                  </h2>
+                  <div className="space-y-2 mb-3">
                     <div className="flex items-center justify-end gap-1.5 text-gray-500 text-sm">
                       <span>{warehouse?.Location}</span>
                       <MapPin size={13} className="text-gray-400 shrink-0" />
@@ -165,25 +147,34 @@ function BookingPage() {
                       <Package size={13} className="text-gray-400 shrink-0" />
                     </div>
                   </div>
-                  <div className="pt-3 border-t border-gray-100 flex justify-between items-center">
-                    <span className="text-xs text-gray-400">السعر اليومي</span>
-                    <span className="font-bold text-[#1a3a5c]">
-                      {warehouse?.PricePerDay?.toLocaleString()} <span className="text-xs font-normal text-gray-400">ر.س</span>
-                    </span>
+                </div>
+              </div>
+
+              {/* دليل التقويم */}
+              <div className="bg-white border border-gray-200 rounded-xl p-4 text-right" style={{ boxShadow: '0 1px 2px rgba(15,23,42,0.04)' }}>
+                <h4 className="text-xs font-bold text-gray-600 mb-3">دليل التقويم</h4>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-end gap-2 text-xs text-gray-500">
+                    <span>أيام محجوزة (غير متاحة)</span>
+                    <div className="w-4 h-4 rounded bg-red-100 border border-red-300" />
+                  </div>
+                  <div className="flex items-center justify-end gap-2 text-xs text-gray-500">
+                    <span>الفترة المختارة</span>
+                    <div className="w-4 h-4 rounded" style={{ background: '#2563eb' }} />
                   </div>
                 </div>
               </div>
 
-
-              <div className="bg-white border border-gray-200 rounded-xl p-4 text-right">
+              {/* رسوم المنصة */}
+              <div className="bg-white border border-gray-200 rounded-xl p-4 text-right" style={{ boxShadow: '0 1px 2px rgba(15,23,42,0.04)' }}>
                 <h4 className="text-xs font-bold text-gray-600 mb-3">رسوم المنصة</h4>
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="text-xs font-semibold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-100">5%</span>
+                    <span className="text-xs font-semibold px-2 py-0.5 rounded" style={{ background: '#eff6ff', color: '#1d4ed8' }}>5%</span>
                     <span className="text-xs text-gray-500">عمولة على المستأجر</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-xs font-semibold px-2 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-100">7%</span>
+                    <span className="text-xs font-semibold px-2 py-0.5 rounded bg-purple-50 text-purple-700">7%</span>
                     <span className="text-xs text-gray-500">عمولة على المالك</span>
                   </div>
                 </div>
@@ -192,9 +183,9 @@ function BookingPage() {
 
             {/* Right */}
             <div className="lg:col-span-3">
-              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden" style={{ boxShadow: '0 1px 2px rgba(15,23,42,0.04)' }}>
                 <div className="px-5 py-4 border-b border-gray-100 text-right">
-                  <h3 className="font-bold text-gray-900">إتمام الحجز</h3>
+                  <h3 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 18, color: '#0f172a' }}>إتمام الحجز</h3>
                   <p className="text-xs text-gray-500 mt-0.5">اختر فترة الإيجار من التقويم</p>
                 </div>
 
@@ -219,7 +210,6 @@ function BookingPage() {
                   {!success && (
                     <form onSubmit={handleBooking} className="space-y-4">
 
-                      {/* Selected range display */}
                       {(range?.from || range?.to) && (
                         <div className="flex justify-between items-center bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-right">
                           <button type="button" onClick={() => setRange({ from: undefined, to: undefined })}
@@ -234,18 +224,17 @@ function BookingPage() {
                         </div>
                       )}
 
-                      {/* Calendar */}
                       <div className="flex justify-center">
                         <style>{`
-                          .rdp { --rdp-accent-color: #1a3a5c; --rdp-background-color: #eef2f7; font-family: 'Cairo', sans-serif; }
+                          .rdp { --rdp-accent-color: #2563eb; --rdp-background-color: #eff6ff; font-family: 'IBM Plex Sans Arabic', sans-serif; }
                           .rdp-day_disabled { background-color: #fee2e2 !important; color: #ef4444 !important; text-decoration: line-through; opacity: 1 !important; border-radius: 4px; }
-                          .rdp-day_selected { background-color: #1a3a5c !important; color: white !important; }
-                          .rdp-day_range_middle { background-color: #eef2f7 !important; color: #1a3a5c !important; }
-                          .rdp-day_range_start, .rdp-day_range_end { background-color: #1a3a5c !important; color: white !important; }
-                          .rdp-day:hover:not(.rdp-day_disabled) { background-color: #eef2f7; }
-                          .rdp-head_cell { color: #6b7280; font-size: 0.75rem; }
-                          .rdp-caption_label { color: #1a3a5c; font-weight: 800; }
-                          .rdp-nav_button { color: #1a3a5c; }
+                          .rdp-day_selected { background-color: #2563eb !important; color: white !important; }
+                          .rdp-day_range_middle { background-color: #eff6ff !important; color: #2563eb !important; }
+                          .rdp-day_range_start, .rdp-day_range_end { background-color: #2563eb !important; color: white !important; }
+                          .rdp-day:hover:not(.rdp-day_disabled) { background-color: #eff6ff; }
+                          .rdp-head_cell { color: #64748b; font-size: 0.75rem; }
+                          .rdp-caption_label { color: #0f172a; font-weight: 800; }
+                          .rdp-nav_button { color: #2563eb; }
                         `}</style>
                         <DayPicker
                           mode="range"
@@ -257,7 +246,6 @@ function BookingPage() {
                         />
                       </div>
 
-                      {/* Price breakdown */}
                       {days > 0 && (
                         <div className="bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
                           <div className="px-4 py-3 border-b border-gray-100">
@@ -269,11 +257,13 @@ function BookingPage() {
                               <span className="text-gray-500 text-xs">{days} يوم × {warehouse?.PricePerDay?.toLocaleString()} ر.س</span>
                             </div>
                             <div className="flex justify-between items-center text-sm">
-                              <span className="font-semibold text-blue-700">+{commission.toLocaleString()} ر.س</span>
+                              <span className="font-semibold" style={{ color: '#2563eb' }}>+{commission.toLocaleString()} ر.س</span>
                               <span className="text-gray-500 text-xs">رسوم المنصة (5%)</span>
                             </div>
                             <div className="flex justify-between items-center pt-2.5 border-t border-gray-200">
-                              <span className="font-black text-gray-900 text-base">{totalPrice.toLocaleString()} ر.س</span>
+                              <span style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 18, color: '#0f172a' }}>
+                                {totalPrice.toLocaleString()} ر.س
+                              </span>
                               <span className="text-xs font-bold text-gray-500">الإجمالي</span>
                             </div>
                           </div>
@@ -281,14 +271,22 @@ function BookingPage() {
                       )}
 
                       {days > 0 && (
-                        <div className="flex items-center justify-between text-xs bg-blue-50 border border-blue-100 rounded-xl px-4 py-2.5">
-                          <span className="font-semibold text-blue-700">{days} يوم</span>
+                        <div className="flex items-center justify-between text-xs rounded-xl px-4 py-2.5"
+                          style={{ background: '#eff6ff', border: '1px solid #dbeafe' }}>
+                          <span style={{ color: '#2563eb', fontWeight: 600 }}>{days} يوم</span>
                           <span className="text-gray-500">مدة الحجز</span>
                         </div>
                       )}
 
                       <button type="submit" disabled={submitting || !range?.from || !range?.to}
-                        className="w-full py-3 rounded-xl font-bold text-white text-sm bg-[#1a3a5c] hover:bg-[#14304e] disabled:opacity-50 transition-colors flex items-center justify-center gap-2">
+                        style={{
+                          width: '100%', padding: '12px 16px', borderRadius: 9,
+                          background: submitting || !range?.from || !range?.to ? '#93c5fd' : '#2563eb',
+                          color: '#fff', fontWeight: 700, fontSize: 14.5,
+                          border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                          boxShadow: '0 8px 18px -8px rgba(37,99,235,0.6)',
+                        }}>
                         {submitting ? (
                           <span className="flex items-center gap-2">
                             <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin block" />
