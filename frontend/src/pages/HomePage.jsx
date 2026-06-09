@@ -28,7 +28,8 @@ const StatusBadge = ({ active }) => (
 );
 
 const WarehouseCard = ({ w, isRenter, onBook }) => (
-  <div className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 transition-colors group">
+  <div className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 transition-colors group"
+    style={{ boxShadow: '0 1px 2px rgba(15,23,42,0.04)' }}>
     <div className="relative h-48 bg-gray-100 overflow-hidden">
       {w.ImagePath ? (
         <img src={w.ImagePath} alt={w.Name}
@@ -42,7 +43,7 @@ const WarehouseCard = ({ w, isRenter, onBook }) => (
       <div className="absolute top-3 right-3">
         <StatusBadge active={w.IsActive} />
       </div>
-      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/40 to-transparent px-4 py-3">
+      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent px-4 py-3">
         <p className="text-white font-bold text-lg leading-none">
           {w.PricePerDay?.toLocaleString()}
           <span className="text-white/70 text-sm font-normal mr-1">ر.س / يوم</span>
@@ -50,18 +51,20 @@ const WarehouseCard = ({ w, isRenter, onBook }) => (
       </div>
     </div>
     <div className="p-4">
-      <h3 className="font-bold text-gray-900 text-sm mb-1 text-right">{w.Name}</h3>
+      <h3 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 700, fontSize: 15, color: '#0f172a', marginBottom: 6, textAlign: 'right' }}>
+        {w.Name}
+      </h3>
       {w.company?.CompanyName && (
-        <div className="flex items-center justify-end gap-1.5 text-gray-400 text-xs mb-2">
+        <div className="flex items-center justify-end gap-1.5 text-xs mb-2" style={{ color: '#64748b' }}>
           <span>{w.company.CompanyName}</span>
           <Users size={10} className="text-gray-300 shrink-0" />
         </div>
       )}
-      <div className="flex items-center justify-end gap-1.5 text-gray-500 text-xs mb-1">
+      <div className="flex items-center justify-end gap-1.5 text-xs mb-1" style={{ color: '#64748b' }}>
         <span>{w.Location}</span>
         <MapPin size={11} className="text-gray-400 shrink-0" />
       </div>
-      <div className="flex items-center justify-end gap-1.5 text-gray-500 text-xs">
+      <div className="flex items-center justify-end gap-1.5 text-xs" style={{ color: '#64748b' }}>
         <span>{w.Size?.toLocaleString()} م²</span>
         <Package size={11} className="text-gray-400 shrink-0" />
       </div>
@@ -70,7 +73,12 @@ const WarehouseCard = ({ w, isRenter, onBook }) => (
       )}
       {isRenter && w.IsActive && (
         <button onClick={() => onBook(w.WarehouseID)}
-          className="w-full mt-4 py-2.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-bold rounded-lg transition-colors">
+          style={{
+            width: '100%', marginTop: 14, padding: '10px 0',
+            background: '#2563eb', color: '#fff', fontWeight: 700, fontSize: 14,
+            borderRadius: 9, border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+            boxShadow: '0 6px 14px -6px rgba(37,99,235,0.5)',
+          }}>
           احجز الآن
         </button>
       )}
@@ -84,7 +92,7 @@ function HomePage() {
   const [myWarehouses, setMyWarehouses] = useState([]);
   const [myBookings, setMyBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('home');
+  const [showAll, setShowAll] = useState(false);
   const [search, setSearch] = useState('');
 
   const roles = getUserRoles();
@@ -113,61 +121,65 @@ function HomePage() {
     w.Name?.includes(search) || w.Location?.includes(search)
   );
 
+  const displayedWarehouses = showAll ? filteredWarehouses : filteredWarehouses.slice(0, 3);
+
   return (
     <div className="min-h-screen bg-[#f8fafc]" dir="rtl" style={{ fontFamily: "'IBM Plex Sans Arabic', 'Tajawal', sans-serif" }}>
 
       <Navbar />
 
       {/* Hero */}
-      <div style={{ background: '#0d1b3e', position: 'relative', overflow: 'hidden' }} className="py-16 px-4">
+      <div style={{ background: '#0d1b3e', position: 'relative', overflow: 'hidden' }} className="py-14 px-4">
+        {/* dot grid */}
         <div style={{
           position: 'absolute', inset: 0,
-          backgroundImage: 'radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px)',
+          backgroundImage: 'radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1px)',
           backgroundSize: '22px 22px', opacity: 0.7,
           maskImage: 'radial-gradient(ellipse at center, #000 40%, transparent 80%)',
           WebkitMaskImage: 'radial-gradient(ellipse at center, #000 40%, transparent 80%)',
         }} />
+        {/* glow */}
         <div style={{
           position: 'absolute', top: -180, left: '50%', transform: 'translateX(-50%)',
           width: 900, height: 600,
-          background: 'radial-gradient(ellipse at center, rgba(37,99,235,0.45) 0%, rgba(37,99,235,0.18) 30%, transparent 65%)',
+          background: 'radial-gradient(ellipse at center, rgba(37,99,235,0.4) 0%, rgba(37,99,235,0.15) 30%, transparent 65%)',
           pointerEvents: 'none', filter: 'blur(6px)',
         }} />
 
         <div className="max-w-2xl mx-auto text-center relative z-10">
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: 9,
-            padding: '7px 14px 7px 12px',
-            background: 'rgba(255,255,255,0.06)',
-            border: '1px solid rgba(255,255,255,0.12)',
-            borderRadius: 100, fontSize: 13, fontWeight: 500, color: '#cbd5e1', marginBottom: 18,
+          <h1 style={{
+            fontFamily: "'Tajawal', sans-serif", fontWeight: 800,
+            fontSize: 'clamp(30px,4.5vw,50px)', color: '#fff',
+            lineHeight: 1.15, marginBottom: 10, letterSpacing: '-0.02em',
           }}>
-          </div>
-          <p style={{ fontSize: 17, color: 'rgba(255,255,255,0.62)', marginBottom: 32 }}>
+            ابحث عن مستودعك المثالي
+          </h1>
+          <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.55)', marginBottom: 28 }}>
             {warehouses.filter(w => w.IsActive).length} مستودع متاح في مناطق متعددة
           </p>
 
+          {/* Search */}
           <div style={{
             background: '#fff', borderRadius: 14, display: 'flex', alignItems: 'center',
-            padding: '6px 6px 6px 18px',
-            boxShadow: '0 20px 50px -20px rgba(0,0,0,0.55), 0 4px 10px -2px rgba(0,0,0,0.2)',
-            maxWidth: 560, margin: '0 auto',
+            padding: '5px 5px 5px 16px',
+            boxShadow: '0 20px 50px -20px rgba(0,0,0,0.5), 0 4px 10px -2px rgba(0,0,0,0.15)',
+            maxWidth: 540, margin: '0 auto',
           }}>
-            <Search size={20} color="#94a3b8" style={{ flexShrink: 0 }} />
+            <Search size={18} color="#94a3b8" style={{ flexShrink: 0 }} />
             <input
               type="text" value={search} onChange={e => setSearch(e.target.value)}
               placeholder="ابحث بالاسم أو الموقع..."
               style={{
                 flex: 1, border: 0, outline: 'none', background: 'transparent',
-                padding: '14px 12px', fontFamily: 'inherit', fontSize: 15,
+                padding: '12px 10px', fontFamily: 'inherit', fontSize: 14,
                 color: '#0f172a', direction: 'rtl',
               }}
             />
             <button style={{
-              background: '#2563eb', color: '#fff', padding: '11px 22px',
-              borderRadius: 10, fontWeight: 700, fontSize: 15, border: 'none',
+              background: '#2563eb', color: '#fff', padding: '10px 20px',
+              borderRadius: 10, fontWeight: 700, fontSize: 14, border: 'none',
               cursor: 'pointer', fontFamily: 'inherit',
-              boxShadow: '0 6px 14px -6px rgba(37,99,235,0.6)',
+              boxShadow: '0 4px 12px -4px rgba(37,99,235,0.6)',
             }}>
               بحث
             </button>
@@ -178,22 +190,23 @@ function HomePage() {
       {/* Stats */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4">
-          <div className="flex overflow-x-auto justify-end">
+          <div className="flex overflow-x-auto">
             {[
               { label: 'إجمالي المستودعات', value: warehouses.length, icon: Building2 },
               { label: 'متاح للحجز', value: warehouses.filter(w => w.IsActive).length, icon: CheckCircle },
               ...(isRenter ? [{ label: 'حجوزاتي', value: myBookings.length, icon: Layers }] : []),
               ...(isOwner ? [{ label: 'مستودعاتي', value: myWarehouses.length, icon: Users }] : []),
             ].map((s, i) => (
-              <div key={i} className="flex items-center gap-3 px-6 py-4 border-r border-gray-100 last:border-0 shrink-0">
-                <div style={{ width: 42, height: 42, background: '#eff6ff', borderRadius: 10, display: 'grid', placeItems: 'center', flexShrink: 0 }}>
-                  <s.icon size={20} color="#2563eb" />
+              <div key={i} className="flex items-center gap-3 px-6 py-4 shrink-0"
+                style={{ borderLeft: i !== 0 ? '1px solid #f1f5f9' : 'none' }}>
+                <div style={{ width: 40, height: 40, background: '#eff6ff', borderRadius: 10, display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+                  <s.icon size={18} color="#2563eb" />
                 </div>
                 <div>
-                  <p style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 24, color: '#0f172a', lineHeight: 1 }}>
+                  <p style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 22, color: '#0f172a', lineHeight: 1 }}>
                     {loading ? '—' : s.value}
                   </p>
-                  <p style={{ fontSize: 13, color: '#64748b', marginTop: 4, fontWeight: 500 }}>{s.label}</p>
+                  <p style={{ fontSize: 12, color: '#64748b', marginTop: 3, fontWeight: 500 }}>{s.label}</p>
                 </div>
               </div>
             ))}
@@ -203,13 +216,21 @@ function HomePage() {
 
       {/* Warehouses */}
       <main className="max-w-6xl mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-5">
-          <button onClick={() => setActiveTab('warehouses')}
-            style={{ color: '#2563eb', fontWeight: 600, fontSize: 14, display: 'inline-flex', alignItems: 'center', gap: 4, padding: '6px 10px', borderRadius: 8, border: 'none', background: 'transparent', cursor: 'pointer', fontFamily: 'inherit' }}>
-            عرض الكل ({warehouses.length})
-            <ChevronLeft size={14} />
+        <div className="flex justify-between items-center mb-6">
+          {/* يسار — عرض الكل */}
+          <button onClick={() => setShowAll(!showAll)}
+            style={{
+              color: '#2563eb', fontWeight: 600, fontSize: 14,
+              display: 'inline-flex', alignItems: 'center', gap: 4,
+              padding: '6px 10px', borderRadius: 8, border: 'none',
+              background: 'transparent', cursor: 'pointer', fontFamily: 'inherit',
+            }}>
+            {showAll ? 'عرض أقل' : `عرض الكل (${warehouses.length})`}
+            <ChevronLeft size={14} style={{ transform: showAll ? 'rotate(90deg)' : 'none', transition: 'transform .2s' }} />
           </button>
-          <h2 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 26, letterSpacing: '-0.01em', color: '#0f172a' }}>
+
+          {/* يمين — العنوان */}
+          <h2 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 24, color: '#0f172a' }}>
             أحدث المستودعات
           </h2>
         </div>
@@ -219,26 +240,24 @@ function HomePage() {
             <Loader size={28} className="animate-spin" color="#2563eb" />
           </div>
         ) : filteredWarehouses.length === 0 ? (
-          <div className="text-center py-16 bg-white border border-dashed border-gray-300 rounded-xl">
+          <div className="text-center py-16 bg-white border border-dashed border-gray-200 rounded-xl">
             <Building2 size={36} className="text-gray-300 mx-auto mb-3" />
-            <p className="text-sm text-gray-500">لا توجد مستودعات مطابقة</p>
+            <p style={{ fontSize: 14, color: '#94a3b8' }}>لا توجد مستودعات مطابقة</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {filteredWarehouses
-              .slice(0, activeTab === 'home' ? 3 : filteredWarehouses.length)
-              .map(w => (
-                <WarehouseCard key={w.WarehouseID} w={w} isRenter={isRenter}
-                  onBook={id => navigate(`/booking/${id}`)} />
-              ))}
+            {displayedWarehouses.map(w => (
+              <WarehouseCard key={w.WarehouseID} w={w} isRenter={isRenter}
+                onBook={id => navigate(`/booking/${id}`)} />
+            ))}
           </div>
         )}
       </main>
 
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 mt-6">
-        <div className="max-w-6xl mx-auto px-9 py-5 flex items-center justify-between">
-          <span style={{ color: '#64748b', fontSize: 13.5 }}>© Rafdi Platform 2026</span>
+        <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
+          <span style={{ color: '#94a3b8', fontSize: 13 }}>© Rafdi Platform 2026</span>
           <div className="flex items-center gap-2">
             <span style={{
               width: 28, height: 28, background: '#2563eb', borderRadius: 7,
