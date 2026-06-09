@@ -142,16 +142,7 @@ function HomePage() {
             border: '1px solid rgba(255,255,255,0.12)',
             borderRadius: 100, fontSize: 13, fontWeight: 500, color: '#cbd5e1', marginBottom: 18,
           }}>
-            <span style={{
-              width: 8, height: 8, borderRadius: '50%', background: '#60a5fa',
-              boxShadow: '0 0 0 4px rgba(96,165,250,0.18), 0 0 14px rgba(96,165,250,0.9)',
-            }} />
-            السوق اللوجستي الأول في المملكة
           </div>
-
-          <h1 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 'clamp(36px,5vw,56px)', color: '#fff', lineHeight: 1.15, marginBottom: 12, letterSpacing: '-0.02em' }}>
-            ابحث عن مستودعك المثالي
-          </h1>
           <p style={{ fontSize: 17, color: 'rgba(255,255,255,0.62)', marginBottom: 32 }}>
             {warehouses.filter(w => w.IsActive).length} مستودع متاح في مناطق متعددة
           </p>
