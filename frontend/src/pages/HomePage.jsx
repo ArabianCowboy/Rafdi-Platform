@@ -190,7 +190,7 @@ function HomePage() {
       {/* Stats */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4">
-          <div className="flex overflow-x-auto">
+          <div className="flex overflow-x-auto justify-end">
             {[
               { label: 'إجمالي المستودعات', value: warehouses.length, icon: Building2 },
               { label: 'متاح للحجز', value: warehouses.filter(w => w.IsActive).length, icon: CheckCircle },
@@ -198,7 +198,7 @@ function HomePage() {
               ...(isOwner ? [{ label: 'مستودعاتي', value: myWarehouses.length, icon: Users }] : []),
             ].map((s, i) => (
               <div key={i} className="flex items-center gap-3 px-6 py-4 shrink-0"
-                style={{ borderLeft: i !== 0 ? '1px solid #f1f5f9' : 'none' }}>
+                style={{ borderRight: i !== 0 ? '1px solid #f1f5f9' : 'none' }}>
                 <div style={{ width: 40, height: 40, background: '#eff6ff', borderRadius: 10, display: 'grid', placeItems: 'center', flexShrink: 0 }}>
                   <s.icon size={18} color="#2563eb" />
                 </div>
