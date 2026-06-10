@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff, CheckCircle, ArrowLeft } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, CheckCircle, ArrowLeft, Building2, Layers } from 'lucide-react';
 import { API_URL } from '../config/api';
 
 const WarehouseMark = () => (
@@ -20,12 +20,124 @@ const WarehouseMark = () => (
   </span>
 );
 
+const getRolesFromToken = (token) => {
+  try {
+    return JSON.parse(atob(token.split('.')[1])).roles || [];
+  } catch { return []; }
+};
+
+const getCompanyNameFromToken = (token) => {
+  try {
+    return JSON.parse(atob(token.split('.')[1])).company_name || '';
+  } catch { return ''; }
+};
+
+// شاشة اختيار الدور
+function RoleSelector({ token, onSelect }) {
+  const companyName = getCompanyNameFromToken(token);
+
+  return (
+    <div className="min-h-screen flex items-center justify-center p-6" dir="rtl"
+      style={{ background: '#f8fafc', fontFamily: "'IBM Plex Sans Arabic', 'Tajawal', sans-serif" }}>
+      <div className="w-full max-w-sm">
+
+        {/* Logo */}
+        <div className="flex items-center justify-center gap-2.5 mb-8">
+          <WarehouseMark />
+          <span style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 22, color: '#0f172a' }}>رفدي</span>
+        </div>
+
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div style={{
+            width: 56, height: 56, borderRadius: 16,
+            background: 'linear-gradient(135deg, #2563eb, #1e3a8a)',
+            display: 'grid', placeItems: 'center', margin: '0 auto 16px',
+            boxShadow: '0 8px 24px -8px rgba(37,99,235,0.5)',
+          }}>
+            <span style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 22, color: '#fff' }}>
+              {companyName.charAt(0) || 'م'}
+            </span>
+          </div>
+          <h2 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 22, color: '#0f172a', marginBottom: 6 }}>
+            أهلاً، {companyName}
+          </h2>
+          <p style={{ fontSize: 14, color: '#64748b' }}>كيف تريد الدخول اليوم؟</p>
+        </div>
+
+        {/* Role Cards */}
+        <div className="space-y-3">
+
+          {/* مالك مستودع */}
+          <button onClick={() => onSelect('owner')}
+            style={{
+              width: '100%', padding: '18px 20px', borderRadius: 14,
+              background: '#fff', border: '1.5px solid #e2e8f0',
+              cursor: 'pointer', fontFamily: 'inherit', textAlign: 'right',
+              transition: 'all .15s', display: 'flex', alignItems: 'center', gap: 14,
+            }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = '#2563eb'; e.currentTarget.style.boxShadow = '0 4px 16px -8px rgba(37,99,235,0.3)'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.boxShadow = 'none'; }}>
+            <div style={{
+              width: 44, height: 44, borderRadius: 12, background: '#eff6ff',
+              display: 'grid', placeItems: 'center', flexShrink: 0,
+            }}>
+              <Building2 size={20} color="#2563eb" />
+            </div>
+            <div style={{ flex: 1 }}>
+              <p style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 700, fontSize: 15, color: '#0f172a', marginBottom: 3 }}>
+                مالك مستودع
+              </p>
+              <p style={{ fontSize: 12, color: '#64748b' }}>إدارة مستودعاتك وتتبع الحجوزات</p>
+            </div>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+          </button>
+
+          {/* مستأجر */}
+          <button onClick={() => onSelect('renter')}
+            style={{
+              width: '100%', padding: '18px 20px', borderRadius: 14,
+              background: '#fff', border: '1.5px solid #e2e8f0',
+              cursor: 'pointer', fontFamily: 'inherit', textAlign: 'right',
+              transition: 'all .15s', display: 'flex', alignItems: 'center', gap: 14,
+            }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = '#10b981'; e.currentTarget.style.boxShadow = '0 4px 16px -8px rgba(16,185,129,0.3)'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.boxShadow = 'none'; }}>
+            <div style={{
+              width: 44, height: 44, borderRadius: 12, background: '#ecfdf5',
+              display: 'grid', placeItems: 'center', flexShrink: 0,
+            }}>
+              <Layers size={20} color="#10b981" />
+            </div>
+            <div style={{ flex: 1 }}>
+              <p style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 700, fontSize: 15, color: '#0f172a', marginBottom: 3 }}>
+                مستأجر
+              </p>
+              <p style={{ fontSize: 12, color: '#64748b' }}>ابحث عن مستودع واحجز بسهولة</p>
+            </div>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+          </button>
+        </div>
+
+        <p style={{ textAlign: 'center', fontSize: 12, color: '#94a3b8', marginTop: 28 }}>
+          © 2026 Rafdi Platform
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [pendingToken, setPendingToken] = useState(null);
   const navigate = useNavigate();
 
   const validateEmail = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
@@ -44,8 +156,23 @@ function LoginPage() {
       });
       const data = await res.json();
       if (!res.ok) { setError(data.detail || 'البريد الإلكتروني أو كلمة المرور غير صحيحة'); return; }
-      localStorage.setItem('token', data.access_token);
+
+      const token = data.access_token;
+      const roles = getRolesFromToken(token);
+      const isOwner = roles.includes('warehouse_owner');
+      const isRenter = roles.includes('renter_company');
+
+      localStorage.setItem('token', token);
+
+      // كلا الدورين — أظهر شاشة الاختيار
+      if (isOwner && isRenter) {
+        setPendingToken(token);
+        return;
+      }
+
+      // دور واحد بس — دخول مباشر
       navigate('/home');
+
     } catch {
       setError('حدث خطأ في الاتصال، حاول مرة أخرى');
     } finally {
@@ -53,12 +180,22 @@ function LoginPage() {
     }
   };
 
+  const handleRoleSelect = (role) => {
+    // نحفظ الدور المختار في localStorage عشان الهوم تعرف تعرضه
+    localStorage.setItem('selectedRole', role);
+    navigate('/home');
+  };
+
+  // شاشة اختيار الدور
+  if (pendingToken) {
+    return <RoleSelector token={pendingToken} onSelect={handleRoleSelect} />;
+  }
+
   return (
     <div className="min-h-screen flex" dir="rtl" style={{ fontFamily: "'IBM Plex Sans Arabic', 'Tajawal', sans-serif" }}>
 
       {/* Left Panel */}
       <div className="hidden lg:flex lg:w-1/2 flex-col justify-between p-12" style={{ background: '#0d1b3e' }}>
-        {/* Logo */}
         <div className="flex items-center gap-2.5">
           <WarehouseMark />
           <span style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 22, color: '#fff', letterSpacing: '-0.01em' }}>رفدي</span>
@@ -106,13 +243,11 @@ function LoginPage() {
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6" style={{ background: '#f8fafc' }}>
         <div className="w-full max-w-sm">
 
-          {/* Mobile logo */}
           <div className="flex items-center gap-2.5 mb-8 lg:hidden">
             <WarehouseMark />
             <span style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 20, color: '#0f172a' }}>رفدي</span>
           </div>
 
-          {/* Header */}
           <div className="mb-7 text-right">
             <h2 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 26, color: '#0f172a', marginBottom: 6 }}>
               تسجيل الدخول
@@ -120,7 +255,6 @@ function LoginPage() {
             <p style={{ color: '#64748b', fontSize: 14 }}>أدخل بياناتك للوصول إلى حسابك</p>
           </div>
 
-          {/* Tabs */}
           <div className="flex mb-6" style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12, padding: 4 }}>
             <button style={{
               flex: 1, padding: '10px 0', borderRadius: 9,
@@ -140,7 +274,6 @@ function LoginPage() {
             </Link>
           </div>
 
-          {/* Error */}
           {error && (
             <div className="mb-5 p-3.5 rounded-xl text-sm flex items-start gap-2.5 bg-red-50 border border-red-200">
               <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center shrink-0 mt-0.5">
@@ -150,7 +283,6 @@ function LoginPage() {
             </div>
           )}
 
-          {/* Form */}
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="text-right">
               <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 6 }}>
@@ -208,7 +340,6 @@ function LoginPage() {
                 fontWeight: 700, fontSize: 14.5, border: 'none', cursor: 'pointer',
                 fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                 boxShadow: '0 8px 18px -8px rgba(37,99,235,0.6)', marginTop: 8,
-                transition: 'background .15s',
               }}>
               {loading ? (
                 <span className="flex items-center gap-2">
