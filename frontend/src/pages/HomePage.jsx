@@ -76,7 +76,6 @@ const WarehouseCard = ({ w, isRenter, onBook }) => (
   </div>
 );
 
-// داشبورد المالك
 function OwnerDashboard({ navigate }) {
   const [myWarehouses, setMyWarehouses] = useState([]);
   const [myBookings, setMyBookings] = useState([]);
@@ -130,10 +129,10 @@ function OwnerDashboard({ navigate }) {
         }} />
         <div className="max-w-6xl mx-auto relative z-10" style={{ textAlign: 'right' }}>
           <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: 14, marginBottom: 6 }}>مرحباً بك</p>
-          <h1 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 'clamp(24px,3.5vw,36px)', color: '#fff', marginBottom: 8 }}>
+          <h1 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 'clamp(24px,3.5vw,36px)', color: '#fff', marginBottom: 16 }}>
             {companyName}
           </h1>
-          <div className="flex items-center justify-end gap-3 flex-wrap">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 12, flexWrap: 'wrap' }}>
             <button onClick={() => navigate('/owner-bookings')}
               style={{ padding: '9px 18px', borderRadius: 9, background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', fontWeight: 600, fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}>
               إدارة الحجوزات
@@ -152,16 +151,21 @@ function OwnerDashboard({ navigate }) {
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {stats.map((s, i) => (
-            <div key={i} style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 14, padding: '18px 20px', textAlign: 'right', boxShadow: '0 1px 2px rgba(15,23,42,0.04)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
-                <div style={{ width: 38, height: 38, borderRadius: 10, background: s.bg, display: 'grid', placeItems: 'center', flexShrink: 0 }}>
-                  <s.icon size={18} color={s.color} />
-                </div>
-                <div>
+            <div key={i} style={{
+              background: '#fff', border: '1px solid #e2e8f0', borderRadius: 14,
+              padding: '18px 20px', textAlign: 'right',
+              boxShadow: '0 1px 2px rgba(15,23,42,0.04)',
+            }}>
+              {/* أيقونة يسار، أرقام يمين */}
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12, direction: 'rtl' }}>
+                <div style={{ textAlign: 'right' }}>
                   <p style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 22, color: '#0f172a', lineHeight: 1 }}>
                     {loading ? '—' : s.value}
                   </p>
                   <p style={{ fontSize: 13, color: '#64748b', marginTop: 4, fontWeight: 500 }}>{s.label}</p>
+                </div>
+                <div style={{ width: 38, height: 38, borderRadius: 10, background: s.bg, display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+                  <s.icon size={18} color={s.color} />
                 </div>
               </div>
               <p style={{ fontSize: 11, color: s.color, fontWeight: 600 }}>{s.sub}</p>
@@ -169,16 +173,16 @@ function OwnerDashboard({ navigate }) {
           ))}
         </div>
 
-        {/* مستودعاتي */}
+        {/* مستودعاتي header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, direction: 'rtl' }}>
+          <h2 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 20, color: '#0f172a' }}>
+            مستودعاتي
+          </h2>
           <button onClick={() => navigate('/warehouses')}
             style={{ color: '#2563eb', fontWeight: 600, fontSize: 14, display: 'inline-flex', alignItems: 'center', gap: 4, padding: '6px 10px', borderRadius: 8, border: 'none', background: 'transparent', cursor: 'pointer', fontFamily: 'inherit' }}>
             إدارة المستودعات
             <ChevronLeft size={14} />
           </button>
-          <h2 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 20, color: '#0f172a' }}>
-            مستودعاتي
-          </h2>
         </div>
 
         {loading ? (
@@ -231,31 +235,24 @@ function OwnerDashboard({ navigate }) {
         {myBookings.length > 0 && (
           <>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '32px 0 16px', direction: 'rtl' }}>
+              <h2 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 20, color: '#0f172a' }}>
+                آخر الحجوزات
+              </h2>
               <button onClick={() => navigate('/owner-bookings')}
                 style={{ color: '#2563eb', fontWeight: 600, fontSize: 14, display: 'inline-flex', alignItems: 'center', gap: 4, padding: '6px 10px', borderRadius: 8, border: 'none', background: 'transparent', cursor: 'pointer', fontFamily: 'inherit' }}>
                 عرض الكل
                 <ChevronLeft size={14} />
               </button>
-              <h2 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 20, color: '#0f172a' }}>
-                آخر الحجوزات
-              </h2>
             </div>
 
             <div className="space-y-3">
               {myBookings.slice(0, 4).map(b => (
-                <div key={b.BookingID} dir="rtl" style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12, padding: '14px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 1px 2px rgba(15,23,42,0.04)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{
-                      fontSize: 12, fontWeight: 600, padding: '3px 10px', borderRadius: 6,
-                      background: b.Status === 'confirmed' ? '#ecfdf5' : b.Status === 'pending' ? '#fffbeb' : '#fef2f2',
-                      color: b.Status === 'confirmed' ? '#059669' : b.Status === 'pending' ? '#d97706' : '#ef4444',
-                    }}>
-                      {b.Status === 'confirmed' ? 'مؤكد' : b.Status === 'pending' ? 'قيد الانتظار' : 'ملغي'}
-                    </span>
-                    <span style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 700, fontSize: 14, color: '#0f172a' }}>
-                      {parseFloat(b.TotalPrice).toLocaleString()} ر.س
-                    </span>
-                  </div>
+                <div key={b.BookingID} dir="rtl" style={{
+                  background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12,
+                  padding: '14px 18px', boxShadow: '0 1px 2px rgba(15,23,42,0.04)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                }}>
+                  {/* يمين — اسم المستودع والتاريخ */}
                   <div style={{ textAlign: 'right' }}>
                     <p style={{ fontWeight: 600, fontSize: 13, color: '#0f172a' }}>
                       {b.warehouse?.Name || `مستودع #${b.WarehouseID}`}
@@ -263,6 +260,19 @@ function OwnerDashboard({ navigate }) {
                     <p style={{ fontSize: 12, color: '#94a3b8', marginTop: 2, fontFamily: 'monospace' }}>
                       {b.StartDate} ← {b.EndDate}
                     </p>
+                  </div>
+                  {/* يسار — المبلغ والحالة */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+                    <span style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 700, fontSize: 14, color: '#0f172a' }}>
+                      {parseFloat(b.TotalPrice).toLocaleString()} ر.س
+                    </span>
+                    <span style={{
+                      fontSize: 12, fontWeight: 600, padding: '3px 10px', borderRadius: 6,
+                      background: b.Status === 'confirmed' ? '#ecfdf5' : b.Status === 'pending' ? '#fffbeb' : '#fef2f2',
+                      color: b.Status === 'confirmed' ? '#059669' : b.Status === 'pending' ? '#d97706' : '#ef4444',
+                    }}>
+                      {b.Status === 'confirmed' ? 'مؤكد' : b.Status === 'pending' ? 'قيد الانتظار' : 'ملغي'}
+                    </span>
                   </div>
                 </div>
               ))}
@@ -305,11 +315,10 @@ function HomePage() {
   const isOwner = roles.includes('warehouse_owner');
   const selectedRole = localStorage.getItem('selectedRole');
 
-  // إذا مالك بس أو اختار مالك — طلع داشبورد
   const showOwnerDashboard = isOwner && (!isRenter || selectedRole === 'owner');
 
   useEffect(() => {
-    if (showOwnerDashboard) return; // ما نحتاج warehouses للداشبورد
+    if (showOwnerDashboard) return;
     const fetchData = async () => {
       try {
         const res = await fetch(`${API_URL}/warehouses/`, { headers: getHeaders(false) });
@@ -331,7 +340,6 @@ function HomePage() {
 
       <Navbar />
 
-      {/* Hero */}
       <div style={{ background: '#0d1b3e', position: 'relative', overflow: 'hidden' }} className="py-14 px-4">
         <div style={{
           position: 'absolute', inset: 0,
