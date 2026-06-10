@@ -112,7 +112,6 @@ function OwnerDashboard({ navigate }) {
     <div className="min-h-screen bg-[#f8fafc]" dir="rtl" style={{ fontFamily: "'IBM Plex Sans Arabic', 'Tajawal', sans-serif" }}>
       <Navbar />
 
-      {/* Header */}
       <div style={{ background: '#0d1b3e', position: 'relative', overflow: 'hidden' }} className="py-10 px-4">
         <div style={{
           position: 'absolute', inset: 0,
@@ -132,15 +131,15 @@ function OwnerDashboard({ navigate }) {
           <h1 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 'clamp(24px,3.5vw,36px)', color: '#fff', marginBottom: 16 }}>
             {companyName}
           </h1>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 12, flexWrap: 'wrap' }}>
-            <button onClick={() => navigate('/owner-bookings')}
-              style={{ padding: '9px 18px', borderRadius: 9, background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', fontWeight: 600, fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}>
-              إدارة الحجوزات
-            </button>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
             <button onClick={() => navigate('/warehouses')}
               style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 18px', borderRadius: 9, background: '#2563eb', border: 'none', color: '#fff', fontWeight: 600, fontSize: 14, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 6px 14px -6px rgba(37,99,235,0.6)' }}>
               <Plus size={15} />
               إضافة مستودع
+            </button>
+            <button onClick={() => navigate('/owner-bookings')}
+              style={{ padding: '9px 18px', borderRadius: 9, background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', fontWeight: 600, fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}>
+              إدارة الحجوزات
             </button>
           </div>
         </div>
@@ -148,15 +147,9 @@ function OwnerDashboard({ navigate }) {
 
       <main className="max-w-6xl mx-auto px-4 py-8">
 
-        {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {stats.map((s, i) => (
-            <div key={i} style={{
-              background: '#fff', border: '1px solid #e2e8f0', borderRadius: 14,
-              padding: '18px 20px', textAlign: 'right',
-              boxShadow: '0 1px 2px rgba(15,23,42,0.04)',
-            }}>
-              {/* أيقونة يسار، أرقام يمين */}
+            <div key={i} style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 14, padding: '18px 20px', textAlign: 'right', boxShadow: '0 1px 2px rgba(15,23,42,0.04)' }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12, direction: 'rtl' }}>
                 <div style={{ textAlign: 'right' }}>
                   <p style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 22, color: '#0f172a', lineHeight: 1 }}>
@@ -173,11 +166,8 @@ function OwnerDashboard({ navigate }) {
           ))}
         </div>
 
-        {/* مستودعاتي header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, direction: 'rtl' }}>
-          <h2 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 20, color: '#0f172a' }}>
-            مستودعاتي
-          </h2>
+          <h2 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 20, color: '#0f172a' }}>مستودعاتي</h2>
           <button onClick={() => navigate('/warehouses')}
             style={{ color: '#2563eb', fontWeight: 600, fontSize: 14, display: 'inline-flex', alignItems: 'center', gap: 4, padding: '6px 10px', borderRadius: 8, border: 'none', background: 'transparent', cursor: 'pointer', fontFamily: 'inherit' }}>
             إدارة المستودعات
@@ -231,13 +221,10 @@ function OwnerDashboard({ navigate }) {
           </div>
         )}
 
-        {/* آخر الحجوزات */}
         {myBookings.length > 0 && (
           <>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '32px 0 16px', direction: 'rtl' }}>
-              <h2 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 20, color: '#0f172a' }}>
-                آخر الحجوزات
-              </h2>
+              <h2 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 20, color: '#0f172a' }}>آخر الحجوزات</h2>
               <button onClick={() => navigate('/owner-bookings')}
                 style={{ color: '#2563eb', fontWeight: 600, fontSize: 14, display: 'inline-flex', alignItems: 'center', gap: 4, padding: '6px 10px', borderRadius: 8, border: 'none', background: 'transparent', cursor: 'pointer', fontFamily: 'inherit' }}>
                 عرض الكل
@@ -252,7 +239,6 @@ function OwnerDashboard({ navigate }) {
                   padding: '14px 18px', boxShadow: '0 1px 2px rgba(15,23,42,0.04)',
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 }}>
-                  {/* يمين — اسم المستودع والتاريخ */}
                   <div style={{ textAlign: 'right' }}>
                     <p style={{ fontWeight: 600, fontSize: 13, color: '#0f172a' }}>
                       {b.warehouse?.Name || `مستودع #${b.WarehouseID}`}
@@ -261,7 +247,6 @@ function OwnerDashboard({ navigate }) {
                       {b.StartDate} ← {b.EndDate}
                     </p>
                   </div>
-                  {/* يسار — المبلغ والحالة */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
                     <span style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 700, fontSize: 14, color: '#0f172a' }}>
                       {parseFloat(b.TotalPrice).toLocaleString()} ر.س
@@ -337,7 +322,6 @@ function HomePage() {
 
   return (
     <div className="min-h-screen bg-[#f8fafc]" dir="rtl" style={{ fontFamily: "'IBM Plex Sans Arabic', 'Tajawal', sans-serif" }}>
-
       <Navbar />
 
       <div style={{ background: '#0d1b3e', position: 'relative', overflow: 'hidden' }} className="py-14 px-4">
