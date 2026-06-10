@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, Plus, MapPin, Package, Edit2, Power, X, Loader, Save, ChevronLeft, ImagePlus, CheckCircle } from 'lucide-react';
-import NotificationBell from '../components/NotificationBell';
+import { Building2, Plus, MapPin, Package, Edit2, Power, X, Loader, Save, ImagePlus, CheckCircle } from 'lucide-react';
+import Navbar from '../components/Navbar';
+import { API_URL, getHeaders } from '../config/api';
 
-const API_URL = 'https://api.rafdi.com';
 const CLOUDINARY_CLOUD = 'dnhn19zpj';
 const CLOUDINARY_PRESET = 'Rafdi_Image';
 
@@ -53,15 +53,13 @@ function WarehousesPage() {
 
   const roles = getUserRoles();
   const isOwner = roles.includes('warehouse_owner');
-  const token = localStorage.getItem('token');
-  const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
 
   useEffect(() => { fetchWarehouses(); }, []);
 
   const fetchWarehouses = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/warehouses/my`, { headers: { 'Authorization': `Bearer ${token}` } });
+      const res = await fetch(`${API_URL}/warehouses/my`, { headers: getHeaders(false) });
       if (res.ok) setWarehouses(await res.json());
     } catch {} finally { setLoading(false); }
   };
@@ -77,39 +75,25 @@ function WarehousesPage() {
     if (!file) return;
     if (!file.type.startsWith('image/')) { setError('يرجى اختيار صورة صحيحة'); return; }
     if (file.size > 5 * 1024 * 1024) { setError('حجم الصورة يجب أن يكون أقل من 5MB'); return; }
-
-    setUploading(true);
-    setError('');
+    setUploading(true); setError('');
     try {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('upload_preset', CLOUDINARY_PRESET);
-
-      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, {
-        method: 'POST',
-        body: formData,
-      });
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, { method: 'POST', body: formData });
       const data = await res.json();
-      if (data.secure_url) {
-        setForm(prev => ({ ...prev, ImagePath: data.secure_url }));
-      } else {
-        setError('فشل رفع الصورة، حاول مرة أخرى');
-      }
-    } catch {
-      setError('حدث خطأ أثناء رفع الصورة');
-    } finally {
-      setUploading(false);
-    }
+      if (data.secure_url) setForm(prev => ({ ...prev, ImagePath: data.secure_url }));
+      else setError('فشل رفع الصورة، حاول مرة أخرى');
+    } catch { setError('حدث خطأ أثناء رفع الصورة');
+    } finally { setUploading(false); }
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
+    e.preventDefault(); setError('');
     if (!form.Name) { setError('يرجى إدخال اسم المستودع'); return; }
     if (!form.Location) { setError('يرجى إدخال الموقع'); return; }
     if (!form.Size || form.Size <= 0) { setError('يرجى إدخال مساحة صحيحة'); return; }
     if (!form.PricePerDay || form.PricePerDay <= 0) { setError('يرجى إدخال سعر صحيح'); return; }
-
     setSubmitting(true);
     try {
       const url = editWarehouse ? `${API_URL}/warehouses/${editWarehouse.WarehouseID}` : `${API_URL}/warehouses/`;
@@ -117,13 +101,11 @@ function WarehousesPage() {
       const body = editWarehouse
         ? { ...form, Size: parseFloat(form.Size), PricePerDay: parseFloat(form.PricePerDay) }
         : { ...form, CompanyID: getCompanyId(), Size: parseFloat(form.Size), PricePerDay: parseFloat(form.PricePerDay) };
-
-      const res = await fetch(url, { method, headers, body: JSON.stringify(body) });
+      const res = await fetch(url, { method, headers: getHeaders(), body: JSON.stringify(body) });
       const data = await res.json();
       if (!res.ok) { setError(parseError(data.detail)); return; }
       setSuccess(editWarehouse ? 'تم تعديل المستودع بنجاح' : 'تم إنشاء المستودع بنجاح');
-      setShowModal(false);
-      fetchWarehouses();
+      setShowModal(false); fetchWarehouses();
       setTimeout(() => setSuccess(''), 3000);
     } catch { setError('حدث خطأ في الاتصال');
     } finally { setSubmitting(false); }
@@ -131,72 +113,71 @@ function WarehousesPage() {
 
   const handleToggle = async (w) => {
     try {
-      const res = await fetch(`${API_URL}/warehouses/${w.WarehouseID}/toggle`, { method: 'PATCH', headers });
+      const res = await fetch(`${API_URL}/warehouses/${w.WarehouseID}/toggle`, { method: 'PATCH', headers: getHeaders(false) });
       if (res.ok) fetchWarehouses();
     } catch {}
   };
 
-  return (
-    <div className="min-h-screen bg-[#f7f8fa]" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
+  const inputStyle = {
+    width: '100%', padding: '10px 14px', borderRadius: 10,
+    border: '1px solid #e2e8f0', outline: 'none', background: '#fff',
+    fontSize: 14, color: '#0f172a', direction: 'rtl', fontFamily: 'inherit',
+    boxSizing: 'border-box', transition: 'border-color .15s',
+  };
 
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="flex items-center justify-between h-14">
-            <div className="flex items-center gap-4">
-              <button onClick={() => navigate('/home')}
-                className="flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-gray-800 transition-colors">
-                <ChevronLeft size={16} className="rotate-180" />
-                رجوع
-              </button>
-              <div className="h-4 w-px bg-gray-200" />
-              <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/home')}>
-                <div className="w-7 h-7 rounded-lg bg-[#1a3a5c] flex items-center justify-center">
-                  <span className="text-white font-black text-xs">ر</span>
-                </div>
-                <span className="text-[#1a3a5c] font-black text-base">رفدي</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <NotificationBell />
-              {isOwner && (
-                <button onClick={openCreate}
-                  className="flex items-center gap-2 px-4 py-2 bg-[#1a3a5c] hover:bg-[#14304e] text-white text-sm font-bold rounded-lg transition-colors">
-                  <Plus size={15} />
-                  إضافة مستودع
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+  return (
+    <div className="min-h-screen bg-[#f8fafc]" dir="rtl" style={{ fontFamily: "'IBM Plex Sans Arabic', 'Tajawal', sans-serif" }}>
+
+      <Navbar />
 
       <main className="max-w-6xl mx-auto px-4 py-8">
-        <div className="flex justify-between items-start mb-6 text-right">
+        <div className="flex justify-between items-center mb-6">
           <div />
-          <div>
-            <h1 className="text-xl font-black text-gray-900">إدارة المستودعات</h1>
-            <p className="text-sm text-gray-500 mt-0.5">{warehouses.length} مستودع مسجل</p>
+          <div className="text-right flex items-center gap-4">
+            <div>
+              <h1 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 22, color: '#0f172a' }}>
+                إدارة المستودعات
+              </h1>
+              <p style={{ fontSize: 13, color: '#64748b', marginTop: 3 }}>{warehouses.length} مستودع مسجل</p>
+            </div>
+            {isOwner && (
+              <button onClick={openCreate}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  padding: '10px 18px', background: '#2563eb', color: '#fff',
+                  fontWeight: 600, fontSize: 14, borderRadius: 9, border: 'none',
+                  cursor: 'pointer', fontFamily: 'inherit',
+                  boxShadow: '0 6px 16px -6px rgba(37,99,235,0.55)',
+                }}>
+                <Plus size={15} />
+                إضافة مستودع
+              </button>
+            )}
           </div>
         </div>
 
         {success && (
-          <div className="mb-5 p-3.5 rounded-xl text-sm flex items-center gap-2.5 bg-emerald-50 border border-emerald-200">
+          <div className="mb-5 p-3.5 rounded-xl flex items-center gap-2.5 bg-emerald-50 border border-emerald-200">
             <CheckCircle size={15} className="text-emerald-600 shrink-0" />
-            <span className="text-emerald-600 font-semibold">{success}</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: '#059669' }}>{success}</span>
           </div>
         )}
 
         {loading ? (
           <div className="flex justify-center py-20">
-            <Loader size={26} className="text-[#1a3a5c] animate-spin" />
+            <Loader size={26} color="#2563eb" className="animate-spin" />
           </div>
         ) : warehouses.length === 0 ? (
           <div className="text-center py-20 bg-white border border-dashed border-gray-300 rounded-xl">
             <Building2 size={36} className="text-gray-300 mx-auto mb-3" />
-            <p className="text-sm text-gray-500 font-medium mb-4">لم تضف أي مستودع بعد</p>
+            <p style={{ fontSize: 14, color: '#64748b', marginBottom: 14 }}>لم تضف أي مستودع بعد</p>
             {isOwner && (
               <button onClick={openCreate}
-                className="px-4 py-2 bg-[#1a3a5c] text-white text-sm font-bold rounded-lg hover:bg-[#14304e] transition-colors">
+                style={{
+                  padding: '9px 20px', background: '#2563eb', color: '#fff',
+                  fontWeight: 600, fontSize: 14, borderRadius: 9, border: 'none',
+                  cursor: 'pointer', fontFamily: 'inherit',
+                }}>
                 أضف مستودعك الأول
               </button>
             )}
@@ -205,13 +186,16 @@ function WarehousesPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {warehouses.map((w) => (
               <div key={w.WarehouseID}
-                className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 hover:shadow-sm transition-all">
+                className="bg-white border border-gray-200 rounded-xl overflow-hidden transition-all"
+                style={{ boxShadow: '0 1px 2px rgba(15,23,42,0.04)' }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.boxShadow = '0 4px 12px -4px rgba(15,23,42,0.1)'; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.boxShadow = '0 1px 2px rgba(15,23,42,0.04)'; }}>
                 <div className="h-44 relative bg-gray-100 overflow-hidden">
                   {w.ImagePath ? (
                     <img src={w.ImagePath} alt={w.Name} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <Building2 size={36} className="text-gray-300" />
+                      <Building2 size={36} color="#cbd5e1" />
                     </div>
                   )}
                   <div className="absolute top-3 right-3">
@@ -225,31 +209,44 @@ function WarehousesPage() {
                   </div>
                 </div>
                 <div className="p-4">
-                  <h3 className="font-bold text-gray-900 text-sm mb-2 text-right">{w.Name}</h3>
+                  <h3 style={{ fontWeight: 700, fontSize: 14.5, color: '#0f172a', marginBottom: 8, textAlign: 'right' }}>{w.Name}</h3>
                   <div className="space-y-1 mb-3">
-                    <div className="flex items-center justify-end gap-1.5 text-gray-500 text-xs">
+                    <div className="flex items-center justify-end gap-1.5 text-xs" style={{ color: '#64748b' }}>
                       <span>{w.Location}</span>
-                      <MapPin size={11} className="text-gray-400 shrink-0" />
+                      <MapPin size={11} color="#94a3b8" className="shrink-0" />
                     </div>
-                    <div className="flex items-center justify-end gap-1.5 text-gray-500 text-xs">
+                    <div className="flex items-center justify-end gap-1.5 text-xs" style={{ color: '#64748b' }}>
                       <span>{w.Size?.toLocaleString()} م²</span>
-                      <Package size={11} className="text-gray-400 shrink-0" />
+                      <Package size={11} color="#94a3b8" className="shrink-0" />
                     </div>
                   </div>
                   {w.Description && (
-                    <p className="text-xs text-gray-400 text-right line-clamp-2 leading-relaxed mb-3">{w.Description}</p>
+                    <p style={{ fontSize: 12, color: '#94a3b8', textAlign: 'right', lineHeight: 1.6, marginBottom: 10 }} className="line-clamp-2">
+                      {w.Description}
+                    </p>
                   )}
                   {isOwner && (
                     <div className="flex gap-2 pt-3 border-t border-gray-100">
                       <button onClick={() => openEdit(w)}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold border border-gray-200 text-gray-700 hover:border-[#1a3a5c] hover:text-[#1a3a5c] transition-colors">
+                        style={{
+                          flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                          padding: '8px 0', borderRadius: 8, fontSize: 12, fontWeight: 600,
+                          border: '1px solid #e2e8f0', color: '#475569', background: '#fff',
+                          cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s',
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.borderColor = '#2563eb'; e.currentTarget.style.color = '#2563eb'; }}
+                        onMouseLeave={e => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = '#475569'; }}>
                         <Edit2 size={13} />
                         تعديل
                       </button>
                       <button onClick={() => handleToggle(w)}
-                        className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold border transition-colors ${
-                          w.IsActive ? 'border-red-200 text-red-600 hover:bg-red-50' : 'border-emerald-200 text-emerald-600 hover:bg-emerald-50'
-                        }`}>
+                        style={{
+                          flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                          padding: '8px 0', borderRadius: 8, fontSize: 12, fontWeight: 600,
+                          border: w.IsActive ? '1px solid #fecaca' : '1px solid #a7f3d0',
+                          color: w.IsActive ? '#ef4444' : '#10b981',
+                          background: '#fff', cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s',
+                        }}>
                         <Power size={13} />
                         {w.IsActive ? 'تعطيل' : 'تفعيل'}
                       </button>
@@ -270,24 +267,24 @@ function WarehousesPage() {
 
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
               <button onClick={() => setShowModal(false)}
-                className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors">
+                style={{ width: 28, height: 28, borderRadius: 8, background: '#f1f5f9', border: 'none', cursor: 'pointer', display: 'grid', placeItems: 'center', color: '#64748b' }}>
                 <X size={15} />
               </button>
               <div className="text-right">
-                <h3 className="font-bold text-gray-900 text-sm">
+                <h3 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 16, color: '#0f172a' }}>
                   {editWarehouse ? 'تعديل المستودع' : 'إضافة مستودع جديد'}
                 </h3>
-                {editWarehouse && <p className="text-xs text-gray-400 mt-0.5">{editWarehouse.Name}</p>}
+                {editWarehouse && <p style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>{editWarehouse.Name}</p>}
               </div>
             </div>
 
             <div className="p-5">
               {error && (
-                <div className="mb-4 p-3.5 rounded-xl text-sm flex items-start gap-2.5 bg-red-50 border border-red-200">
+                <div className="mb-4 p-3.5 rounded-xl flex items-start gap-2.5 bg-red-50 border border-red-200">
                   <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center shrink-0 mt-0.5">
                     <span className="text-red-600 text-xs font-black">!</span>
                   </div>
-                  <p className="font-semibold text-red-700 text-right">{error}</p>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: '#b91c1c' }}>{error}</p>
                 </div>
               )}
 
@@ -295,96 +292,117 @@ function WarehousesPage() {
 
                 {/* Image Upload */}
                 <div>
-                  <label className="block text-xs font-bold text-gray-600 mb-1.5">صورة المستودع</label>
-                  <div className="relative">
-                    {/* Preview */}
-                    {form.ImagePath ? (
-                      <div className="relative h-36 rounded-xl overflow-hidden border border-gray-200 mb-2">
-                        <img src={form.ImagePath} alt="preview" className="w-full h-full object-cover" />
-                        <button type="button"
-                          onClick={() => setForm(prev => ({ ...prev, ImagePath: '' }))}
-                          className="absolute top-2 left-2 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-colors">
-                          <X size={12} />
-                        </button>
-                        <div className="absolute bottom-2 right-2 bg-emerald-500 text-white text-xs font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
-                          <CheckCircle size={11} />
-                          تم الرفع
-                        </div>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 6 }}>
+                    صورة المستودع
+                  </label>
+                  {form.ImagePath ? (
+                    <div className="relative h-36 rounded-xl overflow-hidden border border-gray-200 mb-2">
+                      <img src={form.ImagePath} alt="preview" className="w-full h-full object-cover" />
+                      <button type="button" onClick={() => setForm(prev => ({ ...prev, ImagePath: '' }))}
+                        style={{ position: 'absolute', top: 8, left: 8, width: 24, height: 24, borderRadius: '50%', background: '#ef4444', color: '#fff', border: 'none', cursor: 'pointer', display: 'grid', placeItems: 'center' }}>
+                        <X size={12} />
+                      </button>
+                      <div style={{ position: 'absolute', bottom: 8, right: 8, background: '#10b981', color: '#fff', fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 6, display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <CheckCircle size={11} /> تم الرفع
                       </div>
-                    ) : (
-                      <label className={`flex flex-col items-center justify-center h-36 rounded-xl border-2 border-dashed cursor-pointer transition-colors ${
-                        uploading ? 'border-blue-300 bg-blue-50' : 'border-gray-200 hover:border-[#1a3a5c] hover:bg-gray-50'
-                      }`}>
-                        <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploading} />
-                        {uploading ? (
-                          <div className="flex flex-col items-center gap-2">
-                            <Loader size={24} className="text-[#1a3a5c] animate-spin" />
-                            <span className="text-xs text-gray-500 font-medium">جاري الرفع...</span>
-                          </div>
-                        ) : (
-                          <div className="flex flex-col items-center gap-2">
-                            <ImagePlus size={24} className="text-gray-300" />
-                            <span className="text-xs text-gray-500 font-medium">اضغط لرفع صورة</span>
-                            <span className="text-xs text-gray-400">PNG, JPG حتى 5MB</span>
-                          </div>
-                        )}
-                      </label>
-                    )}
-                  </div>
+                    </div>
+                  ) : (
+                    <label style={{
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                      height: 136, borderRadius: 12, border: `2px dashed ${uploading ? '#93c5fd' : '#e2e8f0'}`,
+                      background: uploading ? '#eff6ff' : '#fff', cursor: 'pointer', transition: 'all .15s',
+                    }}>
+                      <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploading} />
+                      {uploading ? (
+                        <>
+                          <Loader size={24} color="#2563eb" className="animate-spin" style={{ marginBottom: 8 }} />
+                          <span style={{ fontSize: 12, color: '#64748b', fontWeight: 500 }}>جاري الرفع...</span>
+                        </>
+                      ) : (
+                        <>
+                          <ImagePlus size={24} color="#cbd5e1" style={{ marginBottom: 8 }} />
+                          <span style={{ fontSize: 12, color: '#64748b', fontWeight: 500 }}>اضغط لرفع صورة</span>
+                          <span style={{ fontSize: 11, color: '#94a3b8', marginTop: 3 }}>PNG, JPG حتى 5MB</span>
+                        </>
+                      )}
+                    </label>
+                  )}
                 </div>
 
                 {[
-                  { label: 'اسم المستودع', key: 'Name', placeholder: 'مستودع الرياض الرئيسي', type: 'text' },
-                  { label: 'الموقع', key: 'Location', placeholder: 'الرياض، حي العارض', type: 'text' },
+                  { label: 'اسم المستودع', key: 'Name', placeholder: 'مستودع الرياض الرئيسي' },
+                  { label: 'الموقع', key: 'Location', placeholder: 'الرياض، حي العارض' },
                 ].map((field) => (
                   <div key={field.key}>
-                    <label className="block text-xs font-bold text-gray-600 mb-1.5">{field.label}</label>
-                    <input type={field.type} placeholder={field.placeholder}
-                      className="w-full py-2.5 px-3.5 rounded-xl text-sm font-medium text-right bg-white border border-gray-200 outline-none focus:border-[#1a3a5c] transition-colors placeholder:text-gray-400 text-gray-900"
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 6 }}>
+                      {field.label}
+                    </label>
+                    <input type="text" placeholder={field.placeholder} style={inputStyle}
+                      onFocus={e => e.target.style.borderColor = '#2563eb'}
+                      onBlur={e => e.target.style.borderColor = '#e2e8f0'}
                       value={form[field.key]}
                       onChange={e => { setForm({ ...form, [field.key]: e.target.value }); if (error) setError(''); }} />
                   </div>
                 ))}
 
                 <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-600 mb-1.5">المساحة (م²)</label>
-                    <input type="number" min="1" placeholder="500"
-                      className="w-full py-2.5 px-3.5 rounded-xl text-sm font-medium text-right bg-white border border-gray-200 outline-none focus:border-[#1a3a5c] transition-colors placeholder:text-gray-400 text-gray-900"
-                      value={form.Size}
-                      onChange={e => { setForm({ ...form, Size: e.target.value }); if (error) setError(''); }} />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-600 mb-1.5">السعر اليومي (ر.س)</label>
-                    <input type="number" min="1" placeholder="500"
-                      className="w-full py-2.5 px-3.5 rounded-xl text-sm font-medium text-right bg-white border border-gray-200 outline-none focus:border-[#1a3a5c] transition-colors placeholder:text-gray-400 text-gray-900"
-                      value={form.PricePerDay}
-                      onChange={e => { setForm({ ...form, PricePerDay: e.target.value }); if (error) setError(''); }} />
-                  </div>
+                  {[
+                    { label: 'المساحة (م²)', key: 'Size', placeholder: '500' },
+                    { label: 'السعر اليومي (ر.س)', key: 'PricePerDay', placeholder: '500' },
+                  ].map(field => (
+                    <div key={field.key}>
+                      <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 6 }}>
+                        {field.label}
+                      </label>
+                      <input type="number" min="1" placeholder={field.placeholder} style={inputStyle}
+                        onFocus={e => e.target.style.borderColor = '#2563eb'}
+                        onBlur={e => e.target.style.borderColor = '#e2e8f0'}
+                        value={form[field.key]}
+                        onChange={e => { setForm({ ...form, [field.key]: e.target.value }); if (error) setError(''); }} />
+                    </div>
+                  ))}
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-600 mb-1.5">الوصف</label>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 6 }}>الوصف</label>
                   <textarea rows={3} placeholder="وصف المستودع وما يميزه..."
-                    className="w-full py-2.5 px-3.5 rounded-xl text-sm font-medium text-right bg-white border border-gray-200 outline-none focus:border-[#1a3a5c] transition-colors placeholder:text-gray-400 text-gray-900 resize-none"
+                    style={{ ...inputStyle, resize: 'none', padding: '10px 14px' }}
+                    onFocus={e => e.target.style.borderColor = '#2563eb'}
+                    onBlur={e => e.target.style.borderColor = '#e2e8f0'}
                     value={form.Description}
                     onChange={e => setForm({ ...form, Description: e.target.value })} />
                 </div>
 
-                <div className="flex items-center justify-between p-3.5 rounded-xl bg-gray-50 border border-gray-100">
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', borderRadius: 10, background: '#f8fafc', border: '1px solid #f1f5f9' }}>
                   <button type="button" onClick={() => setForm({ ...form, IsActive: !form.IsActive })}
-                    className="relative w-10 h-5 rounded-full transition-colors shrink-0"
-                    style={{ background: form.IsActive ? '#1a3a5c' : '#d1d5db' }}>
-                    <span className="absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all shadow-sm"
-                      style={{ right: form.IsActive ? '2px' : 'auto', left: form.IsActive ? 'auto' : '2px' }} />
+                    style={{
+                      position: 'relative', width: 40, height: 22, borderRadius: 11, border: 'none',
+                      background: form.IsActive ? '#2563eb' : '#cbd5e1', cursor: 'pointer', flexShrink: 0,
+                      transition: 'background .2s',
+                    }}>
+                    <span style={{
+                      position: 'absolute', top: 3,
+                      right: form.IsActive ? 3 : 'auto',
+                      left: form.IsActive ? 'auto' : 3,
+                      width: 16, height: 16, borderRadius: '50%',
+                      background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                      transition: 'all .2s',
+                    }} />
                   </button>
-                  <span className="text-sm font-semibold text-gray-700">
+                  <span style={{ fontSize: 14, fontWeight: 500, color: '#475569' }}>
                     {form.IsActive ? 'المستودع نشط ومتاح للحجز' : 'المستودع معطل'}
                   </span>
                 </div>
 
                 <button type="submit" disabled={submitting || uploading}
-                  className="w-full py-3 rounded-xl font-bold text-white text-sm bg-[#1a3a5c] hover:bg-[#14304e] disabled:opacity-60 transition-colors flex items-center justify-center gap-2">
+                  style={{
+                    width: '100%', padding: '12px 16px', borderRadius: 9,
+                    background: submitting || uploading ? '#93c5fd' : '#2563eb',
+                    color: '#fff', fontWeight: 700, fontSize: 14.5, border: 'none',
+                    cursor: 'pointer', fontFamily: 'inherit',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                    boxShadow: '0 8px 18px -8px rgba(37,99,235,0.6)',
+                  }}>
                   {submitting ? (
                     <span className="flex items-center gap-2">
                       <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin block" />

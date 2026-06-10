@@ -1,155 +1,217 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { useApp } from '../context/AppContext';
-import { LogOut, User, LayoutDashboard, Database, Building2, Layers, History, Languages, Bell, Palette } from 'lucide-react';
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { LogOut, Settings } from 'lucide-react';
+import NotificationBell from './NotificationBell';
 
-export const Navbar = () => {
-  const { user, setUser, language, setLanguage, notifications, setNotifications, switchRole } = useApp();
+const getUserRoles = () => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) return [];
+    return JSON.parse(atob(token.split('.')[1])).roles || [];
+  } catch { return []; }
+};
+
+const getUserInfo = () => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) return {};
+    return JSON.parse(atob(token.split('.')[1]));
+  } catch { return {}; }
+};
+
+const WarehouseLogo = () => (
+  <svg width="20" height="20" viewBox="0 0 64 64" fill="none">
+    <path d="M32 7 L61 28 L3 28 Z" fill="#fff" stroke="#fff" strokeWidth="2.4" strokeLinejoin="round"/>
+    <path d="M8 28 L8 57 L56 57 L56 28" stroke="#fff" strokeWidth="3.4" strokeLinejoin="round" strokeLinecap="round"/>
+    <line x1="2" y1="57" x2="62" y2="57" stroke="#fff" strokeWidth="3.4" strokeLinecap="round"/>
+    <rect x="13" y="44" width="10" height="13" fill="#fff" rx="1"/>
+    <rect x="27" y="37" width="10" height="20" fill="#fff" rx="1"/>
+    <rect x="41" y="41" width="10" height="16" fill="#fff" rx="1"/>
+  </svg>
+);
+
+function Navbar() {
   const navigate = useNavigate();
-  const [showNotifications, setShowNotifications] = useState(false);
+  const location = useLocation();
+
+  const roles = getUserRoles();
+  const userInfo = getUserInfo();
+  const isOwner = roles.includes('warehouse_owner');
+  const isRenter = roles.includes('renter_company');
+  const displayName = userInfo.company_name || userInfo.name || userInfo.email || 'المستخدم';
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    setUser(null);
-    navigate('/auth');
+    navigate('/login');
   };
 
-  const userNotifications = notifications.filter(n =>
-    (n.userId === user?.id || (user?.role === 'ADMIN' && n.role === 'ADMIN'))
-  );
-  const unreadCount = userNotifications.filter(n => !n.read).length;
+  const navLinks = [
+    { label: 'الرئيسية', path: '/home' },
+    ...(isRenter ? [{ label: 'حجوزاتي', path: '/bookings' }] : []),
+    ...(isOwner ? [{ label: 'مستودعاتي', path: '/warehouses' }] : []),
+    ...(isOwner ? [{ label: 'إدارة الحجوزات', path: '/owner-bookings' }] : []),
+  ];
 
-  const markAllAsRead = () => {
-    setNotifications(notifications.map(n =>
-      (n.userId === user?.id || (user?.role === 'ADMIN' && n.role === 'ADMIN')) ? { ...n, read: true } : n
-    ));
-  };
-
-  const markAsRead = (id) => {
-    setNotifications(notifications.map(n => n.id === id ? { ...n, read: true } : n));
-  };
-
-  const navItems = {
-    RENTER: [
-      { label: language === 'ar' ? 'اكتشف المستودعات' : 'Browse Warehouses', path: '/', icon: Database },
-      { label: language === 'ar' ? 'حجوزاتي' : 'My Bookings', path: '/my-bookings', icon: History },
-    ],
-    OWNER: [
-      { label: language === 'ar' ? 'مستودعاتي' : 'My Warehouses', path: '/', icon: Building2 },
-      { label: language === 'ar' ? 'الطلبات' : 'Bookings', path: '/bookings', icon: Layers },
-    ],
-    ADMIN: [
-      { label: language === 'ar' ? 'لوحة القيادة' : 'Dashboard', path: '/', icon: LayoutDashboard },
-      { label: language === 'ar' ? 'الشركات' : 'Companies', path: '/companies', icon: User },
-      { label: language === 'ar' ? 'المستودعات' : 'Warehouses', path: '/warehouses', icon: Building2 },
-      { label: language === 'ar' ? 'الحجوزات' : 'All Bookings', path: '/all-bookings', icon: History },
-    ]
-  };
+  const isActive = (path) => location.pathname === path;
 
   return (
-    <nav className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
-      <div className="container mx-auto px-6">
-        <div className="flex justify-between items-center h-20">
-          <div className="flex items-center gap-12">
-            <Link to="/" className="text-2xl font-bold text-[#2E5F8A] flex items-center gap-2">
-              <div className="p-2 bg-[#2E5F8A]/5 rounded-xl">
-                <Building2 className="text-[#2E5F8A]" size={24} />
-              </div>
-              <span>{language === 'ar' ? 'رفدي' : 'Rafdi'}</span>
-            </Link>
+    <header style={{
+      position: 'sticky', top: 0, zIndex: 50,
+      background: '#fff',
+      borderBottom: '1px solid #e2e8f0',
+      boxShadow: '0 1px 0 rgba(15,23,42,0.02), 0 4px 14px -10px rgba(15,23,42,0.08)',
+      fontFamily: "'IBM Plex Sans Arabic', 'Tajawal', sans-serif",
+    }} dir="rtl">
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '14px 36px', display: 'flex', alignItems: 'center', gap: 28 }}>
 
-            <div className="hidden md:flex items-center gap-8">
-              {user && navItems[user.role]?.map((item) => (
-                <Link key={item.path} to={item.path}
-                  className="text-gray-500 hover:text-[#2E5F8A] flex items-center gap-2 font-medium transition-all">
-                  <item.icon size={18} className="opacity-70" />
-                  <span>{item.label}</span>
-                </Link>
-              ))}
-            </div>
-          </div>
+        {/* Logo */}
+        <div onClick={() => navigate('/home')} style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', flexShrink: 0 }}>
+          <span style={{
+            width: 32, height: 32,
+            background: '#2563eb',
+            borderRadius: 8,
+            display: 'grid', placeItems: 'center',
+            boxShadow: '0 6px 14px -6px rgba(37,99,235,0.55), inset 0 -2px 0 rgba(0,0,0,0.08)',
+            flexShrink: 0,
+          }}>
+            <WarehouseLogo />
+          </span>
+          <span style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 22, letterSpacing: '-0.01em', color: '#0f172a' }}>
+            رفدي
+          </span>
+        </div>
 
-          <div className="flex items-center gap-3">
-            {user && user.roles?.length > 1 && (
-              <div className="hidden lg:flex items-center bg-gray-50 p-1.5 rounded-2xl border border-gray-100">
-                {user.roles.map((r) => (
-                  <button key={r} onClick={() => { switchRole(r); navigate('/'); }}
-                    className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.1em] transition-all ${user.role === r ? 'bg-white text-[#2E5F8A] shadow-md' : 'text-gray-400 hover:text-gray-600'}`}>
-                    {r === 'OWNER' ? (language === 'ar' ? 'صاحب مستودع' : 'Owner') : r === 'RENTER' ? (language === 'ar' ? 'مستأجر' : 'Renter') : r}
-                  </button>
-                ))}
-              </div>
-            )}
+        {/* Nav Links */}
+        <nav style={{ display: 'flex', alignItems: 'center', gap: 4, marginRight: 24 }}>
+          {navLinks.map(link => (
+            <button key={link.path} onClick={() => navigate(link.path)}
+              style={{
+                padding: '8px 14px',
+                borderRadius: 8,
+                border: 'none',
+                background: isActive(link.path) ? '#eff6ff' : 'transparent',
+                color: isActive(link.path) ? '#2563eb' : '#475569',
+                fontWeight: isActive(link.path) ? 700 : 500,
+                fontSize: 15,
+                cursor: 'pointer',
+                fontFamily: 'inherit',
+                transition: 'background .15s, color .15s',
+              }}
+              onMouseEnter={e => { if (!isActive(link.path)) { e.target.style.background = '#f1f5f9'; e.target.style.color = '#0f172a'; }}}
+              onMouseLeave={e => { if (!isActive(link.path)) { e.target.style.background = 'transparent'; e.target.style.color = '#475569'; }}}
+            >
+              {link.label}
+            </button>
+          ))}
+        </nav>
 
-            <div className="relative">
-              <button onClick={() => setShowNotifications(!showNotifications)}
-                className="p-2.5 rounded-full text-gray-400 hover:bg-gray-50 relative">
-                <Bell size={20} />
-                {unreadCount > 0 && (
-                  <span className="absolute top-2 right-2 w-4 h-4 bg-red-500 text-white text-[10px] flex items-center justify-center rounded-full font-bold border-2 border-white animate-pulse">
-                    {unreadCount}
-                  </span>
-                )}
+        {/* Right side */}
+        <div style={{ marginInlineStart: 'auto', display: 'flex', alignItems: 'center', gap: 14 }}>
+
+          {/* إدارة المستودعات */}
+          {isOwner && (
+            <>
+              <button onClick={() => navigate('/warehouses')}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  padding: '9px 16px',
+                  borderRadius: 9,
+                  background: '#2563eb',
+                  color: '#fff',
+                  fontWeight: 600,
+                  fontSize: 14,
+                  border: 'none',
+                  cursor: 'pointer',
+                  boxShadow: '0 6px 16px -6px rgba(37,99,235,0.55)',
+                  fontFamily: 'inherit',
+                }}>
+                <Settings size={15} />
+                إدارة المستودعات
               </button>
+              <span style={{ width: 1, height: 26, background: '#e2e8f0' }} />
+            </>
+          )}
 
-              <AnimatePresence>
-                {showNotifications && (
-                  <>
-                    <div className="fixed inset-0 z-0" onClick={() => setShowNotifications(false)} />
-                    <motion.div initial={{ opacity: 0, y: 15, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 15, scale: 0.95 }}
-                      className="absolute ltr:right-0 rtl:left-0 mt-4 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-10">
-                      <div className="p-5 border-b bg-gray-50/50 flex justify-between items-center">
-                        <h4 className="font-bold text-gray-900">{language === 'ar' ? 'التنبيهات' : 'Notifications'}</h4>
-                        <button onClick={markAllAsRead} className="text-xs font-bold text-[#2E5F8A]">
-                          {language === 'ar' ? 'مقروء الكل' : 'Mark all read'}
-                        </button>
-                      </div>
-                      <div className="max-h-[400px] overflow-y-auto">
-                        {userNotifications.length === 0 ? (
-                          <div className="p-12 text-center">
-                            <Bell size={24} className="text-gray-300 mx-auto mb-4" />
-                            <p className="text-sm text-gray-400">{language === 'ar' ? 'لا يوجد تنبيهات' : 'No notifications'}</p>
-                          </div>
-                        ) : (
-                          userNotifications.map((note) => (
-                            <div key={note.id} onClick={() => markAsRead(note.id)}
-                              className={`p-5 border-b border-gray-50 cursor-pointer flex gap-4 ${note.read ? 'bg-white hover:bg-gray-50' : 'bg-[#2E5F8A]/5 hover:bg-[#2E5F8A]/10'}`}>
-                              <div className={`w-2 h-2 rounded-full mt-2 shrink-0 ${note.read ? 'bg-transparent' : 'bg-[#2E5F8A]'}`} />
-                              <div className="flex-1">
-                                <p className={`text-sm leading-relaxed ${note.read ? 'text-gray-600' : 'text-gray-900 font-semibold'}`}>
-                                  {language === 'ar' ? note.message.ar : note.message.en}
-                                </p>
-                                <p className="text-[11px] text-gray-400 mt-2">{note.date}</p>
-                              </div>
-                            </div>
-                          ))
-                        )}
-                      </div>
-                    </motion.div>
-                  </>
-                )}
-              </AnimatePresence>
-            </div>
+          {/* Notification */}
+          <NotificationBell />
 
-            <div className="h-6 w-px bg-gray-100 mx-2" />
-
-            <button onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
-              className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 rounded-xl text-gray-500 font-bold text-xs transition-all">
-              <Languages size={18} className="text-gray-400" />
-              <span>{language === 'ar' ? 'English' : 'عربي'}</span>
-            </button>
-
-            <Link to="/profile" className="p-2.5 hover:bg-gray-50 text-gray-400 hover:text-gray-600 rounded-xl transition-all">
-              <User size={20} />
-            </Link>
-
-            <button onClick={handleLogout} className="p-2.5 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-xl transition-all">
-              <LogOut size={20} />
-            </button>
+          {/* Role chips */}
+          <div style={{ display: 'flex', gap: 6 }}>
+            {isOwner && (
+              <span style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                padding: '5px 11px', borderRadius: 100,
+                fontSize: 12.5, fontWeight: 600,
+                background: '#eff6ff', color: '#1d4ed8',
+              }}>
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#2563eb' }} />
+                مالك
+              </span>
+            )}
+            {isRenter && (
+              <span style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                padding: '5px 11px', borderRadius: 100,
+                fontSize: 12.5, fontWeight: 600,
+                background: '#ecfdf5', color: '#047857',
+              }}>
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10b981' }} />
+                مستأجر
+              </span>
+            )}
           </div>
+
+          <span style={{ width: 1, height: 26, background: '#e2e8f0' }} />
+
+          {/* User */}
+          <button onClick={() => navigate('/profile')}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              padding: '4px 10px 4px 4px',
+              borderRadius: 100,
+              border: 'none',
+              background: 'transparent',
+              cursor: 'pointer',
+              fontFamily: 'inherit',
+              transition: 'background .15s',
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+          >
+            <span style={{
+              width: 32, height: 32, borderRadius: '50%',
+              background: 'linear-gradient(135deg, #94a3b8, #475569)',
+              color: '#fff', display: 'grid', placeItems: 'center',
+              fontWeight: 700, fontSize: 13, flexShrink: 0,
+            }}>
+              {displayName.charAt(0)}
+            </span>
+            <span style={{ fontSize: 14, fontWeight: 600, color: '#0f172a' }}>{displayName}</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </button>
+
+          {/* Logout */}
+          <button onClick={handleLogout}
+            style={{
+              display: 'flex', alignItems: 'center',
+              padding: '8px',
+              borderRadius: 8,
+              border: 'none',
+              background: 'transparent',
+              color: '#94a3b8',
+              cursor: 'pointer',
+              transition: 'color .15s, background .15s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.background = '#fef2f2'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.background = 'transparent'; }}
+          >
+            <LogOut size={17} />
+          </button>
         </div>
       </div>
-    </nav>
+    </header>
   );
-};
+}
+
+export default Navbar;

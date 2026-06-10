@@ -1,9 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Building2, LogOut, Layers, Package, CheckCircle, Users, MapPin, Loader, Settings, Search, ChevronLeft, LayoutDashboard } from "lucide-react";
-import NotificationBell from "../components/NotificationBell";
-
-const API_URL = 'https://api.rafdi.com';
+import { Building2, Layers, Package, CheckCircle, Users, MapPin, Loader, Search, ChevronLeft } from "lucide-react";
+import Navbar from "../components/Navbar";
+import { API_URL, getHeaders } from '../config/api';
 
 const getUserRoles = () => {
   try {
@@ -11,14 +10,6 @@ const getUserRoles = () => {
     if (!token) return [];
     return JSON.parse(atob(token.split('.')[1])).roles || [];
   } catch { return []; }
-};
-
-const getUserInfo = () => {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) return {};
-    return JSON.parse(atob(token.split('.')[1]));
-  } catch { return {}; }
 };
 
 const getCompanyId = () => {
@@ -37,7 +28,8 @@ const StatusBadge = ({ active }) => (
 );
 
 const WarehouseCard = ({ w, isRenter, onBook }) => (
-  <div className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 transition-colors group">
+  <div className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 transition-colors group"
+    style={{ boxShadow: '0 1px 2px rgba(15,23,42,0.04)' }}>
     <div className="relative h-48 bg-gray-100 overflow-hidden">
       {w.ImagePath ? (
         <img src={w.ImagePath} alt={w.Name}
@@ -51,7 +43,7 @@ const WarehouseCard = ({ w, isRenter, onBook }) => (
       <div className="absolute top-3 right-3">
         <StatusBadge active={w.IsActive} />
       </div>
-      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/40 to-transparent px-4 py-3">
+      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent px-4 py-3">
         <p className="text-white font-bold text-lg leading-none">
           {w.PricePerDay?.toLocaleString()}
           <span className="text-white/70 text-sm font-normal mr-1">ر.س / يوم</span>
@@ -59,18 +51,20 @@ const WarehouseCard = ({ w, isRenter, onBook }) => (
       </div>
     </div>
     <div className="p-4">
-      <h3 className="font-bold text-gray-900 text-sm mb-1 text-right">{w.Name}</h3>
+      <h3 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 700, fontSize: 15, color: '#0f172a', marginBottom: 6, textAlign: 'right' }}>
+        {w.Name}
+      </h3>
       {w.company?.CompanyName && (
-        <div className="flex items-center justify-end gap-1.5 text-gray-400 text-xs mb-2">
+        <div className="flex items-center justify-end gap-1.5 text-xs mb-2" style={{ color: '#64748b' }}>
           <span>{w.company.CompanyName}</span>
           <Users size={10} className="text-gray-300 shrink-0" />
         </div>
       )}
-      <div className="flex items-center justify-end gap-1.5 text-gray-500 text-xs mb-1">
+      <div className="flex items-center justify-end gap-1.5 text-xs mb-1" style={{ color: '#64748b' }}>
         <span>{w.Location}</span>
         <MapPin size={11} className="text-gray-400 shrink-0" />
       </div>
-      <div className="flex items-center justify-end gap-1.5 text-gray-500 text-xs">
+      <div className="flex items-center justify-end gap-1.5 text-xs" style={{ color: '#64748b' }}>
         <span>{w.Size?.toLocaleString()} م²</span>
         <Package size={11} className="text-gray-400 shrink-0" />
       </div>
@@ -79,7 +73,12 @@ const WarehouseCard = ({ w, isRenter, onBook }) => (
       )}
       {isRenter && w.IsActive && (
         <button onClick={() => onBook(w.WarehouseID)}
-          className="w-full mt-4 py-2.5 bg-[#1a3a5c] hover:bg-[#14304e] text-white text-sm font-bold rounded-lg transition-colors">
+          style={{
+            width: '100%', marginTop: 14, padding: '10px 0',
+            background: '#2563eb', color: '#fff', fontWeight: 700, fontSize: 14,
+            borderRadius: 9, border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+            boxShadow: '0 6px 14px -6px rgba(37,99,235,0.5)',
+          }}>
           احجز الآن
         </button>
       )}
@@ -93,33 +92,24 @@ function HomePage() {
   const [myWarehouses, setMyWarehouses] = useState([]);
   const [myBookings, setMyBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('home');
+  const [showAll, setShowAll] = useState(false);
   const [search, setSearch] = useState('');
 
   const roles = getUserRoles();
-  const userInfo = getUserInfo();
   const isRenter = roles.includes('renter_company');
   const isOwner = roles.includes('warehouse_owner');
-  const displayName = userInfo.company_name || userInfo.name || userInfo.email || 'المستخدم';
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
-  };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const headers = { 'Authorization': `Bearer ${token}` };
-        const res = await fetch(`${API_URL}/warehouses/`, { headers });
+        const res = await fetch(`${API_URL}/warehouses/`, { headers: getHeaders(false) });
         if (res.ok) {
           const data = await res.json();
           setWarehouses(data);
           if (isOwner) setMyWarehouses(data.filter(w => w.CompanyID === getCompanyId()));
         }
         if (isRenter) {
-          const br = await fetch(`${API_URL}/bookings/my`, { headers });
+          const br = await fetch(`${API_URL}/bookings/my`, { headers: getHeaders(false) });
           if (br.ok) setMyBookings(await br.json());
         }
       } catch {} finally { setLoading(false); }
@@ -131,171 +121,159 @@ function HomePage() {
     w.Name?.includes(search) || w.Location?.includes(search)
   );
 
-  const navItems = [
-    { label: 'الرئيسية', icon: LayoutDashboard, id: 'home', path: null },
-    ...(isRenter ? [{ label: 'حجوزاتي', icon: Layers, id: 'bookings', path: '/bookings' }] : []),
-    ...(isOwner ? [{ label: 'مستودعاتي', icon: Building2, id: 'my-warehouses', path: '/warehouses' }] : []),
-    ...(isOwner ? [{ label: 'إدارة الحجوزات', icon: Users, id: 'owner-bookings', path: '/owner-bookings' }] : []),
-  ];
-
-  const handleNavClick = (item) => {
-    if (item.path) navigate(item.path);
-    else setActiveTab(item.id);
-  };
+  const displayedWarehouses = showAll ? filteredWarehouses : filteredWarehouses.slice(0, 3);
 
   return (
-    <div className="min-h-screen bg-[#f7f8fa]" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
+    <div className="min-h-screen bg-[#f8fafc]" dir="rtl" style={{ fontFamily: "'IBM Plex Sans Arabic', 'Tajawal', sans-serif" }}>
 
-      {/* Navbar */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+      <Navbar />
+
+      {/* Hero */}
+      <div style={{ background: '#0d1b3e', position: 'relative', overflow: 'hidden' }} className="py-14 px-4">
+        {/* dot grid */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: 'radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1px)',
+          backgroundSize: '22px 22px', opacity: 0.7,
+          maskImage: 'radial-gradient(ellipse at center, #000 40%, transparent 80%)',
+          WebkitMaskImage: 'radial-gradient(ellipse at center, #000 40%, transparent 80%)',
+        }} />
+        {/* glow */}
+        <div style={{
+          position: 'absolute', top: -180, left: '50%', transform: 'translateX(-50%)',
+          width: 900, height: 600,
+          background: 'radial-gradient(ellipse at center, rgba(37,99,235,0.4) 0%, rgba(37,99,235,0.15) 30%, transparent 65%)',
+          pointerEvents: 'none', filter: 'blur(6px)',
+        }} />
+
+        <div className="max-w-2xl mx-auto text-center relative z-10">
+          <h1 style={{
+            fontFamily: "'Tajawal', sans-serif", fontWeight: 800,
+            fontSize: 'clamp(30px,4.5vw,50px)', color: '#fff',
+            lineHeight: 1.15, marginBottom: 10, letterSpacing: '-0.02em',
+          }}>
+            ابحث عن مستودعك المثالي
+          </h1>
+          <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.55)', marginBottom: 28 }}>
+            {warehouses.filter(w => w.IsActive).length} مستودع متاح في مناطق متعددة
+          </p>
+
+          {/* Search */}
+          <div style={{
+            background: '#fff', borderRadius: 14, display: 'flex', alignItems: 'center',
+            padding: '5px 5px 5px 16px',
+            boxShadow: '0 20px 50px -20px rgba(0,0,0,0.5), 0 4px 10px -2px rgba(0,0,0,0.15)',
+            maxWidth: 540, margin: '0 auto',
+          }}>
+            <Search size={18} color="#94a3b8" style={{ flexShrink: 0 }} />
+            <input
+              type="text" value={search} onChange={e => setSearch(e.target.value)}
+              placeholder="ابحث بالاسم أو الموقع..."
+              style={{
+                flex: 1, border: 0, outline: 'none', background: 'transparent',
+                padding: '12px 10px', fontFamily: 'inherit', fontSize: 14,
+                color: '#0f172a', direction: 'rtl',
+              }}
+            />
+            <button style={{
+              background: '#2563eb', color: '#fff', padding: '10px 20px',
+              borderRadius: 10, fontWeight: 700, fontSize: 14, border: 'none',
+              cursor: 'pointer', fontFamily: 'inherit',
+              boxShadow: '0 4px 12px -4px rgba(37,99,235,0.6)',
+            }}>
+              بحث
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="bg-white border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4">
-          <div className="flex items-center justify-between h-14">
-            <div className="flex items-center gap-5">
-              <div className="flex items-center gap-2 cursor-pointer" onClick={() => setActiveTab('home')}>
-                <div className="w-8 h-8 rounded-lg bg-[#1a3a5c] flex items-center justify-center">
-                  <span className="text-white font-black text-sm">ر</span>
+          <div className="flex overflow-x-auto">
+            {[
+              { label: 'إجمالي المستودعات', value: warehouses.length, icon: Building2 },
+              { label: 'متاح للحجز', value: warehouses.filter(w => w.IsActive).length, icon: CheckCircle },
+              ...(isRenter ? [{ label: 'حجوزاتي', value: myBookings.length, icon: Layers }] : []),
+              ...(isOwner ? [{ label: 'مستودعاتي', value: myWarehouses.length, icon: Users }] : []),
+            ].map((s, i) => (
+              <div key={i} className="flex items-center gap-3 px-6 py-4 shrink-0"
+                style={{ borderLeft: i !== 0 ? '1px solid #f1f5f9' : 'none' }}>
+                <div style={{ width: 40, height: 40, background: '#eff6ff', borderRadius: 10, display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+                  <s.icon size={18} color="#2563eb" />
                 </div>
-                <span className="text-[#1a3a5c] font-black text-lg">رفدي</span>
-              </div>
-
-              <nav className="hidden md:flex items-center gap-0.5">
-                {navItems.map(item => (
-                  <button key={item.id} onClick={() => handleNavClick(item)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors"
-                    style={{
-                      color: activeTab === item.id ? '#1a3a5c' : '#6b7280',
-                      background: activeTab === item.id ? '#eef2f7' : 'transparent'
-                    }}>
-                    <item.icon size={14} />
-                    {item.label}
-                  </button>
-                ))}
-              </nav>
-            </div>
-
-            <div className="flex items-center gap-3">
-              {isOwner && (
-                <button onClick={() => navigate('/warehouses')}
-                  className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-[#1a3a5c] hover:bg-[#14304e] text-white text-xs font-bold rounded-lg transition-colors">
-                  <Settings size={14} />
-                  إدارة المستودعات
-                </button>
-              )}
-
-              <NotificationBell />
-
-              <div className="hidden md:flex items-center gap-1.5">
-                {isOwner && <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-100">مالك</span>}
-                {isRenter && <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-100">مستأجر</span>}
-              </div>
-
-              {/* Avatar — يوجه لصفحة البروفايل */}
-              <div className="flex items-center gap-2 border-r border-gray-200 pr-3 cursor-pointer"
-                onClick={() => navigate('/profile')}>
-                <span className="text-sm font-semibold text-gray-700 hidden md:block max-w-[120px] truncate hover:text-[#1a3a5c] transition-colors">
-                  {displayName}
-                </span>
-                <div className="w-8 h-8 rounded-full bg-[#1a3a5c] hover:bg-[#14304e] flex items-center justify-center shrink-0 transition-colors">
-                  <span className="text-white text-xs font-bold">{displayName.charAt(0)}</span>
+                <div>
+                  <p style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 22, color: '#0f172a', lineHeight: 1 }}>
+                    {loading ? '—' : s.value}
+                  </p>
+                  <p style={{ fontSize: 12, color: '#64748b', marginTop: 3, fontWeight: 500 }}>{s.label}</p>
                 </div>
               </div>
-
-              <button onClick={handleLogout}
-                className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-red-600 transition-colors">
-                <LogOut size={15} />
-              </button>
-            </div>
+            ))}
           </div>
         </div>
-      </header>
+      </div>
 
-      {/* Hero / Search */}
-      {(activeTab === 'home' || activeTab === 'warehouses') && (
-        <div className="bg-[#1a3a5c] py-10 px-4">
-          <div className="max-w-2xl mx-auto text-center">
-            <h1 className="text-2xl font-black text-white mb-1">ابحث عن مستودعك المثالي</h1>
-            <p className="text-blue-200 text-sm mb-6">
-              {warehouses.filter(w => w.IsActive).length} مستودع متاح في مناطق متعددة
-            </p>
-            <div className="relative">
-              <input type="text" value={search} onChange={e => setSearch(e.target.value)}
-                placeholder="ابحث بالاسم أو الموقع..."
-                className="w-full py-3.5 pr-12 pl-4 rounded-xl text-sm font-medium bg-white border border-gray-200 outline-none text-gray-900 placeholder:text-gray-400" />
-              <Search size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Stats strip */}
-      {activeTab === 'home' && (
-        <div className="bg-white border-b border-gray-200">
-          <div className="max-w-6xl mx-auto px-4">
-            <div className="flex overflow-x-auto">
-              {[
-                { label: 'إجمالي المستودعات', value: warehouses.length, icon: Building2 },
-                { label: 'متاح للحجز', value: warehouses.filter(w => w.IsActive).length, icon: CheckCircle },
-                ...(isRenter ? [{ label: 'حجوزاتي', value: myBookings.length, icon: Layers }] : []),
-                ...(isOwner ? [{ label: 'مستودعاتي', value: myWarehouses.length, icon: Users }] : []),
-              ].map((s, i) => (
-                <div key={i} className="flex items-center gap-3 px-6 py-4 border-l border-gray-100 last:border-0 first:border-0 shrink-0">
-                  <s.icon size={18} className="text-gray-400" />
-                  <div>
-                    <p className="text-lg font-black text-gray-900 leading-none">{loading ? '—' : s.value}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">{s.label}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
+      {/* Warehouses */}
       <main className="max-w-6xl mx-auto px-4 py-8">
-        {(activeTab === 'home' || activeTab === 'warehouses') && (
-          <section>
-            <div className="flex justify-between items-center mb-5">
-              <button onClick={() => setActiveTab('warehouses')}
-                className="flex items-center gap-1 text-sm font-semibold text-[#1a3a5c] hover:underline">
-                عرض الكل ({warehouses.length})
-                <ChevronLeft size={14} />
-              </button>
-              <h2 className="text-base font-black text-gray-900">
-                {activeTab === 'home' ? 'أحدث المستودعات' : 'جميع المستودعات'}
-              </h2>
-            </div>
+        <div className="flex justify-between items-center mb-6">
+          {/* يسار — عرض الكل */}
+          <button onClick={() => setShowAll(!showAll)}
+            style={{
+              color: '#2563eb', fontWeight: 600, fontSize: 14,
+              display: 'inline-flex', alignItems: 'center', gap: 4,
+              padding: '6px 10px', borderRadius: 8, border: 'none',
+              background: 'transparent', cursor: 'pointer', fontFamily: 'inherit',
+            }}>
+            {showAll ? 'عرض أقل' : `عرض الكل (${warehouses.length})`}
+            <ChevronLeft size={14} style={{ transform: showAll ? 'rotate(90deg)' : 'none', transition: 'transform .2s' }} />
+          </button>
 
-            {loading ? (
-              <div className="flex justify-center py-16">
-                <Loader size={26} className="text-[#1a3a5c] animate-spin" />
-              </div>
-            ) : filteredWarehouses.length === 0 ? (
-              <div className="text-center py-16 bg-white border border-dashed border-gray-300 rounded-xl">
-                <Building2 size={32} className="text-gray-300 mx-auto mb-3" />
-                <p className="text-sm text-gray-500">لا توجد مستودعات مطابقة</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredWarehouses
-                  .slice(0, activeTab === 'home' ? 3 : filteredWarehouses.length)
-                  .map(w => (
-                    <WarehouseCard key={w.WarehouseID} w={w} isRenter={isRenter}
-                      onBook={id => navigate(`/booking/${id}`)} />
-                  ))}
-              </div>
-            )}
-          </section>
+          {/* يمين — العنوان */}
+          <h2 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 24, color: '#0f172a' }}>
+            أحدث المستودعات
+          </h2>
+        </div>
+
+        {loading ? (
+          <div className="flex justify-center py-16">
+            <Loader size={28} className="animate-spin" color="#2563eb" />
+          </div>
+        ) : filteredWarehouses.length === 0 ? (
+          <div className="text-center py-16 bg-white border border-dashed border-gray-200 rounded-xl">
+            <Building2 size={36} className="text-gray-300 mx-auto mb-3" />
+            <p style={{ fontSize: 14, color: '#94a3b8' }}>لا توجد مستودعات مطابقة</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {displayedWarehouses.map(w => (
+              <WarehouseCard key={w.WarehouseID} w={w} isRenter={isRenter}
+                onBook={id => navigate(`/booking/${id}`)} />
+            ))}
+          </div>
         )}
       </main>
 
-      <footer className="border-t border-gray-200 mt-12 py-6 bg-white">
-        <div className="max-w-6xl mx-auto px-4 flex justify-between items-center">
-          <span className="text-xs text-gray-400">© 2026 Rafdi Platform</span>
+      {/* Footer */}
+      <footer className="bg-white border-t border-gray-200 mt-6">
+        <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
+          <span style={{ color: '#94a3b8', fontSize: 13 }}>© Rafdi Platform 2026</span>
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md bg-[#1a3a5c] flex items-center justify-center">
-              <span className="text-white font-bold text-xs">ر</span>
-            </div>
-            <span className="text-xs font-bold text-gray-600">رفدي</span>
+            <span style={{
+              width: 28, height: 28, background: '#2563eb', borderRadius: 7,
+              display: 'grid', placeItems: 'center',
+              boxShadow: '0 4px 10px -4px rgba(37,99,235,0.5)',
+            }}>
+              <svg width="16" height="16" viewBox="0 0 64 64" fill="none">
+                <path d="M32 7 L61 28 L3 28 Z" fill="#fff" stroke="#fff" strokeWidth="2.4" strokeLinejoin="round"/>
+                <path d="M8 28 L8 57 L56 57 L56 28" stroke="#fff" strokeWidth="3.4" strokeLinejoin="round" strokeLinecap="round"/>
+                <line x1="2" y1="57" x2="62" y2="57" stroke="#fff" strokeWidth="3.4" strokeLinecap="round"/>
+                <rect x="13" y="44" width="10" height="13" fill="#fff" rx="1"/>
+                <rect x="27" y="37" width="10" height="20" fill="#fff" rx="1"/>
+                <rect x="41" y="41" width="10" height="16" fill="#fff" rx="1"/>
+              </svg>
+            </span>
+            <span style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 16, color: '#0f172a' }}>رفدي</span>
           </div>
         </div>
       </footer>

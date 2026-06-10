@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Building2, Calendar, Loader, Layers, Users, CheckCircle, Clock, XCircle } from 'lucide-react';
-import NotificationBell from '../components/NotificationBell';
-
-const API_URL = 'https://api.rafdi.com';
+import { Building2, Calendar, Loader, Layers, Users, CheckCircle, Clock, XCircle } from 'lucide-react';
+import Navbar from '../components/Navbar';
+import { API_URL, getHeaders } from '../config/api';
 
 const statusConfig = {
   confirmed: { label: 'مؤكد', className: 'bg-emerald-50 text-emerald-700 border border-emerald-200', icon: CheckCircle },
@@ -20,10 +19,7 @@ function OwnerBookingsPage() {
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const res = await fetch(`${API_URL}/bookings/owner`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
+        const res = await fetch(`${API_URL}/bookings/owner`, { headers: getHeaders(false) });
         if (res.ok) setBookings(await res.json());
       } catch {} finally { setLoading(false); }
     };
@@ -33,44 +29,24 @@ function OwnerBookingsPage() {
   const filtered = filter === 'all' ? bookings : bookings.filter(b => b.Status === filter);
 
   const stats = [
-    { label: 'إجمالي الحجوزات', value: bookings.length, color: 'text-gray-900' },
-    { label: 'مؤكدة', value: bookings.filter(b => b.Status === 'confirmed').length, color: 'text-emerald-600' },
-    { label: 'قيد الانتظار', value: bookings.filter(b => b.Status === 'pending').length, color: 'text-amber-600' },
-    { label: 'ملغية', value: bookings.filter(b => b.Status === 'cancelled').length, color: 'text-red-500' },
+    { label: 'إجمالي الحجوزات', value: bookings.length, color: '#0f172a' },
+    { label: 'مؤكدة', value: bookings.filter(b => b.Status === 'confirmed').length, color: '#10b981' },
+    { label: 'قيد الانتظار', value: bookings.filter(b => b.Status === 'pending').length, color: '#f59e0b' },
+    { label: 'ملغية', value: bookings.filter(b => b.Status === 'cancelled').length, color: '#ef4444' },
   ];
 
   return (
-    <div className="min-h-screen bg-[#f7f8fa]" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
+    <div className="min-h-screen bg-[#f8fafc]" dir="rtl" style={{ fontFamily: "'IBM Plex Sans Arabic', 'Tajawal', sans-serif" }}>
 
-      {/* Navbar */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-5xl mx-auto px-4">
-          <div className="flex items-center justify-between gap-4 h-14">
-            <div className="flex items-center gap-4">
-              <button onClick={() => navigate('/home')}
-                className="flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-gray-800 transition-colors">
-                <ChevronLeft size={16} className="rotate-180" />
-                رجوع
-              </button>
-              <div className="h-4 w-px bg-gray-200" />
-              <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/home')}>
-                <div className="w-7 h-7 rounded-lg bg-[#1a3a5c] flex items-center justify-center">
-                  <span className="text-white font-black text-xs">ر</span>
-                </div>
-                <span className="text-[#1a3a5c] font-black text-base">رفدي</span>
-              </div>
-            </div>
-
-            <NotificationBell />
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       {/* Page header */}
-      <div className="bg-[#1a3a5c] py-8 px-4">
+      <div style={{ background: '#0d1b3e' }} className="py-8 px-4">
         <div className="max-w-5xl mx-auto text-right">
-          <h1 className="text-xl font-black text-white mb-1">حجوزات مستودعاتي</h1>
-          <p className="text-blue-200 text-sm">عرض جميع الحجوزات على مستودعاتك</p>
+          <h1 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 26, color: '#fff', marginBottom: 4 }}>
+            حجوزات مستودعاتي
+          </h1>
+          <p style={{ color: 'rgba(255,255,255,0.62)', fontSize: 15 }}>عرض جميع الحجوزات على مستودعاتك</p>
         </div>
       </div>
 
@@ -79,9 +55,12 @@ function OwnerBookingsPage() {
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
           {stats.map((s, i) => (
-            <div key={i} className="bg-white border border-gray-200 rounded-xl p-4 text-right">
-              <p className={`text-2xl font-black ${s.color}`}>{loading ? '—' : s.value}</p>
-              <p className="text-xs text-gray-500 mt-0.5">{s.label}</p>
+            <div key={i} className="bg-white border border-gray-200 rounded-xl p-4 text-right"
+              style={{ boxShadow: '0 1px 2px rgba(15,23,42,0.04)' }}>
+              <p style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 26, color: s.color, lineHeight: 1 }}>
+                {loading ? '—' : s.value}
+              </p>
+              <p style={{ fontSize: 12, color: '#64748b', marginTop: 5 }}>{s.label}</p>
             </div>
           ))}
         </div>
@@ -95,11 +74,13 @@ function OwnerBookingsPage() {
             { key: 'cancelled', label: 'ملغية' },
           ].map(f => (
             <button key={f.key} onClick={() => setFilter(f.key)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
-                filter === f.key
-                  ? 'bg-[#1a3a5c] text-white'
-                  : 'bg-white border border-gray-200 text-gray-600 hover:border-gray-300'
-              }`}>
+              style={{
+                padding: '7px 14px', borderRadius: 8, fontSize: 13, fontWeight: 600,
+                border: filter === f.key ? 'none' : '1px solid #e2e8f0',
+                background: filter === f.key ? '#2563eb' : '#fff',
+                color: filter === f.key ? '#fff' : '#475569',
+                cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s',
+              }}>
               {f.label}
             </button>
           ))}
@@ -107,7 +88,7 @@ function OwnerBookingsPage() {
 
         {loading ? (
           <div className="flex justify-center py-20">
-            <Loader size={26} className="text-[#1a3a5c] animate-spin" />
+            <Loader size={26} color="#2563eb" className="animate-spin" />
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-20 bg-white border border-dashed border-gray-300 rounded-xl">
@@ -122,50 +103,47 @@ function OwnerBookingsPage() {
 
               return (
                 <div key={b.BookingID}
-                  className={`bg-white border rounded-xl p-5 transition-all ${
-                    b.Status === 'cancelled' ? 'border-gray-100 opacity-70' : 'border-gray-200'
-                  }`}>
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  className={`bg-white border rounded-xl p-5 ${b.Status === 'cancelled' ? 'border-gray-100 opacity-70' : 'border-gray-200'}`}
+                  style={{ boxShadow: '0 1px 2px rgba(15,23,42,0.04)' }}>
 
-                    {/* Left - Warehouse + renter info */}
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-start gap-3 text-right">
-                      <div className="w-10 h-10 rounded-lg bg-[#f0f4f8] border border-gray-200 flex items-center justify-center shrink-0">
-                        <Building2 size={18} className="text-[#1a3a5c]" />
+                      <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+                        style={{ background: '#eff6ff', border: '1px solid #dbeafe' }}>
+                        <Building2 size={18} color="#2563eb" />
                       </div>
                       <div>
-                        <p className="font-bold text-gray-900 text-sm">
+                        <p style={{ fontWeight: 700, fontSize: 14, color: '#0f172a' }}>
                           {b.warehouse?.Name || `مستودع #${b.WarehouseID}`}
                         </p>
                         <div className="flex items-center gap-1.5 mt-1">
-                          <Users size={11} className="text-gray-400" />
-                          <p className="text-xs text-gray-500">
-                            {b.renter_company?.CompanyName || `شركة #${b.CompanyName}`}
+                          <Users size={11} color="#94a3b8" />
+                          <p style={{ fontSize: 12, color: '#64748b' }}>
+                            {b.renter_company?.CompanyName || `شركة #${b.RenterCompanyID}`}
                           </p>
                         </div>
                         {b.renter_company?.CommercialRegistration && (
-                          <p className="text-xs text-gray-400 mt-0.5">
+                          <p style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>
                             سجل تجاري: {b.renter_company.CommercialRegistration}
                           </p>
                         )}
                       </div>
                     </div>
 
-                    {/* Right - Status + amount */}
                     <div className="flex flex-wrap items-center gap-2 justify-end">
                       <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-md border ${status.className}`}>
                         <StatusIcon size={11} />
                         {status.label}
                       </span>
-                      <span className="font-black text-gray-900 text-sm">
+                      <span style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 15, color: '#0f172a' }}>
                         {parseFloat(b.TotalPrice).toLocaleString()}
-                        <span className="text-xs font-normal text-gray-400 mr-1">ر.س</span>
+                        <span style={{ fontSize: 12, fontWeight: 400, color: '#94a3b8', marginRight: 3 }}>ر.س</span>
                       </span>
                     </div>
                   </div>
 
-                  {/* Dates + ID */}
                   <div className="flex flex-wrap items-center justify-between mt-4 pt-3 border-t border-gray-50 gap-2">
-                    <p className="text-xs text-gray-400 font-mono">#{b.BookingID}</p>
+                    <p style={{ fontSize: 12, color: '#94a3b8', fontFamily: 'monospace' }}>#{b.BookingID}</p>
                     <div className="flex items-center gap-1.5 text-gray-500 text-xs">
                       <Calendar size={11} className="text-gray-400 shrink-0" />
                       <span className="font-mono">{b.StartDate}</span>
@@ -177,15 +155,15 @@ function OwnerBookingsPage() {
               );
             })}
 
-            <div className="text-left pt-2">
-              <p className="text-xs text-gray-400">{filtered.length} حجز</p>
-            </div>
+            <p style={{ fontSize: 12, color: '#94a3b8', paddingTop: 8 }}>{filtered.length} حجز</p>
           </div>
         )}
       </main>
 
-      <footer className="border-t border-gray-200 mt-12 py-5 bg-white">
-        <p className="text-center text-xs text-gray-400">© 2026 Rafdi Platform — جميع الحقوق محفوظة</p>
+      <footer className="bg-white border-t border-gray-200 mt-12">
+        <div className="max-w-5xl mx-auto px-4 py-5 text-center">
+          <span style={{ color: '#64748b', fontSize: 13 }}>© Rafdi Platform 2026</span>
+        </div>
       </footer>
     </div>
   );

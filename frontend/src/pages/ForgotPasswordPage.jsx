@@ -1,8 +1,24 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, ShieldCheck, ChevronLeft, CheckCircle } from 'lucide-react';
+import { API_URL } from '../config/api';
 
-const API_URL = 'https://api.rafdi.com';
+const WarehouseMark = () => (
+  <span style={{
+    width: 32, height: 32, background: '#2563eb', borderRadius: 8,
+    display: 'grid', placeItems: 'center', flexShrink: 0,
+    boxShadow: '0 6px 14px -6px rgba(37,99,235,0.55), inset 0 -2px 0 rgba(0,0,0,0.08)',
+  }}>
+    <svg width="18" height="18" viewBox="0 0 64 64" fill="none">
+      <path d="M32 7 L61 28 L3 28 Z" fill="#fff" stroke="#fff" strokeWidth="2.4" strokeLinejoin="round"/>
+      <path d="M8 28 L8 57 L56 57 L56 28" stroke="#fff" strokeWidth="3.4" strokeLinejoin="round" strokeLinecap="round"/>
+      <line x1="2" y1="57" x2="62" y2="57" stroke="#fff" strokeWidth="3.4" strokeLinecap="round"/>
+      <rect x="13" y="44" width="10" height="13" fill="#fff" rx="1"/>
+      <rect x="27" y="37" width="10" height="20" fill="#fff" rx="1"/>
+      <rect x="41" y="41" width="10" height="16" fill="#fff" rx="1"/>
+    </svg>
+  </span>
+);
 
 function ForgotPasswordPage() {
   const [step, setStep] = useState(1);
@@ -59,27 +75,40 @@ function ForgotPasswordPage() {
     } finally { setLoading(false); }
   };
 
+  const inputStyle = {
+    width: '100%', padding: '11px 40px 11px 14px', borderRadius: 10,
+    border: '1px solid #e2e8f0', outline: 'none', background: '#fff',
+    fontSize: 14, color: '#0f172a', direction: 'rtl', fontFamily: 'inherit',
+    boxSizing: 'border-box', transition: 'border-color .15s',
+  };
+
+  const btnStyle = {
+    width: '100%', padding: '12px 16px', borderRadius: 9,
+    background: '#2563eb', color: '#fff',
+    fontWeight: 700, fontSize: 14.5, border: 'none', cursor: 'pointer',
+    fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+    boxShadow: '0 8px 18px -8px rgba(37,99,235,0.6)',
+    opacity: loading ? 0.6 : 1,
+  };
+
   return (
-    <div className="min-h-screen flex" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
+    <div className="min-h-screen flex" dir="rtl" style={{ fontFamily: "'IBM Plex Sans Arabic', 'Tajawal', sans-serif" }}>
 
       {/* Left Panel */}
-      <div className="hidden lg:flex lg:w-1/2 flex-col justify-between bg-[#1a3a5c] p-12">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center">
-            <span className="text-white font-black text-sm">ر</span>
-          </div>
-          <span className="text-white font-black text-lg">رفدي</span>
+      <div className="hidden lg:flex lg:w-1/2 flex-col justify-between p-12" style={{ background: '#0d1b3e' }}>
+        <div className="flex items-center gap-2.5">
+          <WarehouseMark />
+          <span style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 22, color: '#fff', letterSpacing: '-0.01em' }}>رفدي</span>
         </div>
 
         <div>
-          <h1 className="text-3xl font-black text-white leading-snug mb-4">
+          <h1 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 40, color: '#fff', lineHeight: 1.2, marginBottom: 14, letterSpacing: '-0.02em' }}>
             استعادة<br />كلمة المرور
           </h1>
-          <p className="text-blue-200 text-sm leading-relaxed mb-10 max-w-sm">
+          <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: 15, lineHeight: 1.65, marginBottom: 40, maxWidth: 340 }}>
             اتبع الخطوات البسيطة لإعادة تعيين كلمة مرورك والوصول لحسابك.
           </p>
 
-          {/* Steps */}
           <div className="space-y-5">
             {[
               { num: 1, label: 'أدخل بريدك الإلكتروني', desc: 'سنرسل لك رمز التحقق' },
@@ -87,74 +116,74 @@ function ForgotPasswordPage() {
               { num: 3, label: 'كلمة مرور جديدة', desc: 'اختر كلمة مرور قوية' },
             ].map((s) => (
               <div key={s.num} className="flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black shrink-0 transition-all ${
-                  step > s.num
-                    ? 'bg-emerald-500 text-white'
-                    : step === s.num
-                    ? 'bg-white text-[#1a3a5c]'
-                    : 'bg-white/10 text-white/40'
-                }`}>
+                <div style={{
+                  width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+                  display: 'grid', placeItems: 'center',
+                  fontSize: 12, fontWeight: 800,
+                  background: step > s.num ? '#10b981' : step === s.num ? '#fff' : 'rgba(255,255,255,0.1)',
+                  color: step > s.num ? '#fff' : step === s.num ? '#0d1b3e' : 'rgba(255,255,255,0.4)',
+                  transition: 'all .2s',
+                }}>
                   {step > s.num ? <CheckCircle size={14} /> : s.num}
                 </div>
                 <div>
-                  <p className={`text-sm font-bold ${step >= s.num ? 'text-white' : 'text-white/40'}`}>{s.label}</p>
-                  <p className="text-xs text-white/30">{s.desc}</p>
+                  <p style={{ fontSize: 14, fontWeight: 600, color: step >= s.num ? '#fff' : 'rgba(255,255,255,0.4)' }}>{s.label}</p>
+                  <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>{s.desc}</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        <p className="text-blue-400 text-xs">© 2026 Rafdi Platform</p>
+        <p style={{ color: '#3b82f6', fontSize: 12, opacity: 0.7 }}>© 2026 Rafdi Platform</p>
       </div>
 
       {/* Right Panel */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center bg-[#f7f8fa] p-6">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6" style={{ background: '#f8fafc' }}>
         <div className="w-full max-w-sm">
 
           {/* Mobile logo */}
-          <div className="flex items-center gap-2 mb-8 lg:hidden">
-            <div className="w-8 h-8 rounded-lg bg-[#1a3a5c] flex items-center justify-center">
-              <span className="text-white font-black text-sm">ر</span>
-            </div>
-            <span className="text-[#1a3a5c] font-black text-lg">رفدي</span>
+          <div className="flex items-center gap-2.5 mb-8 lg:hidden">
+            <WarehouseMark />
+            <span style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 20, color: '#0f172a' }}>رفدي</span>
           </div>
 
           {/* Back */}
-          <Link to="/login"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-gray-800 transition-colors mb-7">
-            <ChevronLeft size={16} className="rotate-180" />
+          <Link to="/login" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 14, fontWeight: 600, color: '#64748b', textDecoration: 'none', marginBottom: 24 }}>
+            <ChevronLeft size={16} style={{ transform: 'rotate(180deg)' }} />
             العودة لتسجيل الدخول
           </Link>
 
           {/* Header */}
           <div className="mb-6 text-right">
-            <div className="w-10 h-10 rounded-xl bg-[#1a3a5c] flex items-center justify-center mb-4">
-              <ShieldCheck size={20} className="text-white" />
+            <div style={{
+              width: 40, height: 40, borderRadius: 10, background: '#2563eb',
+              display: 'grid', placeItems: 'center', marginBottom: 14,
+              boxShadow: '0 6px 14px -6px rgba(37,99,235,0.55)',
+            }}>
+              <ShieldCheck size={20} color="#fff" />
             </div>
-            <h2 className="text-2xl font-black text-gray-900 mb-1">
+            <h2 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 24, color: '#0f172a', marginBottom: 6 }}>
               {step === 1 ? 'نسيت كلمة المرور؟' : 'أدخل رمز التحقق'}
             </h2>
-            <p className="text-gray-500 text-sm">
-              {step === 1
-                ? 'أدخل بريدك الإلكتروني وسنرسل لك رمز التحقق'
-                : `تم إرسال الرمز إلى ${email}`}
+            <p style={{ fontSize: 14, color: '#64748b' }}>
+              {step === 1 ? 'أدخل بريدك الإلكتروني وسنرسل لك رمز التحقق' : `تم إرسال الرمز إلى ${email}`}
             </p>
           </div>
 
-          {/* Error / Success */}
+          {/* Alerts */}
           {error && (
-            <div className="mb-5 p-3.5 rounded-xl text-sm flex items-start gap-2.5 bg-red-50 border border-red-200">
+            <div className="mb-5 p-3.5 rounded-xl flex items-start gap-2.5 bg-red-50 border border-red-200">
               <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center shrink-0 mt-0.5">
                 <span className="text-red-600 text-xs font-black">!</span>
               </div>
-              <p className="font-semibold text-red-700 text-right">{error}</p>
+              <p className="font-semibold text-red-700 text-right text-sm">{error}</p>
             </div>
           )}
           {success && (
-            <div className="mb-5 p-3.5 rounded-xl text-sm flex items-start gap-2.5 bg-emerald-50 border border-emerald-200">
+            <div className="mb-5 p-3.5 rounded-xl flex items-start gap-2.5 bg-emerald-50 border border-emerald-200">
               <CheckCircle size={16} className="text-emerald-600 shrink-0 mt-0.5" />
-              <p className="font-semibold text-emerald-700 text-right">{success}</p>
+              <p className="font-semibold text-emerald-700 text-right text-sm">{success}</p>
             </div>
           )}
 
@@ -162,18 +191,21 @@ function ForgotPasswordPage() {
           {step === 1 && (
             <form onSubmit={handleSendOTP} className="space-y-4">
               <div className="text-right">
-                <label className="block text-xs font-bold text-gray-600 mb-1.5">البريد الإلكتروني</label>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 6 }}>
+                  البريد الإلكتروني
+                </label>
                 <div className="relative">
                   <input type="text" placeholder="name@company.com"
-                    className="w-full py-3 px-4 pr-10 rounded-xl text-sm font-medium text-right bg-white border border-gray-200 outline-none focus:border-[#1a3a5c] transition-colors placeholder:text-gray-400 text-gray-900"
+                    style={inputStyle}
+                    onFocus={e => e.target.style.borderColor = '#2563eb'}
+                    onBlur={e => e.target.style.borderColor = '#e2e8f0'}
                     value={email}
                     onChange={e => { setEmail(e.target.value); if (error) setError(''); }} />
-                  <Mail size={15} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <Mail size={15} style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                 </div>
               </div>
 
-              <button type="submit" disabled={loading}
-                className="w-full py-3 rounded-xl font-bold text-white text-sm bg-[#1a3a5c] hover:bg-[#14304e] disabled:opacity-60 transition-colors flex items-center justify-center gap-2">
+              <button type="submit" disabled={loading} style={btnStyle}>
                 {loading ? (
                   <span className="flex items-center gap-2">
                     <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin block" />
@@ -188,33 +220,40 @@ function ForgotPasswordPage() {
           {step === 2 && (
             <form onSubmit={handleResetPassword} className="space-y-4">
               <div className="text-right">
-                <label className="block text-xs font-bold text-gray-600 mb-1.5">رمز التحقق</label>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 6 }}>
+                  رمز التحقق
+                </label>
                 <div className="relative">
                   <input type="text" placeholder="أدخل الرمز المرسل إلى بريدك"
-                    className="w-full py-3 px-4 pr-10 rounded-xl text-sm font-medium text-right bg-white border border-gray-200 outline-none focus:border-[#1a3a5c] transition-colors placeholder:text-gray-400 text-gray-900 tracking-widest"
+                    style={{ ...inputStyle, letterSpacing: '0.1em' }}
+                    onFocus={e => e.target.style.borderColor = '#2563eb'}
+                    onBlur={e => e.target.style.borderColor = '#e2e8f0'}
                     value={otp}
                     onChange={e => { setOtp(e.target.value); if (error) setError(''); }} />
-                  <ShieldCheck size={15} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <ShieldCheck size={15} style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                 </div>
               </div>
 
               <div className="text-right">
-                <label className="block text-xs font-bold text-gray-600 mb-1.5">كلمة المرور الجديدة</label>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 6 }}>
+                  كلمة المرور الجديدة
+                </label>
                 <div className="relative">
                   <input type={showPassword ? 'text' : 'password'} placeholder="٦ أحرف على الأقل"
-                    className="w-full py-3 px-4 pr-10 pl-10 rounded-xl text-sm font-medium text-right bg-white border border-gray-200 outline-none focus:border-[#1a3a5c] transition-colors placeholder:text-gray-400 text-gray-900"
+                    style={{ ...inputStyle, paddingLeft: 40 }}
+                    onFocus={e => e.target.style.borderColor = '#2563eb'}
+                    onBlur={e => e.target.style.borderColor = '#e2e8f0'}
                     value={newPassword}
                     onChange={e => { setNewPassword(e.target.value); if (error) setError(''); }} />
-                  <Lock size={15} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <Lock size={15} style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                   <button type="button" onClick={() => setShowPassword(!showPassword)}
-                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                    style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
                     {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                   </button>
                 </div>
               </div>
 
-              <button type="submit" disabled={loading}
-                className="w-full py-3 rounded-xl font-bold text-white text-sm bg-[#1a3a5c] hover:bg-[#14304e] disabled:opacity-60 transition-colors flex items-center justify-center gap-2">
+              <button type="submit" disabled={loading} style={btnStyle}>
                 {loading ? (
                   <span className="flex items-center gap-2">
                     <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin block" />
@@ -224,13 +263,13 @@ function ForgotPasswordPage() {
               </button>
 
               <button type="button" onClick={() => { setStep(1); setError(''); setSuccess(''); }}
-                className="w-full py-2.5 text-xs font-semibold text-gray-400 hover:text-[#1a3a5c] transition-colors">
+                style={{ width: '100%', padding: '10px', fontSize: 12, fontWeight: 600, color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>
                 لم تستلم الرمز؟ أعد الإرسال
               </button>
             </form>
           )}
 
-          <p className="text-center text-xs text-gray-400 mt-8">
+          <p style={{ textAlign: 'center', fontSize: 12, color: '#94a3b8', marginTop: 28 }}>
             © 2026 Rafdi Platform — جميع الحقوق محفوظة
           </p>
         </div>

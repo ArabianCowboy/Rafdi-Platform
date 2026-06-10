@@ -1,8 +1,24 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, Building2, ShieldCheck, ArrowLeft, CheckCircle } from 'lucide-react';
+import { API_URL } from '../config/api';
 
-const API_URL = 'https://api.rafdi.com';
+const WarehouseMark = () => (
+  <span style={{
+    width: 32, height: 32, background: '#2563eb', borderRadius: 8,
+    display: 'grid', placeItems: 'center', flexShrink: 0,
+    boxShadow: '0 6px 14px -6px rgba(37,99,235,0.55), inset 0 -2px 0 rgba(0,0,0,0.08)',
+  }}>
+    <svg width="18" height="18" viewBox="0 0 64 64" fill="none">
+      <path d="M32 7 L61 28 L3 28 Z" fill="#fff" stroke="#fff" strokeWidth="2.4" strokeLinejoin="round"/>
+      <path d="M8 28 L8 57 L56 57 L56 28" stroke="#fff" strokeWidth="3.4" strokeLinejoin="round" strokeLinecap="round"/>
+      <line x1="2" y1="57" x2="62" y2="57" stroke="#fff" strokeWidth="3.4" strokeLinecap="round"/>
+      <rect x="13" y="44" width="10" height="13" fill="#fff" rx="1"/>
+      <rect x="27" y="37" width="10" height="20" fill="#fff" rx="1"/>
+      <rect x="41" y="41" width="10" height="16" fill="#fff" rx="1"/>
+    </svg>
+  </span>
+);
 
 function RegisterPage() {
   const [companyName, setCompanyName] = useState('');
@@ -20,8 +36,7 @@ function RegisterPage() {
   const validateEmail = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
 
   const handleRegister = async (e) => {
-    e.preventDefault();
-    setError('');
+    e.preventDefault(); setError('');
     if (!companyName) { setError('يرجى إدخال اسم الشركة'); return; }
     if (!commercialRegistration) { setError('يرجى إدخال رقم السجل التجاري'); return; }
     if (!isOwner && !isRenter) { setError('يرجى اختيار نوع الحساب'); return; }
@@ -38,13 +53,7 @@ function RegisterPage() {
       const res = await fetch(`${API_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          company_name: companyName,
-          commercial_registration: commercialRegistration,
-          account_types: accountTypes,
-          email,
-          password,
-        }),
+        body: JSON.stringify({ company_name: companyName, commercial_registration: commercialRegistration, account_types: accountTypes, email, password }),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.detail || 'حدث خطأ أثناء إنشاء الحساب'); return; }
@@ -52,28 +61,31 @@ function RegisterPage() {
       setTimeout(() => navigate('/login'), 2500);
     } catch {
       setError('حدث خطأ في الاتصال، حاول مرة أخرى');
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
+  };
+
+  const inputStyle = {
+    width: '100%', padding: '11px 40px 11px 14px', borderRadius: 10,
+    border: '1px solid #e2e8f0', outline: 'none', background: '#fff',
+    fontSize: 14, color: '#0f172a', direction: 'rtl', fontFamily: 'inherit',
+    boxSizing: 'border-box', transition: 'border-color .15s',
   };
 
   return (
-    <div className="min-h-screen flex" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
+    <div className="min-h-screen flex" dir="rtl" style={{ fontFamily: "'IBM Plex Sans Arabic', 'Tajawal', sans-serif" }}>
 
       {/* Left Panel */}
-      <div className="hidden lg:flex lg:w-1/2 flex-col justify-between bg-[#1a3a5c] p-12">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center">
-            <span className="text-white font-black text-sm">ر</span>
-          </div>
-          <span className="text-white font-black text-lg">رفدي</span>
+      <div className="hidden lg:flex lg:w-1/2 flex-col justify-between p-12" style={{ background: '#0d1b3e' }}>
+        <div className="flex items-center gap-2.5">
+          <WarehouseMark />
+          <span style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 22, color: '#fff', letterSpacing: '-0.01em' }}>رفدي</span>
         </div>
 
         <div>
-          <h1 className="text-4xl font-black text-white leading-snug mb-4">
+          <h1 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 42, color: '#fff', lineHeight: 1.2, marginBottom: 14, letterSpacing: '-0.02em' }}>
             ابدأ رحلتك مع<br />منصة رفدي
           </h1>
-          <p className="text-blue-200 text-base leading-relaxed mb-10 max-w-sm">
+          <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: 16, lineHeight: 1.65, marginBottom: 36, maxWidth: 360 }}>
             سواء كنت تمتلك مستودعاً أو تبحث عن مساحة تخزين — رفدي يربطك بالطرف الآخر مباشرة.
           </p>
 
@@ -85,71 +97,79 @@ function RegisterPage() {
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-3">
                 <CheckCircle size={16} className="text-emerald-400 shrink-0" />
-                <span className="text-blue-100 text-sm">{item}</span>
+                <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14 }}>{item}</span>
               </div>
             ))}
           </div>
 
-          <div className="flex gap-8 pt-8 border-t border-white/10">
+          <div className="flex gap-8 pt-8" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
             {[
               { value: '+500', label: 'شركة مسجلة' },
               { value: '+128', label: 'مستودع نشط' },
               { value: '٩٩٪', label: 'رضا العملاء' },
             ].map((s, i) => (
               <div key={i}>
-                <p className="text-2xl font-black text-white">{s.value}</p>
-                <p className="text-blue-300 text-xs mt-0.5">{s.label}</p>
+                <p style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 26, color: '#fff' }}>{s.value}</p>
+                <p style={{ color: '#93c5fd', fontSize: 12, marginTop: 3 }}>{s.label}</p>
               </div>
             ))}
           </div>
         </div>
 
-        <p className="text-blue-400 text-xs">© 2026 Rafdi Platform</p>
+        <p style={{ color: '#3b82f6', fontSize: 12, opacity: 0.7 }}>© 2026 Rafdi Platform</p>
       </div>
 
       {/* Right Panel */}
-      <div className="w-full lg:w-1/2 flex items-start justify-center bg-[#f7f8fa] overflow-y-auto p-6 py-10">
+      <div className="w-full lg:w-1/2 flex items-start justify-center overflow-y-auto p-6 py-10" style={{ background: '#f8fafc' }}>
         <div className="w-full max-w-sm">
 
           {/* Mobile logo */}
-          <div className="flex items-center gap-2 mb-8 lg:hidden">
-            <div className="w-8 h-8 rounded-lg bg-[#1a3a5c] flex items-center justify-center">
-              <span className="text-white font-black text-sm">ر</span>
-            </div>
-            <span className="text-[#1a3a5c] font-black text-lg">رفدي</span>
+          <div className="flex items-center gap-2.5 mb-8 lg:hidden">
+            <WarehouseMark />
+            <span style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 20, color: '#0f172a' }}>رفدي</span>
           </div>
 
           {/* Header */}
           <div className="mb-6 text-right">
-            <h2 className="text-2xl font-black text-gray-900 mb-1">إنشاء حساب جديد</h2>
-            <p className="text-gray-500 text-sm">أدخل بيانات شركتك للبدء</p>
+            <h2 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 26, color: '#0f172a', marginBottom: 6 }}>
+              إنشاء حساب جديد
+            </h2>
+            <p style={{ fontSize: 14, color: '#64748b' }}>أدخل بيانات شركتك للبدء</p>
           </div>
 
           {/* Tabs */}
-          <div className="flex bg-white border border-gray-200 rounded-xl p-1 mb-6">
-            <Link to="/login" className="flex-1">
-              <button className="w-full py-2.5 rounded-lg text-sm font-semibold text-gray-500 hover:text-gray-700 transition-colors">
+          <div className="flex mb-6" style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12, padding: 4 }}>
+            <Link to="/login" style={{ flex: 1 }}>
+              <button style={{
+                width: '100%', padding: '10px 0', borderRadius: 9,
+                background: 'transparent', color: '#64748b',
+                fontWeight: 500, fontSize: 14, border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+              }}>
                 تسجيل الدخول
               </button>
             </Link>
-            <button className="flex-1 py-2.5 rounded-lg text-sm font-bold text-white bg-[#1a3a5c] transition-all">
+            <button style={{
+              flex: 1, padding: '10px 0', borderRadius: 9,
+              background: '#2563eb', color: '#fff',
+              fontWeight: 700, fontSize: 14, border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+            }}>
               حساب جديد
             </button>
           </div>
 
           {/* Alerts */}
           {error && (
-            <div className="mb-5 p-3.5 rounded-xl text-sm flex items-start gap-2.5 bg-red-50 border border-red-200">
+            <div className="mb-5 p-3.5 rounded-xl flex items-start gap-2.5 bg-red-50 border border-red-200">
               <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center shrink-0 mt-0.5">
                 <span className="text-red-600 text-xs font-black">!</span>
               </div>
-              <p className="font-semibold text-red-700 text-right">{error}</p>
+              <p style={{ fontSize: 13, fontWeight: 600, color: '#b91c1c' }}>{error}</p>
             </div>
           )}
           {success && (
-            <div className="mb-5 p-3.5 rounded-xl text-sm flex items-start gap-2.5 bg-emerald-50 border border-emerald-200">
+            <div className="mb-5 p-3.5 rounded-xl flex items-start gap-2.5 bg-emerald-50 border border-emerald-200">
               <CheckCircle size={16} className="text-emerald-600 shrink-0 mt-0.5" />
-              <p className="font-semibold text-emerald-700">تم إنشاء الحساب بنجاح! جاري التحويل...</p>
+              <p style={{ fontSize: 13, fontWeight: 600, color: '#059669' }}>تم إنشاء الحساب بنجاح! جاري التحويل...</p>
             </div>
           )}
 
@@ -157,49 +177,65 @@ function RegisterPage() {
 
             {/* Company Name */}
             <div className="text-right">
-              <label className="block text-xs font-bold text-gray-600 mb-1.5">اسم الشركة</label>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 6 }}>
+                اسم الشركة
+              </label>
               <div className="relative">
                 <input type="text" placeholder="شركة رفدي للخدمات اللوجستية"
-                  className="w-full py-3 px-4 pr-10 rounded-xl text-sm font-medium text-right bg-white border border-gray-200 outline-none focus:border-[#1a3a5c] transition-colors placeholder:text-gray-400 text-gray-900"
+                  style={inputStyle}
+                  onFocus={e => e.target.style.borderColor = '#2563eb'}
+                  onBlur={e => e.target.style.borderColor = '#e2e8f0'}
                   value={companyName}
                   onChange={e => { setCompanyName(e.target.value); if (error) setError(''); }} />
-                <Building2 size={15} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Building2 size={15} style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
               </div>
             </div>
 
             {/* CR */}
             <div className="text-right">
-              <label className="block text-xs font-bold text-gray-600 mb-1.5">رقم السجل التجاري</label>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 6 }}>
+                رقم السجل التجاري
+              </label>
               <div className="relative">
                 <input type="text" placeholder="1010XXXXXX"
-                  className="w-full py-3 px-4 pr-10 rounded-xl text-sm font-medium text-right bg-white border border-gray-200 outline-none focus:border-[#1a3a5c] transition-colors placeholder:text-gray-400 text-gray-900"
+                  style={inputStyle}
+                  onFocus={e => e.target.style.borderColor = '#2563eb'}
+                  onBlur={e => e.target.style.borderColor = '#e2e8f0'}
                   value={commercialRegistration}
                   onChange={e => { setCommercialRegistration(e.target.value); if (error) setError(''); }} />
-                <ShieldCheck size={15} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                <ShieldCheck size={15} style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
               </div>
             </div>
 
             {/* Account Type */}
             <div className="text-right">
-              <label className="block text-xs font-bold text-gray-600 mb-2">نوع الحساب <span className="text-gray-400 font-normal">(يمكن اختيار أكثر من نوع)</span></label>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 8 }}>
+                نوع الحساب <span style={{ color: '#94a3b8', fontWeight: 400 }}>(يمكن اختيار أكثر من نوع)</span>
+              </label>
               <div className="grid grid-cols-2 gap-2">
                 {[
                   { label: 'مالك مستودع', desc: 'أرغب في التأجير', checked: isOwner, onChange: () => { setIsOwner(!isOwner); if (error) setError(''); } },
                   { label: 'مستأجر', desc: 'أرغب في الاستئجار', checked: isRenter, onChange: () => { setIsRenter(!isRenter); if (error) setError(''); } },
                 ].map((type, i) => (
                   <button key={i} type="button" onClick={type.onChange}
-                    className="p-3.5 rounded-xl text-right border transition-all relative"
                     style={{
-                      borderColor: type.checked ? '#1a3a5c' : '#e5e7eb',
-                      background: type.checked ? '#f0f4f8' : 'white',
+                      padding: '12px 14px', borderRadius: 10, textAlign: 'right',
+                      border: `1.5px solid ${type.checked ? '#2563eb' : '#e2e8f0'}`,
+                      background: type.checked ? '#eff6ff' : '#fff',
+                      cursor: 'pointer', fontFamily: 'inherit', position: 'relative',
+                      transition: 'all .15s',
                     }}>
                     {type.checked && (
-                      <div className="absolute top-2 left-2 w-4 h-4 rounded-full bg-[#1a3a5c] flex items-center justify-center">
-                        <span className="text-white text-[10px] font-black">✓</span>
+                      <div style={{
+                        position: 'absolute', top: 8, left: 8,
+                        width: 18, height: 18, borderRadius: '50%',
+                        background: '#2563eb', display: 'grid', placeItems: 'center',
+                      }}>
+                        <span style={{ color: '#fff', fontSize: 10, fontWeight: 800 }}>✓</span>
                       </div>
                     )}
-                    <p className="font-bold text-sm text-gray-900">{type.label}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">{type.desc}</p>
+                    <p style={{ fontWeight: 700, fontSize: 13.5, color: '#0f172a' }}>{type.label}</p>
+                    <p style={{ fontSize: 12, color: '#64748b', marginTop: 3 }}>{type.desc}</p>
                   </button>
                 ))}
               </div>
@@ -207,34 +243,48 @@ function RegisterPage() {
 
             {/* Email */}
             <div className="text-right">
-              <label className="block text-xs font-bold text-gray-600 mb-1.5">البريد الإلكتروني</label>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 6 }}>
+                البريد الإلكتروني
+              </label>
               <div className="relative">
                 <input type="text" placeholder="name@company.com"
-                  className="w-full py-3 px-4 pr-10 rounded-xl text-sm font-medium text-right bg-white border border-gray-200 outline-none focus:border-[#1a3a5c] transition-colors placeholder:text-gray-400 text-gray-900"
+                  style={inputStyle}
+                  onFocus={e => e.target.style.borderColor = '#2563eb'}
+                  onBlur={e => e.target.style.borderColor = '#e2e8f0'}
                   value={email}
                   onChange={e => { setEmail(e.target.value); if (error) setError(''); }} />
-                <Mail size={15} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Mail size={15} style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
               </div>
             </div>
 
             {/* Password */}
             <div className="text-right">
-              <label className="block text-xs font-bold text-gray-600 mb-1.5">كلمة المرور</label>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 6 }}>
+                كلمة المرور
+              </label>
               <div className="relative">
                 <input type={showPassword ? 'text' : 'password'} placeholder="٦ أحرف على الأقل"
-                  className="w-full py-3 px-4 pr-10 pl-10 rounded-xl text-sm font-medium text-right bg-white border border-gray-200 outline-none focus:border-[#1a3a5c] transition-colors placeholder:text-gray-400 text-gray-900"
+                  style={{ ...inputStyle, paddingLeft: 40 }}
+                  onFocus={e => e.target.style.borderColor = '#2563eb'}
+                  onBlur={e => e.target.style.borderColor = '#e2e8f0'}
                   value={password}
                   onChange={e => { setPassword(e.target.value); if (error) setError(''); }} />
-                <Lock size={15} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Lock size={15} style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                 <button type="button" onClick={() => setShowPassword(!showPassword)}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                  style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
                   {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                 </button>
               </div>
             </div>
 
             <button type="submit" disabled={loading}
-              className="w-full py-3 rounded-xl font-bold text-white text-sm bg-[#1a3a5c] hover:bg-[#14304e] disabled:opacity-60 transition-colors flex items-center justify-center gap-2 mt-2">
+              style={{
+                width: '100%', padding: '12px 16px', borderRadius: 9,
+                background: loading ? '#93c5fd' : '#2563eb', color: '#fff',
+                fontWeight: 700, fontSize: 14.5, border: 'none', cursor: 'pointer',
+                fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                boxShadow: '0 8px 18px -8px rgba(37,99,235,0.6)', marginTop: 8,
+              }}>
               {loading ? (
                 <span className="flex items-center gap-2">
                   <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin block" />
@@ -249,7 +299,7 @@ function RegisterPage() {
             </button>
           </form>
 
-          <p className="text-center text-xs text-gray-400 mt-8">
+          <p style={{ textAlign: 'center', fontSize: 12, color: '#94a3b8', marginTop: 28 }}>
             © 2026 Rafdi Platform — جميع الحقوق محفوظة
           </p>
         </div>
