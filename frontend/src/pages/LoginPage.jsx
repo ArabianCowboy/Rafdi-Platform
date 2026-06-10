@@ -133,6 +133,7 @@ function LoginPage() {
   const validateEmail = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
 
   const handleLogin = async (e) => {
+
     e.preventDefault();
     setError('');
     if (!validateEmail(email)) { setError('يرجى إدخال بريد إلكتروني صحيح'); return; }
@@ -153,6 +154,9 @@ function LoginPage() {
       const isRenter = roles.includes('renter_company');
 
       localStorage.setItem('token', token);
+
+      const payload = JSON.parse(atob(token.split('.')[1]));
+        localStorage.setItem('company_name', payload.company_name || '');
 
       if (isOwner && isRenter) {
         setPendingToken(token);

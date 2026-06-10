@@ -1,8 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useState, useEffect } from 'react';
 import { LogOut, Settings } from 'lucide-react';
 import NotificationBell from './NotificationBell';
-import { API_URL, getHeaders } from '../config/api';
 
 const getUserRoles = () => {
   try {
@@ -26,31 +24,17 @@ const WarehouseLogo = () => (
 function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [companyName, setCompanyName] = useState('');
 
   const roles = getUserRoles();
   const isOwner = roles.includes('warehouse_owner');
   const isRenter = roles.includes('renter_company');
 
-  // جيب اسم الشركة من API
-  useEffect(() => {
-    const fetchMe = async () => {
-      try {
-        const res = await fetch(`${API_URL}/auth/me`, { headers: getHeaders(false) });
-        if (res.ok) {
-          const data = await res.json();
-          setCompanyName(data.company?.CompanyName || '');
-        }
-      } catch {}
-    };
-    fetchMe();
-  }, []);
-
-  const displayName = companyName || 'المستخدم';
-  const avatarLetter = displayName.charAt(0);
+  const companyName = localStorage.getItem('company_name') || 'المستخدم';
+  const avatarLetter = companyName.charAt(0);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('company_name');
     localStorage.removeItem('selectedRole');
     navigate('/login');
   };
@@ -153,7 +137,7 @@ function Navbar() {
               {avatarLetter}
             </span>
             <span style={{ fontSize: 14, fontWeight: 600, color: '#0f172a', maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {displayName}
+              {companyName}
             </span>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="6 9 12 15 18 9"/>
