@@ -1,6 +1,8 @@
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { LogOut, Settings } from 'lucide-react';
 import NotificationBell from './NotificationBell';
+import { API_URL, getHeaders } from '../config/api';
 
 const getUserRoles = () => {
   try {
@@ -8,14 +10,6 @@ const getUserRoles = () => {
     if (!token) return [];
     return JSON.parse(atob(token.split('.')[1])).roles || [];
   } catch { return []; }
-};
-
-const getUserInfo = () => {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) return {};
-    return JSON.parse(atob(token.split('.')[1]));
-  } catch { return {}; }
 };
 
 const WarehouseLogo = () => (
@@ -32,17 +26,32 @@ const WarehouseLogo = () => (
 function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [companyName, setCompanyName] = useState('');
 
   const roles = getUserRoles();
-  const userInfo = getUserInfo();
   const isOwner = roles.includes('warehouse_owner');
   const isRenter = roles.includes('renter_company');
-  const companyName = userInfo.company_name || '';
-  const displayName = companyName || userInfo.email || 'المستخدم';
-  const avatarLetter = companyName.charAt(0) || userInfo.email?.charAt(0) || 'م';
+
+  // جيب اسم الشركة من API
+  useEffect(() => {
+    const fetchMe = async () => {
+      try {
+        const res = await fetch(`${API_URL}/auth/me`, { headers: getHeaders(false) });
+        if (res.ok) {
+          const data = await res.json();
+          setCompanyName(data.company?.CompanyName || '');
+        }
+      } catch {}
+    };
+    fetchMe();
+  }, []);
+
+  const displayName = companyName || 'المستخدم';
+  const avatarLetter = displayName.charAt(0);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('selectedRole');
     navigate('/login');
   };
 
@@ -122,35 +131,9 @@ function Navbar() {
 
           <NotificationBell />
 
-          {/* Role chips */}
-          <div style={{ display: 'flex', gap: 6 }}>
-            {isOwner && (
-              <span style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6,
-                padding: '5px 11px', borderRadius: 100,
-                fontSize: 12.5, fontWeight: 600,
-                background: '#eff6ff', color: '#1d4ed8',
-              }}>
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#2563eb' }} />
-                مالك
-              </span>
-            )}
-            {isRenter && (
-              <span style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6,
-                padding: '5px 11px', borderRadius: 100,
-                fontSize: 12.5, fontWeight: 600,
-                background: '#ecfdf5', color: '#047857',
-              }}>
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10b981' }} />
-                مستأجر
-              </span>
-            )}
-          </div>
-
           <span style={{ width: 1, height: 26, background: '#e2e8f0' }} />
 
-          {/* User — اسم الشركة */}
+          {/* User */}
           <button onClick={() => navigate('/profile')}
             style={{
               display: 'flex', alignItems: 'center', gap: 8,
