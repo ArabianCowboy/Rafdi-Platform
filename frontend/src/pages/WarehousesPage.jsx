@@ -131,29 +131,31 @@ function WarehousesPage() {
       <Navbar />
 
       <main className="max-w-6xl mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-6">
-          <div />
-          <div className="text-right flex items-center gap-4">
-            <div>
+
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, direction: 'rtl' }}>
+          {/* يمين */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            {isOwner && (
+              <button onClick={openCreate} style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                padding: '10px 18px', background: '#2563eb', color: '#fff',
+                fontWeight: 600, fontSize: 14, borderRadius: 9, border: 'none',
+                cursor: 'pointer', fontFamily: 'inherit',
+                boxShadow: '0 6px 16px -6px rgba(37,99,235,0.55)',
+              }}>
+                <Plus size={15} />
+                إضافة مستودع
+              </button>
+            )}
+            <div style={{ textAlign: 'right' }}>
               <h1 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 22, color: '#0f172a' }}>
                 إدارة المستودعات
               </h1>
               <p style={{ fontSize: 13, color: '#64748b', marginTop: 3 }}>{warehouses.length} مستودع مسجل</p>
             </div>
-            {isOwner && (
-              <button onClick={openCreate}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 8,
-                  padding: '10px 18px', background: '#2563eb', color: '#fff',
-                  fontWeight: 600, fontSize: 14, borderRadius: 9, border: 'none',
-                  cursor: 'pointer', fontFamily: 'inherit',
-                  boxShadow: '0 6px 16px -6px rgba(37,99,235,0.55)',
-                }}>
-                <Plus size={15} />
-                إضافة مستودع
-              </button>
-            )}
           </div>
+          <div />
         </div>
 
         {success && (
@@ -172,12 +174,11 @@ function WarehousesPage() {
             <Building2 size={36} className="text-gray-300 mx-auto mb-3" />
             <p style={{ fontSize: 14, color: '#64748b', marginBottom: 14 }}>لم تضف أي مستودع بعد</p>
             {isOwner && (
-              <button onClick={openCreate}
-                style={{
-                  padding: '9px 20px', background: '#2563eb', color: '#fff',
-                  fontWeight: 600, fontSize: 14, borderRadius: 9, border: 'none',
-                  cursor: 'pointer', fontFamily: 'inherit',
-                }}>
+              <button onClick={openCreate} style={{
+                padding: '9px 20px', background: '#2563eb', color: '#fff',
+                fontWeight: 600, fontSize: 14, borderRadius: 9, border: 'none',
+                cursor: 'pointer', fontFamily: 'inherit',
+              }}>
                 أضف مستودعك الأول
               </button>
             )}
@@ -185,7 +186,7 @@ function WarehousesPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {warehouses.map((w) => (
-              <div key={w.WarehouseID}
+              <div key={w.WarehouseID} dir="rtl"
                 className="bg-white border border-gray-200 rounded-xl overflow-hidden transition-all"
                 style={{ boxShadow: '0 1px 2px rgba(15,23,42,0.04)' }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.boxShadow = '0 4px 12px -4px rgba(15,23,42,0.1)'; }}
@@ -202,26 +203,26 @@ function WarehousesPage() {
                     <StatusBadge active={w.IsActive} />
                   </div>
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/40 to-transparent px-4 py-3">
-                    <p className="text-white font-bold text-base leading-none">
+                    <p className="text-white font-bold text-base leading-none text-right">
                       {w.PricePerDay?.toLocaleString()}
                       <span className="text-white/70 text-xs font-normal mr-1">ر.س / يوم</span>
                     </p>
                   </div>
                 </div>
-                <div className="p-4">
-                  <h3 style={{ fontWeight: 700, fontSize: 14.5, color: '#0f172a', marginBottom: 8, textAlign: 'right' }}>{w.Name}</h3>
+                <div className="p-4 text-right">
+                  <h3 style={{ fontWeight: 700, fontSize: 14.5, color: '#0f172a', marginBottom: 8 }}>{w.Name}</h3>
                   <div className="space-y-1 mb-3">
-                    <div className="flex items-center justify-end gap-1.5 text-xs" style={{ color: '#64748b' }}>
-                      <span>{w.Location}</span>
+                    <div className="flex items-center gap-1.5 text-xs" style={{ color: '#64748b' }}>
                       <MapPin size={11} color="#94a3b8" className="shrink-0" />
+                      <span>{w.Location}</span>
                     </div>
-                    <div className="flex items-center justify-end gap-1.5 text-xs" style={{ color: '#64748b' }}>
-                      <span>{w.Size?.toLocaleString()} م²</span>
+                    <div className="flex items-center gap-1.5 text-xs" style={{ color: '#64748b' }}>
                       <Package size={11} color="#94a3b8" className="shrink-0" />
+                      <span>{w.Size?.toLocaleString()} م²</span>
                     </div>
                   </div>
                   {w.Description && (
-                    <p style={{ fontSize: 12, color: '#94a3b8', textAlign: 'right', lineHeight: 1.6, marginBottom: 10 }} className="line-clamp-2">
+                    <p style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.6, marginBottom: 10 }} className="line-clamp-2">
                       {w.Description}
                     </p>
                   )}
@@ -245,7 +246,7 @@ function WarehousesPage() {
                           padding: '8px 0', borderRadius: 8, fontSize: 12, fontWeight: 600,
                           border: w.IsActive ? '1px solid #fecaca' : '1px solid #a7f3d0',
                           color: w.IsActive ? '#ef4444' : '#10b981',
-                          background: '#fff', cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s',
+                          background: '#fff', cursor: 'pointer', fontFamily: 'inherit',
                         }}>
                         <Power size={13} />
                         {w.IsActive ? 'تعطيل' : 'تفعيل'}
@@ -265,17 +266,17 @@ function WarehousesPage() {
           <div className="absolute inset-0 bg-black/50" onClick={() => setShowModal(false)} />
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md relative z-10 overflow-hidden max-h-[90vh] overflow-y-auto">
 
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-              <button onClick={() => setShowModal(false)}
-                style={{ width: 28, height: 28, borderRadius: 8, background: '#f1f5f9', border: 'none', cursor: 'pointer', display: 'grid', placeItems: 'center', color: '#64748b' }}>
-                <X size={15} />
-              </button>
-              <div className="text-right">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100" dir="rtl">
+              <div>
                 <h3 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 16, color: '#0f172a' }}>
                   {editWarehouse ? 'تعديل المستودع' : 'إضافة مستودع جديد'}
                 </h3>
                 {editWarehouse && <p style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>{editWarehouse.Name}</p>}
               </div>
+              <button onClick={() => setShowModal(false)}
+                style={{ width: 28, height: 28, borderRadius: 8, background: '#f1f5f9', border: 'none', cursor: 'pointer', display: 'grid', placeItems: 'center', color: '#64748b' }}>
+                <X size={15} />
+              </button>
             </div>
 
             <div className="p-5">
@@ -290,7 +291,6 @@ function WarehousesPage() {
 
               <form onSubmit={handleSubmit} className="space-y-4 text-right">
 
-                {/* Image Upload */}
                 <div>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 6 }}>
                     صورة المستودع
@@ -409,10 +409,7 @@ function WarehousesPage() {
                       جاري الحفظ...
                     </span>
                   ) : (
-                    <>
-                      <Save size={15} />
-                      {editWarehouse ? 'حفظ التعديلات' : 'إنشاء المستودع'}
-                    </>
+                    <><Save size={15} />{editWarehouse ? 'حفظ التعديلات' : 'إنشاء المستودع'}</>
                   )}
                 </button>
               </form>

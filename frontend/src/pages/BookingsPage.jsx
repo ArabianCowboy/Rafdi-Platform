@@ -66,7 +66,6 @@ function BookingsPage() {
 
       <Navbar />
 
-      {/* Page header */}
       <div style={{ background: '#0d1b3e' }} className="py-8 px-4">
         <div className="max-w-5xl mx-auto text-right">
           <h1 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 26, color: '#fff', marginBottom: 4 }}>حجوزاتي</h1>
@@ -105,9 +104,33 @@ function BookingsPage() {
                   onMouseEnter={e => { if (b.Status !== 'cancelled') e.currentTarget.style.borderColor = '#2563eb'; }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = b.Status === 'cancelled' ? '#f3f4f6' : '#e2e8f0'; }}
                 >
-                  <div className="p-5 text-right">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex flex-wrap items-center gap-2">
+                  <div className="p-5" dir="rtl">
+
+                    {/* Row 1: warehouse info يمين — badges يسار */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
+
+                      {/* يمين — بيانات المستودع */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <div style={{ width: 40, height: 40, borderRadius: 10, background: '#eff6ff', border: '1px solid #dbeafe', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+                          <Building2 size={18} color="#2563eb" />
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                          <p style={{ fontWeight: 700, fontSize: 14, color: '#0f172a' }}>
+                            {b.warehouse?.Name || `مستودع #${b.WarehouseID}`}
+                          </p>
+                          {b.warehouse?.company?.CompanyName && (
+                            <p style={{ fontSize: 12, fontWeight: 600, color: '#2563eb', marginTop: 2 }}>
+                              {b.warehouse.company.CompanyName}
+                            </p>
+                          )}
+                          {b.warehouse?.Location && (
+                            <p style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>{b.warehouse.Location}</p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* يسار — badges */}
+                      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6, flexShrink: 0 }}>
                         <span className={`text-xs font-semibold px-2.5 py-1 rounded-md border ${status.className}`}>
                           {status.label}
                         </span>
@@ -116,66 +139,49 @@ function BookingsPage() {
                           {payment.label}
                         </span>
                       </div>
-
-                      <div className="flex items-center gap-3">
-                        <div className="text-right">
-                          <p className="font-bold text-gray-900 text-sm">
-                            {b.warehouse?.Name || `مستودع #${b.WarehouseID}`}
-                          </p>
-                          {b.warehouse?.company?.CompanyName && (
-                            <p className="text-xs font-semibold mt-0.5" style={{ color: '#2563eb' }}>
-                              {b.warehouse.company.CompanyName}
-                            </p>
-                          )}
-                          {b.warehouse?.Location && (
-                            <p className="text-xs text-gray-400 mt-0.5">{b.warehouse.Location}</p>
-                          )}
-                        </div>
-                        <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
-                          style={{ background: '#eff6ff', border: '1px solid #dbeafe' }}>
-                          <Building2 size={18} color="#2563eb" />
-                        </div>
-                      </div>
                     </div>
 
-                    <div className="mt-3 text-right">
+                    {/* Row 2: المبلغ */}
+                    <div style={{ marginTop: 12, textAlign: 'right' }}>
                       <span style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 16, color: '#0f172a' }}>
                         {parseFloat(b.TotalPrice).toLocaleString()}
                         <span style={{ fontSize: 12, fontWeight: 400, color: '#94a3b8', marginRight: 4 }}>ر.س</span>
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-50 gap-2">
-                      <p className="text-xs text-gray-400 font-mono">{b.BookingID}#</p>
-                      <div className="flex items-center gap-1.5 text-gray-500 text-xs">
-                        <span className="font-mono">{b.EndDate}</span>
-                        <span className="text-gray-300 mx-1">←</span>
-                        <span className="font-mono">{b.StartDate}</span>
-                        <Calendar size={11} className="text-gray-400 shrink-0" />
+                    {/* Row 3: التواريخ + الرقم */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, paddingTop: 12, borderTop: '1px solid #f8fafc' }}>
+                      <p style={{ fontSize: 12, color: '#94a3b8', fontFamily: 'monospace' }}>{b.BookingID}#</p>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#64748b' }}>
+                        <span style={{ fontFamily: 'monospace' }}>{b.EndDate}</span>
+                        <span style={{ color: '#cbd5e1' }}>←</span>
+                        <span style={{ fontFamily: 'monospace' }}>{b.StartDate}</span>
+                        <Calendar size={11} color="#94a3b8" />
                       </div>
                     </div>
                   </div>
 
+                  {/* زر الإلغاء */}
                   {canCancel(b) && (
-                    <div className="px-5 pb-4" onClick={e => e.stopPropagation()}>
+                    <div className="px-5 pb-4" dir="rtl" onClick={e => e.stopPropagation()}>
                       {cancelError && cancellingId === null && confirmCancel === b.BookingID && (
                         <p className="text-xs text-red-600 font-semibold text-right mb-2">{cancelError}</p>
                       )}
                       {confirmCancel === b.BookingID ? (
-                        <div className="flex items-center gap-2 justify-end">
-                          <p className="text-xs text-gray-500 font-medium">هل أنت متأكد من إلغاء الحجز؟</p>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'flex-start' }}>
+                          <button onClick={() => handleCancel(b.BookingID)} disabled={isCancelling}
+                            className="px-3 py-1.5 text-xs font-bold text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors disabled:opacity-60 flex items-center gap-1.5">
+                            {isCancelling ? <span className="w-3 h-3 border border-white/30 border-t-white rounded-full animate-spin block" /> : <X size={12} />}
+                            نعم، إلغاء
+                          </button>
                           <button onClick={() => setConfirmCancel(null)}
                             className="px-3 py-1.5 text-xs font-bold text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                             لا
                           </button>
-                          <button onClick={() => handleCancel(b.BookingID)} disabled={isCancelling}
-                            className="px-3 py-1.5 text-xs font-bold text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors disabled:opacity-60 flex items-center gap-1.5">
-                            {isCancelling ? <span className="w-3 h-3 border border-white/30 border-t-white rounded-full animate-spin block" /> : <X size={12} />}
-                            نعم، إلغاء الحجز
-                          </button>
+                          <p className="text-xs text-gray-500 font-medium">هل أنت متأكد؟</p>
                         </div>
                       ) : (
-                        <div className="flex justify-end">
+                        <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
                           <button onClick={() => { setConfirmCancel(b.BookingID); setCancelError(''); }}
                             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors">
                             <X size={12} />
@@ -189,13 +195,13 @@ function BookingsPage() {
               );
             })}
 
-            <div className="flex justify-between items-center pt-2">
-              <span className="text-xs text-gray-400">
+            <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 8 }}>
+              <span style={{ fontSize: 12, color: '#94a3b8' }}>{bookings.length} حجز إجمالاً</span>
+              <span style={{ fontSize: 12, color: '#94a3b8' }}>
                 {bookings.filter(b => b.Status === 'confirmed').length} مؤكد •{' '}
                 {bookings.filter(b => b.Status === 'pending').length} قيد الانتظار •{' '}
                 {bookings.filter(b => b.Status === 'cancelled').length} ملغي
               </span>
-              <span className="text-xs text-gray-400">{bookings.length} حجز إجمالاً</span>
             </div>
           </div>
         )}
@@ -205,12 +211,12 @@ function BookingsPage() {
       {confirmCancel && (
         <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40" onClick={() => setConfirmCancel(null)} />
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm relative z-10 p-5 text-right">
-            <div className="flex items-center justify-end gap-2 mb-3">
-              <h3 className="font-bold text-gray-900 text-sm">إلغاء الحجز</h3>
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm relative z-10 p-5" dir="rtl">
+            <div className="flex items-center gap-2 mb-3">
               <div className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center">
                 <AlertTriangle size={16} className="text-red-500" />
               </div>
+              <h3 className="font-bold text-gray-900 text-sm">إلغاء الحجز</h3>
             </div>
             <p className="text-sm text-gray-500 mb-5 leading-relaxed">
               هل أنت متأكد من إلغاء هذا الحجز؟ لا يمكن التراجع عن هذا الإجراء.
