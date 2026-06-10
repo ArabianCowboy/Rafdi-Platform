@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Building2, Layers, Package, CheckCircle, Users, MapPin, Loader, Search, ChevronLeft } from "lucide-react";
+import { Building2, Package, Users, MapPin, Loader, Search, ChevronLeft } from "lucide-react";
 import Navbar from "../components/Navbar";
 import { API_URL, getHeaders } from '../config/api';
 
@@ -55,16 +55,16 @@ const WarehouseCard = ({ w, isRenter, onBook }) => (
         {w.Name}
       </h3>
       {w.company?.CompanyName && (
-        <div className="flex items-center gap-1.5 text-xs mb-2 justify-start" style={{ color: '#64748b' }}>
+        <div className="flex items-center gap-1.5 text-xs mb-2" style={{ color: '#64748b' }}>
           <Users size={10} className="text-gray-300 shrink-0" />
           <span>{w.company.CompanyName}</span>
         </div>
       )}
-      <div className="flex items-center gap-1.5 text-xs mb-1 justify-start" style={{ color: '#64748b' }}>
+      <div className="flex items-center gap-1.5 text-xs mb-1" style={{ color: '#64748b' }}>
         <MapPin size={11} className="text-gray-400 shrink-0" />
         <span>{w.Location}</span>
       </div>
-      <div className="flex items-center gap-1.5 text-xs justify-start" style={{ color: '#64748b' }}>
+      <div className="flex items-center gap-1.5 text-xs" style={{ color: '#64748b' }}>
         <Package size={11} className="text-gray-400 shrink-0" />
         <span>{w.Size?.toLocaleString()} م²</span>
       </div>
@@ -89,8 +89,6 @@ const WarehouseCard = ({ w, isRenter, onBook }) => (
 function HomePage() {
   const navigate = useNavigate();
   const [warehouses, setWarehouses] = useState([]);
-  const [myWarehouses, setMyWarehouses] = useState([]);
-  const [myBookings, setMyBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAll, setShowAll] = useState(false);
   const [search, setSearch] = useState('');
@@ -106,11 +104,6 @@ function HomePage() {
         if (res.ok) {
           const data = await res.json();
           setWarehouses(data);
-          if (isOwner) setMyWarehouses(data.filter(w => w.CompanyID === getCompanyId()));
-        }
-        if (isRenter) {
-          const br = await fetch(`${API_URL}/bookings/my`, { headers: getHeaders(false) });
-          if (br.ok) setMyBookings(await br.json());
         }
       } catch {} finally { setLoading(false); }
     };
@@ -122,13 +115,6 @@ function HomePage() {
   );
 
   const displayedWarehouses = showAll ? filteredWarehouses : filteredWarehouses.slice(0, 3);
-
-  const stats = [
-    { label: 'إجمالي المستودعات', value: warehouses.length, icon: Building2 },
-    { label: 'متاح للحجز', value: warehouses.filter(w => w.IsActive).length, icon: CheckCircle },
-    ...(isRenter ? [{ label: 'حجوزاتي', value: myBookings.length, icon: Layers }] : []),
-    ...(isOwner ? [{ label: 'مستودعاتي', value: myWarehouses.length, icon: Users }] : []),
-  ];
 
   return (
     <div className="min-h-screen bg-[#f8fafc]" dir="rtl" style={{ fontFamily: "'IBM Plex Sans Arabic', 'Tajawal', sans-serif" }}>
@@ -191,34 +177,8 @@ function HomePage() {
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-6xl mx-auto px-4">
-          <div style={{ display: 'flex', overflowX: 'auto', direction: 'rtl' }}>
-            {stats.map((s, i) => (
-              <div key={i} style={{
-                display: 'flex', alignItems: 'center', gap: 12,
-                padding: '16px 24px', flexShrink: 0,
-                borderLeft: i !== stats.length - 1 ? '1px solid #f1f5f9' : 'none',
-              }}>
-                <div style={{ width: 40, height: 40, background: '#eff6ff', borderRadius: 10, display: 'grid', placeItems: 'center', flexShrink: 0 }}>
-                  <s.icon size={18} color="#2563eb" />
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <p style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 22, color: '#0f172a', lineHeight: 1 }}>
-                    {loading ? '—' : s.value}
-                  </p>
-                  <p style={{ fontSize: 12, color: '#64748b', marginTop: 3, fontWeight: 500 }}>{s.label}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
       {/* Warehouses */}
       <main className="max-w-6xl mx-auto px-4 py-8">
-        {/* Header — العنوان يمين، الزر يسار */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, direction: 'rtl' }}>
           <h2 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 24, color: '#0f172a' }}>
             أحدث المستودعات

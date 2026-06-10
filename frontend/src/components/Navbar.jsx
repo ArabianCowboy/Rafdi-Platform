@@ -37,7 +37,9 @@ function Navbar() {
   const userInfo = getUserInfo();
   const isOwner = roles.includes('warehouse_owner');
   const isRenter = roles.includes('renter_company');
-  const displayName = userInfo.company_name || userInfo.name || userInfo.email || 'المستخدم';
+  const companyName = userInfo.company_name || '';
+  const displayName = companyName || userInfo.email || 'المستخدم';
+  const avatarLetter = companyName.charAt(0) || userInfo.email?.charAt(0) || 'م';
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -66,9 +68,7 @@ function Navbar() {
         {/* Logo */}
         <div onClick={() => navigate('/home')} style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', flexShrink: 0 }}>
           <span style={{
-            width: 32, height: 32,
-            background: '#2563eb',
-            borderRadius: 8,
+            width: 32, height: 32, background: '#2563eb', borderRadius: 8,
             display: 'grid', placeItems: 'center',
             boxShadow: '0 6px 14px -6px rgba(37,99,235,0.55), inset 0 -2px 0 rgba(0,0,0,0.08)',
             flexShrink: 0,
@@ -85,15 +85,11 @@ function Navbar() {
           {navLinks.map(link => (
             <button key={link.path} onClick={() => navigate(link.path)}
               style={{
-                padding: '8px 14px',
-                borderRadius: 8,
-                border: 'none',
+                padding: '8px 14px', borderRadius: 8, border: 'none',
                 background: isActive(link.path) ? '#eff6ff' : 'transparent',
                 color: isActive(link.path) ? '#2563eb' : '#475569',
                 fontWeight: isActive(link.path) ? 700 : 500,
-                fontSize: 15,
-                cursor: 'pointer',
-                fontFamily: 'inherit',
+                fontSize: 15, cursor: 'pointer', fontFamily: 'inherit',
                 transition: 'background .15s, color .15s',
               }}
               onMouseEnter={e => { if (!isActive(link.path)) { e.target.style.background = '#f1f5f9'; e.target.style.color = '#0f172a'; }}}
@@ -107,22 +103,15 @@ function Navbar() {
         {/* Right side */}
         <div style={{ marginInlineStart: 'auto', display: 'flex', alignItems: 'center', gap: 14 }}>
 
-          {/* إدارة المستودعات */}
           {isOwner && (
             <>
               <button onClick={() => navigate('/warehouses')}
                 style={{
                   display: 'flex', alignItems: 'center', gap: 8,
-                  padding: '9px 16px',
-                  borderRadius: 9,
-                  background: '#2563eb',
-                  color: '#fff',
-                  fontWeight: 600,
-                  fontSize: 14,
-                  border: 'none',
-                  cursor: 'pointer',
-                  boxShadow: '0 6px 16px -6px rgba(37,99,235,0.55)',
-                  fontFamily: 'inherit',
+                  padding: '9px 16px', borderRadius: 9,
+                  background: '#2563eb', color: '#fff',
+                  fontWeight: 600, fontSize: 14, border: 'none', cursor: 'pointer',
+                  boxShadow: '0 6px 16px -6px rgba(37,99,235,0.55)', fontFamily: 'inherit',
                 }}>
                 <Settings size={15} />
                 إدارة المستودعات
@@ -131,7 +120,6 @@ function Navbar() {
             </>
           )}
 
-          {/* Notification */}
           <NotificationBell />
 
           {/* Role chips */}
@@ -162,30 +150,28 @@ function Navbar() {
 
           <span style={{ width: 1, height: 26, background: '#e2e8f0' }} />
 
-          {/* User */}
+          {/* User — اسم الشركة */}
           <button onClick={() => navigate('/profile')}
             style={{
               display: 'flex', alignItems: 'center', gap: 8,
-              padding: '4px 10px 4px 4px',
-              borderRadius: 100,
-              border: 'none',
-              background: 'transparent',
-              cursor: 'pointer',
-              fontFamily: 'inherit',
-              transition: 'background .15s',
+              padding: '4px 10px 4px 4px', borderRadius: 100,
+              border: 'none', background: 'transparent',
+              cursor: 'pointer', fontFamily: 'inherit', transition: 'background .15s',
             }}
             onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
           >
             <span style={{
               width: 32, height: 32, borderRadius: '50%',
-              background: 'linear-gradient(135deg, #94a3b8, #475569)',
+              background: 'linear-gradient(135deg, #2563eb, #1e3a8a)',
               color: '#fff', display: 'grid', placeItems: 'center',
               fontWeight: 700, fontSize: 13, flexShrink: 0,
             }}>
-              {displayName.charAt(0)}
+              {avatarLetter}
             </span>
-            <span style={{ fontSize: 14, fontWeight: 600, color: '#0f172a' }}>{displayName}</span>
+            <span style={{ fontSize: 14, fontWeight: 600, color: '#0f172a', maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {displayName}
+            </span>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="6 9 12 15 18 9"/>
             </svg>
@@ -194,14 +180,9 @@ function Navbar() {
           {/* Logout */}
           <button onClick={handleLogout}
             style={{
-              display: 'flex', alignItems: 'center',
-              padding: '8px',
-              borderRadius: 8,
-              border: 'none',
-              background: 'transparent',
-              color: '#94a3b8',
-              cursor: 'pointer',
-              transition: 'color .15s, background .15s',
+              display: 'flex', alignItems: 'center', padding: '8px',
+              borderRadius: 8, border: 'none', background: 'transparent',
+              color: '#94a3b8', cursor: 'pointer', transition: 'color .15s, background .15s',
             }}
             onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.background = '#fef2f2'; }}
             onMouseLeave={e => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.background = 'transparent'; }}
