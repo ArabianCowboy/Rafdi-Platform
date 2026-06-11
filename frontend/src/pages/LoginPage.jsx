@@ -38,9 +38,9 @@ function RoleSelector({ token, onSelect }) {
       {/* Header */}
       <div style={{ background: '#0d1b3e', padding: '40px 24px 60px' }}>
         <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'right' }}>
-          <div className="flex items-center justify-end gap-2.5 mb-6">
-            <span style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 22, color: '#fff' }}>رفدي</span>
+          <div className="flex items-center gap-2.5 mb-6">
             <WarehouseMark />
+            <span style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 22, color: '#fff' }}>رفدي</span>
           </div>
           <h1 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 'clamp(28px,4vw,42px)', color: '#fff', marginBottom: 10 }}>
             أهلاً، {companyName}

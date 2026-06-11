@@ -187,6 +187,11 @@ function ProfilePage() {
                   تعديل اسم الشركة
                 </label>
                 <div className="flex gap-2">
+                  <input type="text" value={companyName} placeholder="اسم الشركة"
+                    style={{ ...inputStyle, flex: 1 }}
+                    onFocus={e => { e.target.style.borderColor = '#2563eb'; e.target.style.background = '#fff'; }}
+                    onBlur={e => { e.target.style.borderColor = '#e2e8f0'; e.target.style.background = '#f8fafc'; }}
+                    onChange={e => { setCompanyName(e.target.value); setErrorMsg(''); }} />
                   <button type="submit" disabled={loadingCompany}
                     style={{
                       display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0,
@@ -199,11 +204,6 @@ function ProfilePage() {
                       : <Save size={13} />}
                     حفظ
                   </button>
-                  <input type="text" value={companyName} placeholder="اسم الشركة"
-                    style={{ ...inputStyle, flex: 1 }}
-                    onFocus={e => { e.target.style.borderColor = '#2563eb'; e.target.style.background = '#fff'; }}
-                    onBlur={e => { e.target.style.borderColor = '#e2e8f0'; e.target.style.background = '#f8fafc'; }}
-                    onChange={e => { setCompanyName(e.target.value); setErrorMsg(''); }} />
                 </div>
               </form>
             </div>

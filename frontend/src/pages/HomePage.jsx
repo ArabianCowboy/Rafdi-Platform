@@ -272,7 +272,6 @@ function OwnerDashboard({ navigate }) {
 
       <footer className="bg-white border-t border-gray-200 mt-8">
         <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
-          <span style={{ color: '#94a3b8', fontSize: 13 }}>© Rafdi Platform 2026</span>
           <div className="flex items-center gap-2">
             <span style={{ width: 28, height: 28, background: '#2563eb', borderRadius: 7, display: 'grid', placeItems: 'center' }}>
               <svg width="16" height="16" viewBox="0 0 64 64" fill="none">
@@ -286,6 +285,7 @@ function OwnerDashboard({ navigate }) {
             </span>
             <span style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 16, color: '#0f172a' }}>رفدي</span>
           </div>
+          <span style={{ color: '#94a3b8', fontSize: 13 }}>© Rafdi Platform 2026</span>
         </div>
       </footer>
     </div>
@@ -390,7 +390,6 @@ function HomePage() {
 
       <footer className="bg-white border-t border-gray-200 mt-6">
         <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
-          <span style={{ color: '#94a3b8', fontSize: 13 }}>© Rafdi Platform 2026</span>
           <div className="flex items-center gap-2">
             <span style={{ width: 28, height: 28, background: '#2563eb', borderRadius: 7, display: 'grid', placeItems: 'center', boxShadow: '0 4px 10px -4px rgba(37,99,235,0.5)' }}>
               <svg width="16" height="16" viewBox="0 0 64 64" fill="none">
@@ -404,6 +403,7 @@ function HomePage() {
             </span>
             <span style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 16, color: '#0f172a' }}>رفدي</span>
           </div>
+          <span style={{ color: '#94a3b8', fontSize: 13 }}>© Rafdi Platform 2026</span>
         </div>
       </footer>
     </div>

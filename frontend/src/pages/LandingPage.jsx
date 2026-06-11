@@ -233,7 +233,6 @@ function LandingPage() {
       {/* Footer */}
       <footer style={{ background: '#fff', borderTop: '1px solid #e2e8f0' }}>
         <div className="max-w-6xl mx-auto px-4 py-5 flex items-center justify-between">
-          <span style={{ color: '#64748b', fontSize: 13 }}>© Rafdi Platform 2026 — جميع الحقوق محفوظة</span>
           <div className="flex items-center gap-2">
             <span style={{
               width: 28, height: 28, background: '#2563eb', borderRadius: 7,
@@ -243,6 +242,7 @@ function LandingPage() {
             </span>
             <span style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 16, color: '#0f172a' }}>رفدي</span>
           </div>
+          <span style={{ color: '#64748b', fontSize: 13 }}>© Rafdi Platform 2026 — جميع الحقوق محفوظة</span>
         </div>
       </footer>
     </div>
