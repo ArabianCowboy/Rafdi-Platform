@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Building2, CheckCircle, Loader, MapPin, Package, Calendar, CreditCard, ArrowLeft } from 'lucide-react';
+import { Building2, CheckCircle, ChevronLeft, ChevronRight, Loader, MapPin, Package, Calendar, CreditCard, ArrowLeft } from 'lucide-react';
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 import Navbar from '../components/Navbar';
@@ -323,15 +323,16 @@ function BookingPage() {
 
                     <div className="flex justify-center">
                       <style>{`
-                        .rdp { --rdp-accent-color: #2563eb; --rdp-background-color: #eff6ff; font-family: 'IBM Plex Sans Arabic', sans-serif; }
-                        .rdp-day_disabled { background-color: #fee2e2 !important; color: #ef4444 !important; text-decoration: line-through; opacity: 1 !important; border-radius: 4px; }
-                        .rdp-day_selected { background-color: #2563eb !important; color: white !important; }
-                        .rdp-day_range_middle { background-color: #eff6ff !important; color: #2563eb !important; }
-                        .rdp-day_range_start, .rdp-day_range_end { background-color: #2563eb !important; color: white !important; }
-                        .rdp-day:hover:not(.rdp-day_disabled) { background-color: #eff6ff; }
-                        .rdp-head_cell { color: #64748b; font-size: 0.75rem; }
-                        .rdp-caption_label { color: #0f172a; font-weight: 800; }
-                        .rdp-nav_button { color: #2563eb; }
+                        .rdp-root { font-family: 'IBM Plex Sans Arabic', sans-serif; }
+                        .rdp-disabled .rdp-day_button { background-color: #fee2e2 !important; color: #ef4444 !important; text-decoration: line-through !important; opacity: 1 !important; border-radius: 4px; cursor: not-allowed; }
+                        .rdp-selected .rdp-day_button,
+                        .rdp-range_start .rdp-day_button,
+                        .rdp-range_end .rdp-day_button { background-color: #2563eb !important; color: white !important; border-radius: 4px; }
+                        .rdp-range_middle .rdp-day_button { background-color: #eff6ff !important; color: #2563eb !important; }
+                        .rdp-day_button:hover:not([disabled]) { background-color: #eff6ff; border-radius: 4px; }
+                        .rdp-weekday { color: #64748b; font-size: 0.75rem; }
+                        .rdp-caption_label { color: #0f172a; font-weight: 800; font-family: 'IBM Plex Sans Arabic', sans-serif; }
+                        .rdp-button_previous, .rdp-button_next { color: #2563eb; }
                       `}</style>
                       <DayPicker
                         mode="range"
@@ -340,6 +341,12 @@ function BookingPage() {
                         disabled={disabledDays}
                         numberOfMonths={1}
                         showOutsideDays={false}
+                        components={{
+                          Chevron: ({ orientation }) =>
+                            orientation === 'left'
+                              ? <ChevronRight size={16} />
+                              : <ChevronLeft size={16} />
+                        }}
                       />
                     </div>
 
