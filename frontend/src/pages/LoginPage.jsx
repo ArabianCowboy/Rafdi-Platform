@@ -291,7 +291,7 @@ function LoginPage() {
                   <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin block" />
                   جاري الدخول...
                 </span>
-              ) : (<><ArrowRight size={16} />تسجيل الدخول</>)}
+              ) : (<>تسجيل الدخول <ArrowLeft size={16} /></>)}
             </button>
           </form>
 
