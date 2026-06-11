@@ -28,6 +28,11 @@ function Navbar() {
   const roles = getUserRoles();
   const isOwner = roles.includes('warehouse_owner');
   const isRenter = roles.includes('renter_company');
+  const selectedRole = localStorage.getItem('selectedRole');
+
+  // حسب الدور المختار
+  const showAsOwner = isOwner && (!isRenter || selectedRole === 'owner');
+  const showAsRenter = isRenter && (!isOwner || selectedRole === 'renter');
 
   const companyName = localStorage.getItem('company_name') || 'المستخدم';
   const avatarLetter = companyName.charAt(0);
@@ -41,9 +46,9 @@ function Navbar() {
 
   const navLinks = [
     { label: 'الرئيسية', path: '/home' },
-    ...(isRenter ? [{ label: 'حجوزاتي', path: '/bookings' }] : []),
-    ...(isOwner ? [{ label: 'مستودعاتي', path: '/warehouses' }] : []),
-    ...(isOwner ? [{ label: 'إدارة الحجوزات', path: '/owner-bookings' }] : []),
+    ...(showAsRenter ? [{ label: 'حجوزاتي', path: '/bookings' }] : []),
+    ...(showAsOwner ? [{ label: 'مستودعاتي', path: '/warehouses' }] : []),
+    ...(showAsOwner ? [{ label: 'إدارة الحجوزات', path: '/owner-bookings' }] : []),
   ];
 
   const isActive = (path) => location.pathname === path;
@@ -96,7 +101,7 @@ function Navbar() {
         {/* Right side */}
         <div style={{ marginInlineStart: 'auto', display: 'flex', alignItems: 'center', gap: 14 }}>
 
-          {isOwner && (
+          {showAsOwner && (
             <>
               <button onClick={() => navigate('/warehouses')}
                 style={{
