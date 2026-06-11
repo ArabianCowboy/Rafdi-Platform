@@ -153,10 +153,10 @@ function BookingsPage() {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, paddingTop: 12, borderTop: '1px solid #f8fafc' }}>
                       <p style={{ fontSize: 12, color: '#94a3b8', fontFamily: 'monospace' }}>{b.BookingID}#</p>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#64748b' }}>
-                        <span style={{ fontFamily: 'monospace' }}>{b.EndDate}</span>
-                        <span style={{ color: '#cbd5e1' }}>←</span>
-                        <span style={{ fontFamily: 'monospace' }}>{b.StartDate}</span>
                         <Calendar size={11} color="#94a3b8" />
+                        <span style={{ fontFamily: 'monospace' }}>{b.StartDate}</span>
+                        <span style={{ color: '#cbd5e1' }}>←</span>
+                        <span style={{ fontFamily: 'monospace' }}>{b.EndDate}</span>
                       </div>
                     </div>
                   </div>
@@ -168,7 +168,7 @@ function BookingsPage() {
                         <p className="text-xs text-red-600 font-semibold text-right mb-2">{cancelError}</p>
                       )}
                       {confirmCancel === b.BookingID ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'flex-start' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, direction: 'rtl' }}>
                           <button onClick={() => handleCancel(b.BookingID)} disabled={isCancelling}
                             className="px-3 py-1.5 text-xs font-bold text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors disabled:opacity-60 flex items-center gap-1.5">
                             {isCancelling ? <span className="w-3 h-3 border border-white/30 border-t-white rounded-full animate-spin block" /> : <X size={12} />}
@@ -181,7 +181,7 @@ function BookingsPage() {
                           <p className="text-xs text-gray-500 font-medium">هل أنت متأكد؟</p>
                         </div>
                       ) : (
-                        <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+                        <div style={{ display: 'flex', direction: 'rtl' }}>
                           <button onClick={() => { setConfirmCancel(b.BookingID); setCancelError(''); }}
                             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors">
                             <X size={12} />

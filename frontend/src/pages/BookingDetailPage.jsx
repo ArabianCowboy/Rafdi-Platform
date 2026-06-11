@@ -53,7 +53,7 @@ function BookingDetailPage() {
   }, [id]);
 
   const days = booking
-    ? Math.ceil((new Date(booking.EndDate) - new Date(booking.StartDate)) / 86400000)
+    ? Math.ceil((new Date(booking.EndDate) - new Date(booking.StartDate)) / 86400000) + 1
     : 0;
 
   return (

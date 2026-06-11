@@ -46,7 +46,7 @@ function BookingPage() {
     ...bookedDates.map(({ start, end }) => ({ from: new Date(start), to: new Date(end) }))
   ];
 
-  const days = range?.from && range?.to ? Math.ceil((range.to - range.from) / 86400000) : 0;
+  const days = range?.from && range?.to ? Math.ceil((range.to - range.from) / 86400000) + 1 : 0;
   const basePrice = days > 0 && warehouse ? Math.ceil(days * warehouse.PricePerDay) : 0;
   const commission = Math.ceil(basePrice * 0.05);
   const totalPrice = basePrice + commission;
@@ -309,15 +309,15 @@ function BookingPage() {
                   <form onSubmit={handleBooking} className="space-y-4">
                     {(range?.from || range?.to) && (
                       <div className="flex justify-between items-center bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-right">
+                        <div className="flex items-center gap-3 text-xs font-mono">
+                          <span className="text-gray-700 font-bold">{startDate}</span>
+                          <span className="text-gray-300">←</span>
+                          <span className="text-gray-500">{range?.to ? endDate : '...'}</span>
+                        </div>
                         <button type="button" onClick={() => setRange({ from: undefined, to: undefined })}
                           className="text-xs text-gray-400 hover:text-red-500 transition-colors">
                           مسح
                         </button>
-                        <div className="flex items-center gap-3 text-xs font-mono">
-                          <span className="text-gray-500">{range?.to ? endDate : '...'}</span>
-                          <span className="text-gray-300">←</span>
-                          <span className="text-gray-700 font-bold">{startDate}</span>
-                        </div>
                       </div>
                     )}
 
