@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff, Building2, ShieldCheck, ArrowLeft, CheckCircle } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Building2, ShieldCheck, ArrowLeft, CheckCircle, ArrowRight } from 'lucide-react';
 import { API_URL } from '../config/api';
 
 const WarehouseMark = () => (
@@ -292,7 +292,7 @@ function RegisterPage() {
                 </span>
               ) : (
                 <>
-                  <ArrowLeft size={16} />
+                  <ArrowRight size={16} />
                   إنشاء الحساب
                 </>
               )}

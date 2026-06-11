@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff, CheckCircle, ArrowLeft, Building2, Layers } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, CheckCircle, ArrowLeft, Building2, Layers, ArrowRight } from 'lucide-react';
 import { API_URL } from '../config/api';
 
 const WarehouseMark = () => (
@@ -291,7 +291,7 @@ function LoginPage() {
                   <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin block" />
                   جاري الدخول...
                 </span>
-              ) : (<><ArrowLeft size={16} />تسجيل الدخول</>)}
+              ) : (<><ArrowRight size={16} />تسجيل الدخول</>)}
             </button>
           </form>
 
