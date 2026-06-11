@@ -4,8 +4,8 @@ import { Building2, Plus, MapPin, Package, Edit2, Power, X, Loader, Save, ImageP
 import Navbar from '../components/Navbar';
 import { API_URL, getHeaders } from '../config/api';
 
-const CLOUDINARY_CLOUD = 'dnhn19zpj';
-const CLOUDINARY_PRESET = 'Rafdi_Image';
+const CLOUDINARY_CLOUD = import.meta.env.VITE_CLOUDINARY_CLOUD;
+const CLOUDINARY_PRESET = import.meta.env.VITE_CLOUDINARY_PRESET;
 
 const getUserRoles = () => {
   try {
@@ -17,7 +17,9 @@ const getUserRoles = () => {
 
 const getCompanyId = () => {
   try {
-    return JSON.parse(atob(localStorage.getItem('token').split('.')[1])).company_id;
+    const token = localStorage.getItem('token');
+    if (!token) return null;
+    return JSON.parse(atob(token.split('.')[1])).company_id;
   } catch { return null; }
 };
 
@@ -61,7 +63,9 @@ function WarehousesPage() {
     try {
       const res = await fetch(`${API_URL}/warehouses/my`, { headers: getHeaders(false) });
       if (res.ok) setWarehouses(await res.json());
-    } catch {} finally { setLoading(false); }
+    } catch (err) {
+      console.error('فشل تحميل المستودعات', err);
+    } finally { setLoading(false); }
   };
 
   const openCreate = () => { setForm(emptyForm); setEditWarehouse(null); setError(''); setShowModal(true); };
@@ -115,7 +119,10 @@ function WarehousesPage() {
     try {
       const res = await fetch(`${API_URL}/warehouses/${w.WarehouseID}/toggle`, { method: 'PATCH', headers: getHeaders(false) });
       if (res.ok) fetchWarehouses();
-    } catch {}
+      else setError('فشل تغيير حالة المستودع، حاول مرة أخرى');
+    } catch {
+      setError('حدث خطأ في الاتصال، حاول مرة أخرى');
+    }
   };
 
   const inputStyle = {

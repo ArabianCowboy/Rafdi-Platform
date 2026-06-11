@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowUpLeft,
@@ -13,8 +13,7 @@ import {
   Wallet,
 } from 'lucide-react';
 import NotificationBell from '../components/NotificationBell';
-
-const API_URL = 'https://api.rafdi.com';
+import { API_URL } from '../config/api';
 
 const tabs = [
   { key: 'dashboard', label: 'لوحة التحكم' },
@@ -188,10 +187,6 @@ function AdminPage() {
     }
   };
 
-  const loadActiveTab = useEffectEvent((tab) => {
-    void fetchTabData(tab);
-  });
-
   useEffect(() => {
     if (!token || !isAdminToken()) {
       navigate('/login', { replace: true });
@@ -202,10 +197,12 @@ function AdminPage() {
     if (!isAuthorized) return undefined;
 
     const timeoutId = window.setTimeout(() => {
-      loadActiveTab(activeTab);
+      void fetchTabData(activeTab);
     }, 0);
 
     return () => window.clearTimeout(timeoutId);
+    // fetchTabData reads loadedTabs internally to avoid redundant fetches
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, isAuthorized]);
 
   const handleLogout = () => {

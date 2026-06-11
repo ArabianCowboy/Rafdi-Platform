@@ -85,7 +85,7 @@ function BookingPage() {
         startDate,
         endDate,
         days,
-        totalPrice: parseFloat(data.TotalPrice) * 1.05 || totalPrice,
+        totalPrice: parseFloat(data.TotalPrice) || totalPrice,
       });
     } catch {
       setError('حدث خطأ في الاتصال، حاول مرة أخرى');

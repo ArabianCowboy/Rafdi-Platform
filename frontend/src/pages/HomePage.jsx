@@ -14,7 +14,9 @@ const getUserRoles = () => {
 
 const getCompanyId = () => {
   try {
-    return JSON.parse(atob(localStorage.getItem('token').split('.')[1])).company_id;
+    const token = localStorage.getItem('token');
+    if (!token) return null;
+    return JSON.parse(atob(token.split('.')[1])).company_id;
   } catch { return null; }
 };
 
@@ -91,7 +93,9 @@ function OwnerDashboard({ navigate }) {
         ]);
         if (wRes.ok) setMyWarehouses(await wRes.json());
         if (bRes.ok) setMyBookings(await bRes.json());
-      } catch {} finally { setLoading(false); }
+      } catch (err) {
+        console.error('فشل تحميل بيانات لوحة المالك', err);
+      } finally { setLoading(false); }
     };
     fetch_();
   }, []);
@@ -308,7 +312,9 @@ function HomePage() {
       try {
         const res = await fetch(`${API_URL}/warehouses/`, { headers: getHeaders(false) });
         if (res.ok) setWarehouses(await res.json());
-      } catch {} finally { setLoading(false); }
+      } catch (err) {
+        console.error('فشل تحميل المستودعات', err);
+      } finally { setLoading(false); }
     };
     fetchData();
   }, [showOwnerDashboard]);

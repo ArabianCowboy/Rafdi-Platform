@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { AlertCircle, Bell, CheckCheck, Loader2 } from 'lucide-react';
-
-const API_URL = 'https://api.rafdi.com';
+import { API_URL } from '../config/api';
 
 const typeStyles = {
   info: {
