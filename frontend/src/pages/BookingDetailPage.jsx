@@ -49,12 +49,18 @@ function BookingDetailPage() {
     ? Math.ceil((new Date(booking.EndDate) - new Date(booking.StartDate)) / 86400000)
     : 0;
 
+  const Row = ({ label, children }) => (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '11px 0', borderBottom: '1px solid #f8fafc' }}>
+      <div style={{ display: 'flex', alignItems: 'center' }}>{children}</div>
+      <span style={{ fontSize: 12, color: '#94a3b8', flexShrink: 0, marginRight: 8 }}>{label}</span>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-[#f8fafc]" dir="rtl" style={{ fontFamily: "'IBM Plex Sans Arabic', 'Tajawal', sans-serif" }}>
 
       <Navbar />
 
-      {/* Page header */}
       <div style={{ background: '#0d1b3e' }} className="py-8 px-4">
         <div className="max-w-3xl mx-auto text-right">
           <h1 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 26, color: '#fff', marginBottom: 4 }}>
@@ -76,10 +82,10 @@ function BookingDetailPage() {
         ) : (
           <div className="space-y-4">
 
-            {/* Booking Status */}
-            <div className="bg-white border border-gray-200 rounded-xl p-5 text-right"
+            {/* حالة الحجز */}
+            <div className="bg-white border border-gray-200 rounded-xl p-5" dir="rtl"
               style={{ boxShadow: '0 1px 2px rgba(15,23,42,0.04)' }}>
-              <div className="flex justify-between items-center mb-4">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                 <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg border ${statusConfig[booking.Status]?.className}`}>
                   {booking.Status === 'confirmed' ? <CheckCircle size={13} /> : booking.Status === 'pending' ? <Clock size={13} /> : <XCircle size={13} />}
                   {statusConfig[booking.Status]?.label}
@@ -96,7 +102,7 @@ function BookingDetailPage() {
                   { label: 'مدة الإيجار', value: `${days} يوم` },
                   { label: 'إجمالي الحجز', value: `${parseFloat(booking.TotalPrice).toLocaleString()} ر.س`, blue: true },
                 ].map((item, i) => (
-                  <div key={i} className="bg-gray-50 rounded-xl p-3 text-right">
+                  <div key={i} style={{ background: '#f8fafc', borderRadius: 10, padding: '12px 14px', textAlign: 'right' }}>
                     <p style={{ fontSize: 11, color: '#94a3b8', marginBottom: 4 }}>{item.label}</p>
                     <p style={{
                       fontWeight: 700, fontSize: 14,
@@ -110,7 +116,7 @@ function BookingDetailPage() {
               </div>
             </div>
 
-            {/* Warehouse Info */}
+            {/* بيانات المستودع */}
             {booking.warehouse && (
               <div className="bg-white border border-gray-200 rounded-xl overflow-hidden"
                 style={{ boxShadow: '0 1px 2px rgba(15,23,42,0.04)' }}>
@@ -121,25 +127,27 @@ function BookingDetailPage() {
                     <Building2 size={40} color="#cbd5e1" />
                   </div>
                 )}
-                <div className="p-5 text-right">
+                <div className="p-5" dir="rtl">
                   <h3 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 17, color: '#0f172a', marginBottom: 14 }}>
                     بيانات المستودع
                   </h3>
-                  <div className="space-y-3">
-                    {[
-                      { label: 'الاسم', value: booking.warehouse.Name },
-                      { label: 'الموقع', value: booking.warehouse.Location, icon: <MapPin size={13} color="#94a3b8" /> },
-                      { label: 'المساحة', value: `${booking.warehouse.Size?.toLocaleString()} م²`, icon: <Package size={13} color="#94a3b8" /> },
-                    ].map((item, i) => (
-                      <div key={i} className="flex justify-between items-center py-2 border-b border-gray-50 last:border-0">
-                        <div className="flex items-center gap-1.5">
-                          {item.icon}
-                          <span style={{ fontSize: 14, color: '#475569' }}>{item.value}</span>
-                        </div>
-                        <span style={{ fontSize: 12, color: '#94a3b8' }}>{item.label}</span>
+                  <div>
+                    <Row label="الاسم">
+                      <span style={{ fontSize: 14, color: '#475569' }}>{booking.warehouse.Name}</span>
+                    </Row>
+                    <Row label="الموقع">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <MapPin size={13} color="#94a3b8" />
+                        <span style={{ fontSize: 14, color: '#475569' }}>{booking.warehouse.Location}</span>
                       </div>
-                    ))}
-                    <div className="flex justify-between items-center pt-2 border-t border-gray-100">
+                    </Row>
+                    <Row label="المساحة">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <Package size={13} color="#94a3b8" />
+                        <span style={{ fontSize: 14, color: '#475569' }}>{booking.warehouse.Size?.toLocaleString()} م²</span>
+                      </div>
+                    </Row>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 11 }}>
                       <span style={{ fontSize: 14, fontWeight: 700, color: '#2563eb' }}>
                         {parseFloat(booking.warehouse.PricePerDay).toLocaleString()} ر.س/يوم
                       </span>
@@ -150,53 +158,43 @@ function BookingDetailPage() {
               </div>
             )}
 
-            {/* Payment Info */}
-            <div className="bg-white border border-gray-200 rounded-xl p-5 text-right"
+            {/* بيانات الدفع */}
+            <div className="bg-white border border-gray-200 rounded-xl p-5" dir="rtl"
               style={{ boxShadow: '0 1px 2px rgba(15,23,42,0.04)' }}>
               <h3 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 17, color: '#0f172a', marginBottom: 16 }}>
                 بيانات الدفع
               </h3>
               {payment ? (
-                <div className="space-y-0 divide-y divide-gray-50">
-                  <div className="flex justify-between items-center py-3">
+                <div>
+                  <Row label="حالة الدفع">
                     <span className={`text-xs font-bold px-2.5 py-1 rounded-lg border ${paymentStatusConfig[payment.Status]?.className}`}>
                       {paymentStatusConfig[payment.Status]?.label}
                     </span>
-                    <span style={{ fontSize: 12, color: '#94a3b8' }}>حالة الدفع</span>
-                  </div>
-                  <div className="flex justify-between items-center py-3">
+                  </Row>
+                  <Row label="المبلغ المدفوع">
                     <span style={{ fontSize: 14, fontWeight: 600, color: '#0f172a' }}>
                       {parseFloat(payment.Amount).toLocaleString()} ر.س
                     </span>
-                    <span style={{ fontSize: 12, color: '#94a3b8' }}>المبلغ المدفوع</span>
-                  </div>
-                  <div className="flex justify-between items-center py-3">
+                  </Row>
+                  <Row label="تاريخ الدفع">
                     <span style={{ fontSize: 14, color: '#475569', fontFamily: 'monospace' }}>{payment.PaymentDate}</span>
-                    <span style={{ fontSize: 12, color: '#94a3b8' }}>تاريخ الدفع</span>
-                  </div>
+                  </Row>
                   {payment.PaymentMethod && (
-                    <div className="flex justify-between items-center py-3">
-                      <span style={{ fontSize: 14, color: '#475569', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Row label="طريقة الدفع">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                         <CreditCard size={13} color="#94a3b8" />
-                        {payment.PaymentMethod}
-                      </span>
-                      <span style={{ fontSize: 12, color: '#94a3b8' }}>طريقة الدفع</span>
-                    </div>
-                  )}
-                  {payment.MoyasarPaymentID && (
-                    <div className="flex justify-between items-center py-3">
-                      <span style={{ fontSize: 12, color: '#64748b', fontFamily: 'monospace' }}>{payment.MoyasarPaymentID}</span>
-                      <span style={{ fontSize: 12, color: '#94a3b8' }}>رقم العملية</span>
-                    </div>
+                        <span style={{ fontSize: 14, color: '#475569' }}>{payment.PaymentMethod}</span>
+                      </div>
+                    </Row>
                   )}
                   <div className="grid grid-cols-2 gap-3 pt-3">
-                    <div className="bg-gray-50 rounded-xl p-3 text-right">
+                    <div style={{ background: '#f8fafc', borderRadius: 10, padding: '12px 14px', textAlign: 'right' }}>
                       <p style={{ fontSize: 11, color: '#94a3b8', marginBottom: 4 }}>عمولة المنصة</p>
                       <p style={{ fontWeight: 700, fontSize: 14, color: '#0f172a' }}>
                         {parseFloat(payment.commission_amount).toLocaleString()} ر.س
                       </p>
                     </div>
-                    <div className="bg-gray-50 rounded-xl p-3 text-right">
+                    <div style={{ background: '#f8fafc', borderRadius: 10, padding: '12px 14px', textAlign: 'right' }}>
                       <p style={{ fontSize: 11, color: '#94a3b8', marginBottom: 4 }}>صافي المبلغ</p>
                       <p style={{ fontWeight: 700, fontSize: 14, color: '#0f172a' }}>
                         {parseFloat(payment.net_amount).toLocaleString()} ر.س
