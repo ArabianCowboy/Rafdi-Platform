@@ -3,13 +3,10 @@ from starlette.requests import Request
 
 
 def get_real_ip(request: Request) -> str:
-    """
-    Railway يمر الطلبات عبر proxy — لازم نقرأ IP المستخدم
-    الحقيقي من X-Forwarded-For مو request.client.host
-    """
     forwarded = request.headers.get("X-Forwarded-For")
     if forwarded:
-        return forwarded.split(",")[0].strip()
+        ips = [ip.strip() for ip in forwarded.split(",")]
+        return ips[-1]
     return request.client.host
 
 
