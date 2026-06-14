@@ -24,6 +24,7 @@ from app.services.Notification_Services.Notification_Service import Notification
 from app.services.Notification_Services.NotificationTrigger_Service import NotificationTriggerService
 from app.api.Auth_middleware import get_current_user
 from app.config import get_db
+from app.limiter import limiter
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
@@ -58,6 +59,7 @@ def get_profile_service(db: Session = Depends(get_db)) -> UserProfileService:
 
 
 @router.post("/register", response_model=UserResponse)
+@limiter.limit("3/minute")
 def register(
     data   : RegisterCreate,
     service: AuthService = Depends(get_auth_service)
@@ -69,6 +71,7 @@ def register(
 
 
 @router.post("/login", response_model=TokenResponse)
+@limiter.limit("5/minute")
 def login(
     data   : LoginCreate,
     service: AuthService = Depends(get_auth_service)
@@ -113,6 +116,7 @@ def get_me(
     return user
     
 @router.post("/forgot-password")
+@limiter.limit("3/minute")
 def forgot_password(
     data   : ForgotPasswordRequest,
     service: ForgotPasswordService = Depends(get_forgot_password_service)

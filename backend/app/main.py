@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from app.config import engine
 from app.models.Base_Model import Base
 from app.models import User, Company, Role, User_Role, Warehouse, Booking, Payment, Notification
@@ -8,10 +9,23 @@ from app.api.Auth_Api         import router as auth_router
 from app.api.WareHouse_Api    import router as warehouse_router
 from app.api.Booking_Api      import router as booking_router
 from app.api.Payment_Api      import router as payment_router
-from app.api.Admin_Api       import router as admin_router
+from app.api.Admin_Api        import router as admin_router
 from app.api.Notification_Api import router as notification_router
 
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from app.limiter import limiter
+
+
 app = FastAPI(title="Rafdi Platform")
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+app.add_middleware(
+    TrustedHostMiddleware,
+    allowed_hosts=["api.rafdi.com", "www.rafdi.com", "rafdi.com", "localhost"]
+)
 
 app.add_middleware(
     CORSMiddleware,
