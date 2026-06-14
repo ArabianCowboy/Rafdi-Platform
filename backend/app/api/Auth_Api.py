@@ -11,6 +11,7 @@ from app.Repo.Companey_Repo import CompanyRepo
 from app.Repo.Notification_Repo import NotificationRepo
 from app.Repo.UserRoleRepo import UserRoleRepo
 from app.Repo.Role_Repo import RoleRepo
+from app.Repo.RefreshToken_Repo import RefreshTokenRepo
 from app.services.User_services.auth_service import AuthService
 from app.services.User_services.password_service import PasswordService
 from app.services.User_services.validation_service import ValidationService
@@ -38,19 +39,21 @@ def get_forgot_password_service(db: Session = Depends(get_db)) -> ForgotPassword
 
 
 def get_auth_service(db: Session = Depends(get_db)) -> AuthService:
-    user_repo      = UserRepo(db)
-    company_repo   = CompanyRepo(db)
-    user_role_repo = UserRoleRepo(db)
-    role_repo      = RoleRepo(db)
+    user_repo          = UserRepo(db)
+    company_repo       = CompanyRepo(db)
+    user_role_repo     = UserRoleRepo(db)
+    role_repo          = RoleRepo(db)
+    refresh_token_repo = RefreshTokenRepo(db)
     notification_service = NotificationService(NotificationRepo(db))
     return AuthService(
-        user_repo          = user_repo,
-        company_repo       = company_repo,
-        user_role_repo     = user_role_repo,
-        password_service   = PasswordService(),
-        validation_service = ValidationService(user_repo, company_repo),
-        role_service       = RoleAssignmentService(user_role_repo, role_repo),
-        jwt_service        = JWTService(),
+        user_repo            = user_repo,
+        company_repo         = company_repo,
+        user_role_repo       = user_role_repo,
+        refresh_token_repo   = refresh_token_repo,
+        password_service     = PasswordService(),
+        validation_service   = ValidationService(user_repo, company_repo),
+        role_service         = RoleAssignmentService(user_role_repo, role_repo),
+        jwt_service          = JWTService(),
         notification_trigger = NotificationTriggerService(notification_service),
     )
 
@@ -78,8 +81,6 @@ def login(
     data   : LoginCreate,
     service: AuthService = Depends(get_auth_service)
 ):
-    
-    print("IP:", request.headers.get("X-Forwarded-For"), "|", request.client.host)
     try:
         return service.login(data.email, data.password)
     except ValueError as e:
@@ -153,3 +154,21 @@ def refresh_token(
         return service.refresh_access_token(data.refresh_token)
     except ValueError as e:
         raise HTTPException(status_code=401, detail=str(e))
+
+
+@router.post("/logout")
+def logout(
+    data   : RefreshTokenRequest,
+    service: AuthService = Depends(get_auth_service)
+):
+    service.logout(data.refresh_token)
+    return {"message": "تم تسجيل الخروج بنجاح"}
+
+
+@router.post("/logout-all")
+def logout_all(
+    service     : AuthService = Depends(get_auth_service),
+    current_user: dict         = Depends(get_current_user)
+):
+    service.logout_all(current_user["user_id"])
+    return {"message": "تم تسجيل الخروج من جميع الأجهزة"}
