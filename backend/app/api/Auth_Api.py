@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.Dtos.Auth_DTOs import RegisterCreate, LoginCreate, TokenResponse, ProfileUpdate
 from app.Dtos.User_DTOs import UserResponse
 from app.Dtos.Auth_DTOs import ForgotPasswordRequest, ResetPasswordRequest
+from app.Dtos.Auth_DTOs import RefreshTokenRequest
 from app.Dtos.Company_DTOs import CompanyResponse
 from app.Repo.user_repo import UserRepo
 from app.Repo.Companey_Repo import CompanyRepo
@@ -130,3 +131,13 @@ def reset_password(
         return {"message": "تم تغيير كلمة المرور بنجاح"}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@router.post("/refresh", response_model=TokenResponse)
+def refresh_token(
+    data   : RefreshTokenRequest,
+    service: AuthService = Depends(get_auth_service)
+):
+    try:
+        return service.refresh_access_token(data.refresh_token)
+    except ValueError as e:
+        raise HTTPException(status_code=401, detail=str(e))

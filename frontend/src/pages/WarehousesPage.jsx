@@ -141,7 +141,6 @@ function WarehousesPage() {
 
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, direction: 'rtl' }}>
-          {/* يمين */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             {isOwner && (
               <button onClick={openCreate} style={{
@@ -381,6 +380,9 @@ function WarehousesPage() {
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', borderRadius: 10, background: '#f8fafc', border: '1px solid #f1f5f9' }}>
+                  <span style={{ fontSize: 14, fontWeight: 500, color: '#475569' }}>
+                    {form.IsActive ? 'المستودع نشط ومتاح للحجز' : 'المستودع معطل'}
+                  </span>
                   <button type="button" onClick={() => setForm({ ...form, IsActive: !form.IsActive })}
                     style={{
                       position: 'relative', width: 40, height: 22, borderRadius: 11, border: 'none',
@@ -396,9 +398,6 @@ function WarehousesPage() {
                       transition: 'all .2s',
                     }} />
                   </button>
-                  <span style={{ fontSize: 14, fontWeight: 500, color: '#475569' }}>
-                    {form.IsActive ? 'المستودع نشط ومتاح للحجز' : 'المستودع معطل'}
-                  </span>
                 </div>
 
                 <button type="submit" disabled={submitting || uploading}

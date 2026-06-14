@@ -67,7 +67,7 @@ class AuthService:
             raise ValueError(str(e))
 
 
-    def login(self, email: str, password: str) -> MessageResponse:
+    def login(self, email: str, password: str) -> TokenResponse:
 
         user = self.user_repo.get_by_email(email)
         if not user:
@@ -79,10 +79,44 @@ class AuthService:
         user_roles = self.user_role_repo.get_by_user(user.UserID)
         roles = [ur.role.RoleName for ur in user_roles if ur.role]
 
-        token = self.jwt_service.create_token(
+        access_token = self.jwt_service.create_access_token(
             user_id    = user.UserID,
             company_id = user.CompanyID,
             roles      = roles,
         )
+        refresh_token = self.jwt_service.create_refresh_token(
+            user_id = user.UserID,
+        )
 
-        return TokenResponse(access_token=token)
+        return TokenResponse(
+            access_token  = access_token,
+            refresh_token = refresh_token,
+        )
+
+    # ─────────────────────────────────────────
+    # Refresh Access Token
+    # ─────────────────────────────────────────
+
+    def refresh_access_token(self, refresh_token: str) -> TokenResponse:
+        payload = self.jwt_service.decode_refresh_token(refresh_token)
+
+        user = self.user_repo.get_by_id(payload["user_id"])
+        if not user:
+            raise ValueError("المستخدم غير موجود")
+
+        user_roles = self.user_role_repo.get_by_user(user.UserID)
+        roles = [ur.role.RoleName for ur in user_roles if ur.role]
+
+        access_token = self.jwt_service.create_access_token(
+            user_id    = user.UserID,
+            company_id = user.CompanyID,
+            roles      = roles,
+        )
+        new_refresh_token = self.jwt_service.create_refresh_token(
+            user_id = user.UserID,
+        )
+
+        return TokenResponse(
+            access_token  = access_token,
+            refresh_token = new_refresh_token,
+        )
