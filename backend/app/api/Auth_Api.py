@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from app.Dtos.Auth_DTOs import RegisterCreate, LoginCreate, TokenResponse, ProfileUpdate
@@ -61,6 +61,7 @@ def get_profile_service(db: Session = Depends(get_db)) -> UserProfileService:
 @router.post("/register", response_model=UserResponse)
 @limiter.limit("3/minute")
 def register(
+    request: Request,
     data   : RegisterCreate,
     service: AuthService = Depends(get_auth_service)
 ):
@@ -73,6 +74,7 @@ def register(
 @router.post("/login", response_model=TokenResponse)
 @limiter.limit("5/minute")
 def login(
+    request: Request,
     data   : LoginCreate,
     service: AuthService = Depends(get_auth_service)
 ):
@@ -86,7 +88,7 @@ def login(
 def update_email(
     data        : ProfileUpdate,
     service     : UserProfileService = Depends(get_profile_service),
-    current_user: dict                     = Depends(get_current_user)
+    current_user: dict               = Depends(get_current_user)
 ):
     try:
         return service.update_email(current_user["user_id"], data)
@@ -104,7 +106,8 @@ def update_company(
         return service.update_company_name(current_user["company_id"], data)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-    
+
+
 @router.get("/me", response_model=UserResponse)
 def get_me(
     db          : Session = Depends(get_db),
@@ -114,10 +117,12 @@ def get_me(
     if not user:
         raise HTTPException(status_code=404, detail="المستخدم غير موجود")
     return user
-    
+
+
 @router.post("/forgot-password")
 @limiter.limit("3/minute")
 def forgot_password(
+    request: Request,
     data   : ForgotPasswordRequest,
     service: ForgotPasswordService = Depends(get_forgot_password_service)
 ):
@@ -135,6 +140,7 @@ def reset_password(
         return {"message": "تم تغيير كلمة المرور بنجاح"}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
 
 @router.post("/refresh", response_model=TokenResponse)
 def refresh_token(
