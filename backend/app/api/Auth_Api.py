@@ -78,6 +78,8 @@ def login(
     data   : LoginCreate,
     service: AuthService = Depends(get_auth_service)
 ):
+    
+    print("IP:", request.headers.get("X-Forwarded-For"), "|", request.client.host)
     try:
         return service.login(data.email, data.password)
     except ValueError as e:
