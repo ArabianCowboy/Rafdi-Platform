@@ -268,7 +268,6 @@ function LoginPage() {
 
             <div className="text-right">
               <div className="flex justify-between items-center mb-1.5">
-                <Link to="/forgot-password" style={{ fontSize: 12, fontWeight: 600, color: '#2563eb', textDecoration: 'none' }}>نسيت كلمة المرور؟</Link>
                 <label style={{ fontSize: 12, fontWeight: 700, color: '#475569' }}>كلمة المرور</label>
               </div>
               <div className="relative">
@@ -282,6 +281,7 @@ function LoginPage() {
                   style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
                   {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                 </button>
+                <Link to="/forgot-password" style={{ fontSize: 12, fontWeight: 600, color: '#2563eb', textDecoration: 'none' }}>نسيت كلمة المرور؟</Link>
               </div>
             </div>
 
