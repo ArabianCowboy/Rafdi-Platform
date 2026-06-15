@@ -29,6 +29,7 @@ function App() {
         <Route path="/booking-detail/:id" element={<BookingDetailPage />} />
         <Route path="/owner-bookings" element={<OwnerBookingsPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/change-password" element={<ChangePasswordPage />} />
         <Route path="/payment" element={<PaymentPage />} />
         <Route path="/admin" element={<AdminPage />} />
       </Routes>

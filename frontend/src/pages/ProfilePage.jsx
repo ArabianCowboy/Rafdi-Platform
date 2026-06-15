@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, Mail, ShieldCheck, Save, CheckCircle, KeyRound, Loader } from 'lucide-react';
+import { Building2, Mail, Save, CheckCircle, Loader } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { API_URL, getHeaders } from '../config/api';
 
@@ -59,7 +59,6 @@ function ProfilePage() {
       });
       const data = await res.json();
       if (!res.ok) { showError(data.detail || 'حدث خطأ'); return; }
-      // الرد من نوع CompanyResponse → الحقل Name مباشرة
       setProfile(prev => ({ ...prev, company: { ...prev.company, Name: data.Name } }));
       localStorage.setItem('company_name', data.Name);
       showSuccess('تم تحديث اسم الشركة بنجاح ✓');
@@ -187,6 +186,15 @@ function ProfilePage() {
                 </div>
               </div>
 
+              {/* نوع الحساب */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: '#f8fafc', borderRadius: 10, border: '1px solid #f1f5f9', marginBottom: 20 }}>
+                <span style={{ fontSize: 12, color: '#94a3b8' }}>نوع الحساب</span>
+                <div className="flex gap-1.5">
+                  {isOwner && <span style={{ fontSize: 12, fontWeight: 600, padding: '3px 10px', borderRadius: 6, background: '#eff6ff', color: '#1d4ed8', border: '1px solid #dbeafe' }}>مالك مستودع</span>}
+                  {isRenter && <span style={{ fontSize: 12, fontWeight: 600, padding: '3px 10px', borderRadius: 6, background: '#ecfdf5', color: '#059669', border: '1px solid #a7f3d0' }}>مستأجر</span>}
+                </div>
+              </div>
+
               <form onSubmit={handleUpdateCompany}>
                 <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6, textAlign: 'right' }}>
                   تعديل اسم الشركة
@@ -245,46 +253,6 @@ function ProfilePage() {
               </form>
             </div>
 
-            <div style={{ height: 1, background: '#f1f5f9' }} />
-
-            {/* ======= معلومات الحساب ======= */}
-            <div className="p-6">
-              <SectionHeader title="معلومات الحساب" icon={ShieldCheck} />
-
-              <div className="space-y-0 divide-y divide-gray-50">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0' }}>
-                  <span style={{ fontSize: 12, color: '#94a3b8' }}>نوع الحساب</span>
-                  <div className="flex gap-1.5">
-                    {isOwner && <span style={{ fontSize: 12, fontWeight: 600, padding: '3px 10px', borderRadius: 6, background: '#eff6ff', color: '#1d4ed8', border: '1px solid #dbeafe' }}>مالك مستودع</span>}
-                    {isRenter && <span style={{ fontSize: 12, fontWeight: 600, padding: '3px 10px', borderRadius: 6, background: '#ecfdf5', color: '#059669', border: '1px solid #a7f3d0' }}>مستأجر</span>}
-                  </div>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0' }}>
-                  <span style={{ fontSize: 12, color: '#94a3b8' }}>رقم المستخدم</span>
-                  <span style={{ fontSize: 13, color: '#64748b', fontFamily: 'monospace' }}>{userInfo.user_id}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0' }}>
-                  <span style={{ fontSize: 12, color: '#94a3b8' }}>رقم الشركة</span>
-                  <span style={{ fontSize: 13, color: '#64748b', fontFamily: 'monospace' }}>{userInfo.company_id}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0' }}>
-                  <span style={{ fontSize: 12, color: '#94a3b8' }}>الأمان</span>
-                  <button onClick={() => navigate('/forgot-password')}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: 6,
-                      padding: '8px 14px', borderRadius: 8,
-                      border: '1px solid #e2e8f0', background: '#fff',
-                      fontSize: 13, fontWeight: 600, color: '#475569',
-                      cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s',
-                    }}
-                    onMouseEnter={e => { e.currentTarget.style.borderColor = '#2563eb'; e.currentTarget.style.color = '#2563eb'; }}
-                    onMouseLeave={e => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = '#475569'; }}>
-                    <KeyRound size={13} />
-                    تغيير كلمة المرور
-                  </button>
-                </div>
-              </div>
-            </div>
           </div>
         )}
       </main>
