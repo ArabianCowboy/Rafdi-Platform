@@ -17,7 +17,7 @@ const paymentStatusConfig = {
 };
 
 const Row = ({ label, children }) => (
-  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '11px 0', borderBottom: '1px solid #f8fafc' }}>
+  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '11px 0', borderBottom: '1px solid #f8fafc', direction: 'rtl' }}>
     <div style={{ display: 'flex', alignItems: 'center' }}>{children}</div>
     <span style={{ fontSize: 12, color: '#94a3b8', flexShrink: 0, marginRight: 8 }}>{label}</span>
   </div>
@@ -144,7 +144,7 @@ function BookingDetailPage() {
                       <span style={{ fontSize: 14, color: '#475569' }}>{booking.warehouse.Size?.toLocaleString()} م²</span>
                     </div>
                   </Row>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 11 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 11, direction: 'rtl' }}>
                     <span style={{ fontSize: 14, fontWeight: 700, color: '#2563eb' }}>
                       {parseFloat(booking.warehouse.PricePerDay).toLocaleString()} ر.س/يوم
                     </span>
