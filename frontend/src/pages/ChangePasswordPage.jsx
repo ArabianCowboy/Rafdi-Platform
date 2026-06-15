@@ -1,28 +1,41 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Lock, Eye, EyeOff, ShieldCheck, X, CheckCircle, Mail, ArrowLeft } from 'lucide-react';
-import { API_URL } from '../config/api';
+import { Lock, Eye, EyeOff, ShieldCheck, X, CheckCircle, Mail, ArrowLeft, Loader } from 'lucide-react';
+import { API_URL, getHeaders } from '../config/api';
 
-const getUserInfo = () => {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) return {};
-    return JSON.parse(atob(token.split('.')[1]));
-  } catch { return {}; }
+const parseError = (detail) => {
+  if (!detail) return 'حدث خطأ';
+  if (typeof detail === 'string') return detail;
+  if (Array.isArray(detail)) return detail.map(e => e.msg).join(', ');
+  return 'حدث خطأ';
 };
 
 function ChangePasswordPage() {
   const navigate = useNavigate();
-  const userInfo = getUserInfo();
-  const email = userInfo.email;
+  const [email, setEmailState] = useState('');
+  const [loadingEmail, setLoadingEmail] = useState(true);
 
-  const [step, setStep] = useState(1); // 1: إرسال الرمز، 2: إدخال الرمز وكلمة المرور
+  const [step, setStep] = useState(1);
   const [otp, setOtp] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchEmail = async () => {
+      try {
+        const res = await fetch(`${API_URL}/auth/me`, { headers: getHeaders(false) });
+        if (res.ok) {
+          const data = await res.json();
+          setEmailState(data.Email || '');
+        }
+      } catch {}
+      finally { setLoadingEmail(false); }
+    };
+    fetchEmail();
+  }, []);
 
   const inputStyle = {
     width: '100%', padding: '11px 40px 11px 14px', borderRadius: 10,
@@ -42,6 +55,7 @@ function ChangePasswordPage() {
 
   const handleSendOTP = async () => {
     setError(''); setSuccess('');
+    if (!email) { setError('تعذر جلب بريدك الإلكتروني، حاول إعادة تحميل الصفحة'); return; }
     setLoading(true);
     try {
       const res = await fetch(`${API_URL}/auth/forgot-password`, {
@@ -50,7 +64,7 @@ function ChangePasswordPage() {
         body: JSON.stringify({ email }),
       });
       const data = await res.json();
-      if (!res.ok) { setError(data.detail || 'حدث خطأ'); return; }
+      if (!res.ok) { setError(parseError(data.detail)); return; }
       setSuccess('تم إرسال رمز التحقق إلى بريدك الإلكتروني');
       setStep(2);
     } catch {
@@ -72,7 +86,7 @@ function ChangePasswordPage() {
         body: JSON.stringify({ email, otp, new_password: newPassword }),
       });
       const data = await res.json();
-      if (!res.ok) { setError(data.detail || 'رمز التحقق غير صحيح أو منتهي الصلاحية'); return; }
+      if (!res.ok) { setError(parseError(data.detail)); return; }
       setSuccess('تم تغيير كلمة المرور بنجاح!');
       setTimeout(() => navigate('/profile'), 1800);
     } catch {
@@ -129,81 +143,89 @@ function ChangePasswordPage() {
             </div>
           )}
 
-          {/* Step 1 */}
-          {step === 1 && (
-            <div className="space-y-4">
-              <div style={{ padding: '10px 14px', background: '#f8fafc', borderRadius: 10, border: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'flex-end' }}>
-                <span style={{ fontSize: 14, fontWeight: 600, color: '#0f172a' }}>{email}</span>
-                <Mail size={14} color="#94a3b8" />
-              </div>
-
-              <button onClick={handleSendOTP} disabled={loading} style={btnStyle}>
-                {loading ? (
-                  <span className="flex items-center gap-2">
-                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin block" />
-                    جاري الإرسال...
-                  </span>
-                ) : (
-                  <>
-                    <ArrowLeft size={16} />
-                    إرسال رمز التحقق
-                  </>
-                )}
-              </button>
+          {loadingEmail ? (
+            <div className="flex justify-center py-8">
+              <Loader size={24} color="#2563eb" className="animate-spin" />
             </div>
-          )}
+          ) : (
+            <>
+              {/* Step 1 */}
+              {step === 1 && (
+                <div className="space-y-4">
+                  <div style={{ padding: '10px 14px', background: '#f8fafc', borderRadius: 10, border: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'flex-end' }}>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: '#0f172a' }}>{email}</span>
+                    <Mail size={14} color="#94a3b8" />
+                  </div>
 
-          {/* Step 2 */}
-          {step === 2 && (
-            <form onSubmit={handleResetPassword} className="space-y-4">
-              <div className="text-right">
-                <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 6 }}>
-                  رمز التحقق
-                </label>
-                <div className="relative">
-                  <input type="text" placeholder="أدخل الرمز المرسل إلى بريدك"
-                    style={{ ...inputStyle, letterSpacing: '0.1em' }}
-                    onFocus={e => e.target.style.borderColor = '#2563eb'}
-                    onBlur={e => e.target.style.borderColor = '#e2e8f0'}
-                    value={otp}
-                    onChange={e => { setOtp(e.target.value); if (error) setError(''); }} />
-                  <ShieldCheck size={15} style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                </div>
-              </div>
-
-              <div className="text-right">
-                <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 6 }}>
-                  كلمة المرور الجديدة
-                </label>
-                <div className="relative">
-                  <input type={showPassword ? 'text' : 'password'} placeholder="٦ أحرف على الأقل"
-                    style={{ ...inputStyle, paddingLeft: 40 }}
-                    onFocus={e => e.target.style.borderColor = '#2563eb'}
-                    onBlur={e => e.target.style.borderColor = '#e2e8f0'}
-                    value={newPassword}
-                    onChange={e => { setNewPassword(e.target.value); if (error) setError(''); }} />
-                  <Lock size={15} style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)}
-                    style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
-                    {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                  <button onClick={handleSendOTP} disabled={loading} style={btnStyle}>
+                    {loading ? (
+                      <span className="flex items-center gap-2">
+                        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin block" />
+                        جاري الإرسال...
+                      </span>
+                    ) : (
+                      <>
+                        <ArrowLeft size={16} />
+                        إرسال رمز التحقق
+                      </>
+                    )}
                   </button>
                 </div>
-              </div>
+              )}
 
-              <button type="submit" disabled={loading} style={btnStyle}>
-                {loading ? (
-                  <span className="flex items-center gap-2">
-                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin block" />
-                    جاري التغيير...
-                  </span>
-                ) : 'تغيير كلمة المرور'}
-              </button>
+              {/* Step 2 */}
+              {step === 2 && (
+                <form onSubmit={handleResetPassword} className="space-y-4">
+                  <div className="text-right">
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 6 }}>
+                      رمز التحقق
+                    </label>
+                    <div className="relative">
+                      <input type="text" placeholder="أدخل الرمز المرسل إلى بريدك"
+                        style={{ ...inputStyle, letterSpacing: '0.1em' }}
+                        onFocus={e => e.target.style.borderColor = '#2563eb'}
+                        onBlur={e => e.target.style.borderColor = '#e2e8f0'}
+                        value={otp}
+                        onChange={e => { setOtp(e.target.value); if (error) setError(''); }} />
+                      <ShieldCheck size={15} style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                    </div>
+                  </div>
 
-              <button type="button" onClick={handleSendOTP} disabled={loading}
-                style={{ width: '100%', padding: '8px', fontSize: 12, fontWeight: 600, color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>
-                لم تستلم الرمز؟ أعد الإرسال
-              </button>
-            </form>
+                  <div className="text-right">
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 6 }}>
+                      كلمة المرور الجديدة
+                    </label>
+                    <div className="relative">
+                      <input type={showPassword ? 'text' : 'password'} placeholder="٦ أحرف على الأقل"
+                        style={{ ...inputStyle, paddingLeft: 40 }}
+                        onFocus={e => e.target.style.borderColor = '#2563eb'}
+                        onBlur={e => e.target.style.borderColor = '#e2e8f0'}
+                        value={newPassword}
+                        onChange={e => { setNewPassword(e.target.value); if (error) setError(''); }} />
+                      <Lock size={15} style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                      <button type="button" onClick={() => setShowPassword(!showPassword)}
+                        style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+                        {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <button type="submit" disabled={loading} style={btnStyle}>
+                    {loading ? (
+                      <span className="flex items-center gap-2">
+                        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin block" />
+                        جاري التغيير...
+                      </span>
+                    ) : 'تغيير كلمة المرور'}
+                  </button>
+
+                  <button type="button" onClick={handleSendOTP} disabled={loading}
+                    style={{ width: '100%', padding: '8px', fontSize: 12, fontWeight: 600, color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>
+                    لم تستلم الرمز؟ أعد الإرسال
+                  </button>
+                </form>
+              )}
+            </>
           )}
         </div>
       </div>
