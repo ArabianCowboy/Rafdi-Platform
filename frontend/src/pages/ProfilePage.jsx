@@ -95,13 +95,13 @@ function ProfilePage() {
   };
 
   const SectionHeader = ({ title, icon: Icon }) => (
-    <div style={{ display: 'flex', flexDirection: 'row-reverse', alignItems: 'center', gap: 8, marginBottom: 20 }}>
-      <h2 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 700, fontSize: 16, color: '#0f172a' }}>
-        {title}
-      </h2>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
       <div style={{ width: 30, height: 30, borderRadius: 8, background: '#eff6ff', display: 'grid', placeItems: 'center' }}>
         <Icon size={14} color="#2563eb" />
       </div>
+      <h2 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 700, fontSize: 16, color: '#0f172a' }}>
+        {title}
+      </h2>
     </div>
   );
 
@@ -119,7 +119,7 @@ function ProfilePage() {
           pointerEvents: 'none',
         }} />
         <div className="max-w-2xl mx-auto relative z-10">
-          <div style={{ display: 'flex', flexDirection: 'row-reverse', alignItems: 'center', gap: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             <div style={{
               width: 56, height: 56, borderRadius: 16,
               background: 'linear-gradient(135deg, #2563eb, #1e3a8a)',
@@ -131,14 +131,14 @@ function ProfilePage() {
                 {displayName.charAt(0)}
               </span>
             </div>
-            <div className="text-right">
+            <div style={{ textAlign: 'right' }}>
               <h1 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 20, color: '#fff', marginBottom: 4 }}>
                 {displayName}
               </h1>
-              <div style={{ display: 'flex', flexDirection: 'row-reverse', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)' }}>{displayEmail}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 {isOwner && <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 100, background: 'rgba(37,99,235,0.3)', color: '#93c5fd', border: '1px solid rgba(37,99,235,0.4)' }}>مالك</span>}
                 {isRenter && <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 100, background: 'rgba(16,185,129,0.2)', color: '#6ee7b7', border: '1px solid rgba(16,185,129,0.3)' }}>مستأجر</span>}
+                <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)' }}>{displayEmail}</span>
               </div>
             </div>
           </div>
@@ -172,25 +172,30 @@ function ProfilePage() {
             style={{ boxShadow: '0 1px 3px rgba(15,23,42,0.06), 0 4px 16px -8px rgba(15,23,42,0.08)' }}>
 
             {/* ======= بيانات الشركة ======= */}
-            <div className="p-6 text-right">
+            <div className="p-6">
               <SectionHeader title="بيانات الشركة" icon={Building2} />
 
               <div className="grid grid-cols-2 gap-3 mb-5">
-                <div style={{ padding: '10px 14px', background: '#f8fafc', borderRadius: 10, border: '1px solid #f1f5f9', textAlign: 'right' }}>
-                  <p style={{ fontSize: 11, color: '#94a3b8', marginBottom: 3 }}>اسم الشركة</p>
-                  <p style={{ fontSize: 14, fontWeight: 600, color: '#0f172a' }}>{displayName}</p>
+                <div style={{ padding: '10px 14px', background: '#f8fafc', borderRadius: 10, border: '1px solid #f1f5f9' }}>
+                  <p style={{ fontSize: 11, color: '#94a3b8', marginBottom: 3, textAlign: 'right' }}>اسم الشركة</p>
+                  <p style={{ fontSize: 14, fontWeight: 600, color: '#0f172a', textAlign: 'right' }}>{displayName}</p>
                 </div>
-                <div style={{ padding: '10px 14px', background: '#f8fafc', borderRadius: 10, border: '1px solid #f1f5f9', textAlign: 'right' }}>
-                  <p style={{ fontSize: 11, color: '#94a3b8', marginBottom: 3 }}>السجل التجاري</p>
-                  <p style={{ fontSize: 13, color: '#64748b', fontFamily: 'monospace' }}>{displayCR}</p>
+                <div style={{ padding: '10px 14px', background: '#f8fafc', borderRadius: 10, border: '1px solid #f1f5f9' }}>
+                  <p style={{ fontSize: 11, color: '#94a3b8', marginBottom: 3, textAlign: 'right' }}>السجل التجاري</p>
+                  <p style={{ fontSize: 13, color: '#64748b', fontFamily: 'monospace', textAlign: 'right' }}>{displayCR}</p>
                 </div>
               </div>
 
               <form onSubmit={handleUpdateCompany}>
-                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6, textAlign: 'right' }}>
                   تعديل اسم الشركة
                 </label>
                 <div className="flex gap-2">
+                  <input type="text" value={companyName} placeholder="اسم الشركة"
+                    style={{ ...inputStyle, flex: 1 }}
+                    onFocus={e => { e.target.style.borderColor = '#2563eb'; e.target.style.background = '#fff'; }}
+                    onBlur={e => { e.target.style.borderColor = '#e2e8f0'; e.target.style.background = '#f8fafc'; }}
+                    onChange={e => { setCompanyName(e.target.value); setErrorMsg(''); }} />
                   <button type="submit" disabled={loadingCompany}
                     style={{
                       display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0,
@@ -203,11 +208,6 @@ function ProfilePage() {
                       : <Save size={13} />}
                     حفظ
                   </button>
-                  <input type="text" value={companyName} placeholder="اسم الشركة"
-                    style={{ ...inputStyle, flex: 1 }}
-                    onFocus={e => { e.target.style.borderColor = '#2563eb'; e.target.style.background = '#fff'; }}
-                    onBlur={e => { e.target.style.borderColor = '#e2e8f0'; e.target.style.background = '#f8fafc'; }}
-                    onChange={e => { setCompanyName(e.target.value); setErrorMsg(''); }} />
                 </div>
               </form>
             </div>
@@ -215,19 +215,19 @@ function ProfilePage() {
             <div style={{ height: 1, background: '#f1f5f9' }} />
 
             {/* ======= البريد الإلكتروني ======= */}
-            <div className="p-6 text-right">
+            <div className="p-6">
               <SectionHeader title="البريد الإلكتروني" icon={Mail} />
 
-              <div className="mb-5" style={{ padding: '10px 14px', background: '#f8fafc', borderRadius: 10, border: '1px solid #f1f5f9' }}>
-                <p style={{ fontSize: 11, color: '#94a3b8', marginBottom: 3 }}>البريد الحالي</p>
-                <p style={{ fontSize: 14, fontWeight: 600, color: '#0f172a' }}>{displayEmail}</p>
-              </div>
-
               <form onSubmit={handleUpdateEmail}>
-                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6, textAlign: 'right' }}>
                   تعديل البريد الإلكتروني
                 </label>
                 <div className="flex gap-2">
+                  <input type="email" value={email} placeholder="name@company.com"
+                    style={{ ...inputStyle, flex: 1 }}
+                    onFocus={e => { e.target.style.borderColor = '#2563eb'; e.target.style.background = '#fff'; }}
+                    onBlur={e => { e.target.style.borderColor = '#e2e8f0'; e.target.style.background = '#f8fafc'; }}
+                    onChange={e => { setEmail(e.target.value); setErrorMsg(''); }} />
                   <button type="submit" disabled={loadingEmail}
                     style={{
                       display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0,
@@ -240,11 +240,6 @@ function ProfilePage() {
                       : <Save size={13} />}
                     حفظ
                   </button>
-                  <input type="email" value={email} placeholder="name@company.com"
-                    style={{ ...inputStyle, flex: 1 }}
-                    onFocus={e => { e.target.style.borderColor = '#2563eb'; e.target.style.background = '#fff'; }}
-                    onBlur={e => { e.target.style.borderColor = '#e2e8f0'; e.target.style.background = '#f8fafc'; }}
-                    onChange={e => { setEmail(e.target.value); setErrorMsg(''); }} />
                 </div>
               </form>
             </div>
@@ -252,26 +247,26 @@ function ProfilePage() {
             <div style={{ height: 1, background: '#f1f5f9' }} />
 
             {/* ======= معلومات الحساب ======= */}
-            <div className="p-6 text-right">
+            <div className="p-6">
               <SectionHeader title="معلومات الحساب" icon={ShieldCheck} />
 
               <div className="space-y-0 divide-y divide-gray-50">
-                <div style={{ display: 'flex', flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0' }}>
                   <span style={{ fontSize: 12, color: '#94a3b8' }}>نوع الحساب</span>
                   <div className="flex gap-1.5">
                     {isOwner && <span style={{ fontSize: 12, fontWeight: 600, padding: '3px 10px', borderRadius: 6, background: '#eff6ff', color: '#1d4ed8', border: '1px solid #dbeafe' }}>مالك مستودع</span>}
                     {isRenter && <span style={{ fontSize: 12, fontWeight: 600, padding: '3px 10px', borderRadius: 6, background: '#ecfdf5', color: '#059669', border: '1px solid #a7f3d0' }}>مستأجر</span>}
                   </div>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0' }}>
                   <span style={{ fontSize: 12, color: '#94a3b8' }}>رقم المستخدم</span>
                   <span style={{ fontSize: 13, color: '#64748b', fontFamily: 'monospace' }}>{userInfo.user_id}</span>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0' }}>
                   <span style={{ fontSize: 12, color: '#94a3b8' }}>رقم الشركة</span>
                   <span style={{ fontSize: 13, color: '#64748b', fontFamily: 'monospace' }}>{userInfo.company_id}</span>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0' }}>
                   <span style={{ fontSize: 12, color: '#94a3b8' }}>الأمان</span>
                   <button onClick={() => navigate('/forgot-password')}
                     style={{
