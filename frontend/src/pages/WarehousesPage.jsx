@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Building2, Plus, MapPin, Package, Edit2, Power, X, Loader, Save, ImagePlus, CheckCircle } from 'lucide-react';
 import Navbar from '../components/Navbar';
+import LocationPickerModal from '../components/LocationPickerModal';
 import { API_URL, getHeaders } from '../config/api';
 
 const CLOUDINARY_CLOUD = import.meta.env.VITE_CLOUDINARY_CLOUD;
@@ -46,6 +47,7 @@ function WarehousesPage() {
   const [warehouses, setWarehouses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showLocationPicker, setShowLocationPicker] = useState(false);
   const [editWarehouse, setEditWarehouse] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [submitting, setSubmitting] = useState(false);
@@ -335,21 +337,37 @@ function WarehousesPage() {
                   )}
                 </div>
 
-                {[
-                  { label: 'اسم المستودع', key: 'Name', placeholder: 'مستودع الرياض الرئيسي' },
-                  { label: 'الموقع', key: 'Location', placeholder: 'الرياض، حي العارض' },
-                ].map((field) => (
-                  <div key={field.key}>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 6 }}>
-                      {field.label}
-                    </label>
-                    <input type="text" placeholder={field.placeholder} style={inputStyle}
-                      onFocus={e => e.target.style.borderColor = '#2563eb'}
-                      onBlur={e => e.target.style.borderColor = '#e2e8f0'}
-                      value={form[field.key]}
-                      onChange={e => { setForm({ ...form, [field.key]: e.target.value }); if (error) setError(''); }} />
-                  </div>
-                ))}
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 6 }}>
+                    اسم المستودع
+                  </label>
+                  <input type="text" placeholder="مستودع الرياض الرئيسي" style={inputStyle}
+                    onFocus={e => e.target.style.borderColor = '#2563eb'}
+                    onBlur={e => e.target.style.borderColor = '#e2e8f0'}
+                    value={form.Name}
+                    onChange={e => { setForm({ ...form, Name: e.target.value }); if (error) setError(''); }} />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 6 }}>
+                    الموقع
+                  </label>
+                  <button type="button" onClick={() => setShowLocationPicker(true)}
+                    style={{
+                      ...inputStyle, display: 'flex', alignItems: 'center', gap: 8,
+                      cursor: 'pointer', textAlign: 'right', justifyContent: 'flex-start',
+                    }}
+                    onFocus={e => e.target.style.borderColor = '#2563eb'}
+                    onBlur={e => e.target.style.borderColor = '#e2e8f0'}>
+                    <MapPin size={15} color="#94a3b8" style={{ flexShrink: 0 }} />
+                    <span style={{
+                      color: form.Location ? '#0f172a' : '#94a3b8',
+                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                    }}>
+                      {form.Location || 'اختر الموقع من الخريطة'}
+                    </span>
+                  </button>
+                </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   {[
@@ -422,6 +440,18 @@ function WarehousesPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Location Picker Modal */}
+      {showLocationPicker && (
+        <LocationPickerModal
+          initialValue={form.Location}
+          onSelect={({ location }) => {
+            setForm(prev => ({ ...prev, Location: location }));
+            if (error) setError('');
+          }}
+          onClose={() => setShowLocationPicker(false)}
+        />
       )}
     </div>
   );
