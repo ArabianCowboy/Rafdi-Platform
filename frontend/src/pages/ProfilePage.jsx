@@ -60,6 +60,7 @@ function ProfilePage() {
       const data = await res.json();
       if (!res.ok) { showError(data.detail || 'حدث خطأ'); return; }
       setProfile(prev => ({ ...prev, company: { ...prev.company, CompanyName: companyName } }));
+      localStorage.setItem('company_name', companyName);
       showSuccess('تم تحديث اسم الشركة بنجاح ✓');
     } catch { showError('حدث خطأ في الاتصال');
     } finally { setLoadingCompany(false); }
@@ -93,6 +94,17 @@ function ProfilePage() {
     boxSizing: 'border-box', transition: 'border-color .15s, background .15s',
   };
 
+  const SectionHeader = ({ title, icon: Icon }) => (
+    <div style={{ display: 'flex', flexDirection: 'row-reverse', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+      <h2 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 700, fontSize: 16, color: '#0f172a' }}>
+        {title}
+      </h2>
+      <div style={{ width: 30, height: 30, borderRadius: 8, background: '#eff6ff', display: 'grid', placeItems: 'center' }}>
+        <Icon size={14} color="#2563eb" />
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-[#f8fafc]" dir="rtl" style={{ fontFamily: "'IBM Plex Sans Arabic', 'Tajawal', sans-serif" }}>
 
@@ -107,7 +119,7 @@ function ProfilePage() {
           pointerEvents: 'none',
         }} />
         <div className="max-w-2xl mx-auto relative z-10">
-          <div className="flex items-center gap-4">
+          <div style={{ display: 'flex', flexDirection: 'row-reverse', alignItems: 'center', gap: 16 }}>
             <div style={{
               width: 56, height: 56, borderRadius: 16,
               background: 'linear-gradient(135deg, #2563eb, #1e3a8a)',
@@ -123,7 +135,7 @@ function ProfilePage() {
               <h1 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 20, color: '#fff', marginBottom: 4 }}>
                 {displayName}
               </h1>
-              <div className="flex items-center justify-end gap-2">
+              <div style={{ display: 'flex', flexDirection: 'row-reverse', alignItems: 'center', gap: 8 }}>
                 <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)' }}>{displayEmail}</span>
                 {isOwner && <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 100, background: 'rgba(37,99,235,0.3)', color: '#93c5fd', border: '1px solid rgba(37,99,235,0.4)' }}>مالك</span>}
                 {isRenter && <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 100, background: 'rgba(16,185,129,0.2)', color: '#6ee7b7', border: '1px solid rgba(16,185,129,0.3)' }}>مستأجر</span>}
@@ -161,16 +173,8 @@ function ProfilePage() {
 
             {/* ======= بيانات الشركة ======= */}
             <div className="p-6 text-right">
-              <div className="flex items-center justify-end gap-2 mb-5">
-                <h2 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 700, fontSize: 16, color: '#0f172a' }}>
-                  بيانات الشركة
-                </h2>
-                <div style={{ width: 30, height: 30, borderRadius: 8, background: '#eff6ff', display: 'grid', placeItems: 'center' }}>
-                  <Building2 size={14} color="#2563eb" />
-                </div>
-              </div>
+              <SectionHeader title="بيانات الشركة" icon={Building2} />
 
-              {/* Info row */}
               <div className="grid grid-cols-2 gap-3 mb-5">
                 <div style={{ padding: '10px 14px', background: '#f8fafc', borderRadius: 10, border: '1px solid #f1f5f9', textAlign: 'right' }}>
                   <p style={{ fontSize: 11, color: '#94a3b8', marginBottom: 3 }}>اسم الشركة</p>
@@ -212,14 +216,7 @@ function ProfilePage() {
 
             {/* ======= البريد الإلكتروني ======= */}
             <div className="p-6 text-right">
-              <div className="flex items-center justify-end gap-2 mb-5">
-                <h2 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 700, fontSize: 16, color: '#0f172a' }}>
-                  البريد الإلكتروني
-                </h2>
-                <div style={{ width: 30, height: 30, borderRadius: 8, background: '#eff6ff', display: 'grid', placeItems: 'center' }}>
-                  <Mail size={14} color="#2563eb" />
-                </div>
-              </div>
+              <SectionHeader title="البريد الإلكتروني" icon={Mail} />
 
               <div className="mb-5" style={{ padding: '10px 14px', background: '#f8fafc', borderRadius: 10, border: '1px solid #f1f5f9' }}>
                 <p style={{ fontSize: 11, color: '#94a3b8', marginBottom: 3 }}>البريد الحالي</p>
@@ -231,6 +228,11 @@ function ProfilePage() {
                   تعديل البريد الإلكتروني
                 </label>
                 <div className="flex gap-2">
+                  <input type="email" value={email} placeholder="name@company.com"
+                    style={{ ...inputStyle, flex: 1 }}
+                    onFocus={e => { e.target.style.borderColor = '#2563eb'; e.target.style.background = '#fff'; }}
+                    onBlur={e => { e.target.style.borderColor = '#e2e8f0'; e.target.style.background = '#f8fafc'; }}
+                    onChange={e => { setEmail(e.target.value); setErrorMsg(''); }} />
                   <button type="submit" disabled={loadingEmail}
                     style={{
                       display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0,
@@ -243,11 +245,6 @@ function ProfilePage() {
                       : <Save size={13} />}
                     حفظ
                   </button>
-                  <input type="email" value={email} placeholder="name@company.com"
-                    style={{ ...inputStyle, flex: 1 }}
-                    onFocus={e => { e.target.style.borderColor = '#2563eb'; e.target.style.background = '#fff'; }}
-                    onBlur={e => { e.target.style.borderColor = '#e2e8f0'; e.target.style.background = '#f8fafc'; }}
-                    onChange={e => { setEmail(e.target.value); setErrorMsg(''); }} />
                 </div>
               </form>
             </div>
@@ -256,14 +253,7 @@ function ProfilePage() {
 
             {/* ======= معلومات الحساب ======= */}
             <div className="p-6 text-right">
-              <div className="flex items-center justify-end gap-2 mb-5">
-                <h2 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 700, fontSize: 16, color: '#0f172a' }}>
-                  معلومات الحساب
-                </h2>
-                <div style={{ width: 30, height: 30, borderRadius: 8, background: '#eff6ff', display: 'grid', placeItems: 'center' }}>
-                  <ShieldCheck size={14} color="#2563eb" />
-                </div>
-              </div>
+              <SectionHeader title="معلومات الحساب" icon={ShieldCheck} />
 
               <div className="space-y-0 divide-y divide-gray-50">
                 <div className="flex justify-between items-center py-3">
