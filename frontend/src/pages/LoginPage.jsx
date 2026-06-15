@@ -45,9 +45,6 @@ function RoleSelector({ token, onSelect }) {
           <h1 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 'clamp(28px,4vw,42px)', color: '#fff', marginBottom: 10 }}>
             أهلاً، {companyName}
           </h1>
-          <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: 16 }}>
-            اختر طريقة الدخول للمنصة
-          </p>
         </div>
       </div>
 
@@ -70,7 +67,6 @@ function RoleSelector({ token, onSelect }) {
                 <h3 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 20, color: '#0f172a', marginBottom: 4 }}>
                   مالك مستودع
                 </h3>
-                <p style={{ fontSize: 13, color: '#64748b' }}>إدارة مستودعاتك وتتبع الحجوزات</p>
               </div>
             </div>
             <button onClick={() => onSelect('owner')}
@@ -80,8 +76,8 @@ function RoleSelector({ token, onSelect }) {
                 background: 'none', border: 'none', cursor: 'pointer',
                 fontFamily: 'inherit', padding: 0,
               }}>
+                 دخول
               <ArrowLeft size={16} />
-              دخول
             </button>
           </div>
 
@@ -100,7 +96,6 @@ function RoleSelector({ token, onSelect }) {
                 <h3 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 20, color: '#0f172a', marginBottom: 4 }}>
                   مستأجر
                 </h3>
-                <p style={{ fontSize: 13, color: '#64748b' }}>ابحث عن مستودع واحجز بسهولة</p>
               </div>
             </div>
             <button onClick={() => onSelect('renter')}
@@ -110,8 +105,8 @@ function RoleSelector({ token, onSelect }) {
                 background: 'none', border: 'none', cursor: 'pointer',
                 fontFamily: 'inherit', padding: 0,
               }}>
-              <ArrowLeft size={16} />
-              دخول
+                 دخول
+             <ArrowLeft size={16} /> 
             </button>
           </div>
 
