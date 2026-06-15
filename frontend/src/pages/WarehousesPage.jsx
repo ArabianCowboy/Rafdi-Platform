@@ -141,9 +141,9 @@ function WarehousesPage() {
 
       <main className="max-w-6xl mx-auto px-4 py-8">
 
-        {/* Header */}
-<div style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 12, marginBottom: 24, direction: 'rtl', textAlign: 'right' }}>
-  <div>
+{/* Header */}
+<div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 12, marginBottom: 24, direction: 'rtl' }}>
+  <div style={{ textAlign: 'right' }}>
     <h1 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 22, color: '#0f172a' }}>
       إدارة المستودعات
     </h1>
@@ -151,15 +151,15 @@ function WarehousesPage() {
   </div>
   {isOwner && (
     <button onClick={openCreate} style={{
-      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+      display: 'flex', alignItems: 'center', gap: 8,
       padding: '10px 18px', background: '#2563eb', color: '#fff',
       fontWeight: 600, fontSize: 14, borderRadius: 9, border: 'none',
-      cursor: 'pointer', fontFamily: 'inherit', width: '100%',
+      cursor: 'pointer', fontFamily: 'inherit',
       boxShadow: '0 6px 16px -6px rgba(37,99,235,0.55)',
     }}>
-    <Plus size={15} />
-    إضافة مستودع
-  </button>
+      <Plus size={15} />
+      إضافة مستودع
+    </button>
   )}
 </div>
 
