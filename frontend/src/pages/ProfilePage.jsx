@@ -59,8 +59,9 @@ function ProfilePage() {
       });
       const data = await res.json();
       if (!res.ok) { showError(data.detail || 'حدث خطأ'); return; }
-      setProfile(prev => ({ ...prev, company: { ...prev.company, Name: companyName } }));
-      localStorage.setItem('company_name', companyName);
+      // الرد من نوع CompanyResponse → الحقل Name مباشرة
+      setProfile(prev => ({ ...prev, company: { ...prev.company, Name: data.Name } }));
+      localStorage.setItem('company_name', data.Name);
       showSuccess('تم تحديث اسم الشركة بنجاح ✓');
     } catch { showError('حدث خطأ في الاتصال');
     } finally { setLoadingCompany(false); }
