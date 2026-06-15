@@ -263,20 +263,6 @@ const handleBooking = async (e) => {
                   </div>
                 </div>
               </div>
-
-              <div className="bg-white border border-gray-200 rounded-xl p-4 text-right" style={{ boxShadow: '0 1px 2px rgba(15,23,42,0.04)' }}>
-                <h4 className="text-xs font-bold text-gray-600 mb-3">رسوم المنصة</h4>
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs font-semibold px-2 py-0.5 rounded" style={{ background: '#eff6ff', color: '#1d4ed8' }}>5%</span>
-                    <span className="text-xs text-gray-500">عمولة على المستأجر</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs font-semibold px-2 py-0.5 rounded bg-purple-50 text-purple-700">7%</span>
-                    <span className="text-xs text-gray-500">عمولة على المالك</span>
-                  </div>
-                </div>
-              </div>
             </div>
 
             {/* Right */}
