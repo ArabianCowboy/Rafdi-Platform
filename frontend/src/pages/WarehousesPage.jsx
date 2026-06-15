@@ -154,7 +154,8 @@ function WarehousesPage() {
                 إضافة مستودع
               </button>
             )}
-            <br></br>
+            <br>
+            </br>
             <div style={{ textAlign: 'right' }}>
               <h1 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 22, color: '#0f172a' }}>
                 إدارة المستودعات
