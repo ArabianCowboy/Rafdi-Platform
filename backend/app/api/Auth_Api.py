@@ -1,15 +1,17 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from app.Dtos.Auth_DTOs import RegisterCreate, LoginCreate, TokenResponse, ProfileUpdate
 from app.Dtos.User_DTOs import UserResponse
 from app.Dtos.Auth_DTOs import ForgotPasswordRequest, ResetPasswordRequest
+from app.Dtos.Auth_DTOs import RefreshTokenRequest
 from app.Dtos.Company_DTOs import CompanyResponse
 from app.Repo.user_repo import UserRepo
 from app.Repo.Companey_Repo import CompanyRepo
 from app.Repo.Notification_Repo import NotificationRepo
 from app.Repo.UserRoleRepo import UserRoleRepo
 from app.Repo.Role_Repo import RoleRepo
+from app.Repo.RefreshToken_Repo import RefreshTokenRepo
 from app.services.User_services.auth_service import AuthService
 from app.services.User_services.password_service import PasswordService
 from app.services.User_services.validation_service import ValidationService
@@ -23,6 +25,7 @@ from app.services.Notification_Services.Notification_Service import Notification
 from app.services.Notification_Services.NotificationTrigger_Service import NotificationTriggerService
 from app.api.Auth_middleware import get_current_user
 from app.config import get_db
+from app.limiter import limiter
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
@@ -36,19 +39,21 @@ def get_forgot_password_service(db: Session = Depends(get_db)) -> ForgotPassword
 
 
 def get_auth_service(db: Session = Depends(get_db)) -> AuthService:
-    user_repo      = UserRepo(db)
-    company_repo   = CompanyRepo(db)
-    user_role_repo = UserRoleRepo(db)
-    role_repo      = RoleRepo(db)
+    user_repo          = UserRepo(db)
+    company_repo       = CompanyRepo(db)
+    user_role_repo     = UserRoleRepo(db)
+    role_repo          = RoleRepo(db)
+    refresh_token_repo = RefreshTokenRepo(db)
     notification_service = NotificationService(NotificationRepo(db))
     return AuthService(
-        user_repo          = user_repo,
-        company_repo       = company_repo,
-        user_role_repo     = user_role_repo,
-        password_service   = PasswordService(),
-        validation_service = ValidationService(user_repo, company_repo),
-        role_service       = RoleAssignmentService(user_role_repo, role_repo),
-        jwt_service        = JWTService(),
+        user_repo            = user_repo,
+        company_repo         = company_repo,
+        user_role_repo       = user_role_repo,
+        refresh_token_repo   = refresh_token_repo,
+        password_service     = PasswordService(),
+        validation_service   = ValidationService(user_repo, company_repo),
+        role_service         = RoleAssignmentService(user_role_repo, role_repo),
+        jwt_service          = JWTService(),
         notification_trigger = NotificationTriggerService(notification_service),
     )
 
@@ -57,7 +62,9 @@ def get_profile_service(db: Session = Depends(get_db)) -> UserProfileService:
 
 
 @router.post("/register", response_model=UserResponse)
+@limiter.limit("3/minute")
 def register(
+    request: Request,
     data   : RegisterCreate,
     service: AuthService = Depends(get_auth_service)
 ):
@@ -68,7 +75,9 @@ def register(
 
 
 @router.post("/login", response_model=TokenResponse)
+@limiter.limit("5/minute")
 def login(
+    request: Request,
     data   : LoginCreate,
     service: AuthService = Depends(get_auth_service)
 ):
@@ -82,7 +91,7 @@ def login(
 def update_email(
     data        : ProfileUpdate,
     service     : UserProfileService = Depends(get_profile_service),
-    current_user: dict                     = Depends(get_current_user)
+    current_user: dict               = Depends(get_current_user)
 ):
     try:
         return service.update_email(current_user["user_id"], data)
@@ -100,7 +109,8 @@ def update_company(
         return service.update_company_name(current_user["company_id"], data)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-    
+
+
 @router.get("/me", response_model=UserResponse)
 def get_me(
     db          : Session = Depends(get_db),
@@ -110,9 +120,12 @@ def get_me(
     if not user:
         raise HTTPException(status_code=404, detail="المستخدم غير موجود")
     return user
-    
+
+
 @router.post("/forgot-password")
+@limiter.limit("3/minute")
 def forgot_password(
+    request: Request,
     data   : ForgotPasswordRequest,
     service: ForgotPasswordService = Depends(get_forgot_password_service)
 ):
@@ -130,3 +143,32 @@ def reset_password(
         return {"message": "تم تغيير كلمة المرور بنجاح"}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post("/refresh", response_model=TokenResponse)
+def refresh_token(
+    data   : RefreshTokenRequest,
+    service: AuthService = Depends(get_auth_service)
+):
+    try:
+        return service.refresh_access_token(data.refresh_token)
+    except ValueError as e:
+        raise HTTPException(status_code=401, detail=str(e))
+
+
+@router.post("/logout")
+def logout(
+    data   : RefreshTokenRequest,
+    service: AuthService = Depends(get_auth_service)
+):
+    service.logout(data.refresh_token)
+    return {"message": "تم تسجيل الخروج بنجاح"}
+
+
+@router.post("/logout-all")
+def logout_all(
+    service     : AuthService = Depends(get_auth_service),
+    current_user: dict         = Depends(get_current_user)
+):
+    service.logout_all(current_user["user_id"])
+    return {"message": "تم تسجيل الخروج من جميع الأجهزة"}
