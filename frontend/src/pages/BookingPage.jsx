@@ -60,11 +60,12 @@ function BookingPage() {
     return 'حدث خطأ';
   };
 
-  const handleBooking = async (e) => {
+const handleBooking = async (e) => {
     e.preventDefault();
     setError('');
     if (!range?.from) { setError('يرجى اختيار تاريخ البداية'); return; }
-    if (!range?.to) { setError('يرجى اختيار تاريخ النهاية'); return; }
+    if (!range?.to) { setError('يرجى اختيار تاريخ النهاية، لا يمكن الحجز بيوم واحد فقط'); return; }
+    if (range.to <= range.from) { setError('تاريخ النهاية يجب أن يكون بعد تاريخ البداية'); return; }
 
     setSubmitting(true);
     try {
@@ -179,34 +180,24 @@ function BookingPage() {
               </div>
 
               {/* زر الدفع */}
-              <button onClick={handleGoToPayment}
-                style={{
-                  width: '100%', padding: '14px 16px', borderRadius: 10,
-                  background: '#2563eb', color: '#fff',
-                  fontFamily: "'Tajawal', sans-serif", fontWeight: 700, fontSize: 16,
-                  border: 'none', cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-                  boxShadow: '0 8px 20px -8px rgba(37,99,235,0.6)',
-                  marginBottom: 12,
-                }}>
-                <CreditCard size={18} />
-                ادفع الآن
-                <ArrowLeft size={16} />
-              </button>
+<button onClick={handleGoToPayment}
+  style={{
+    width: '100%', padding: '14px 16px', borderRadius: 10,
+    background: '#2563eb', color: '#fff',
+    fontFamily: "'Tajawal', sans-serif", fontWeight: 700, fontSize: 16,
+    border: 'none', cursor: 'pointer',
+    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+    boxShadow: '0 8px 20px -8px rgba(37,99,235,0.6)',
+    marginBottom: 12,
+  }}>
+  <CreditCard size={18} />
+  الانتقال إلى الدفع
+  <ArrowLeft size={16} />
+</button>
 
-              <button onClick={() => navigate('/bookings')}
-                style={{
-                  width: '100%', padding: '11px 16px', borderRadius: 10,
-                  background: 'transparent', color: '#64748b',
-                  fontWeight: 500, fontSize: 14,
-                  border: '1px solid #e2e8f0', cursor: 'pointer', fontFamily: 'inherit',
-                }}>
-                ادفع لاحقاً — عرض حجوزاتي
-              </button>
-
-              <p style={{ textAlign: 'center', fontSize: 12, color: '#94a3b8', marginTop: 14 }}>
-                سيبقى الحجز قيد الانتظار حتى إتمام الدفع
-              </p>
+<p style={{ textAlign: 'center', fontSize: 12, color: '#94a3b8', marginTop: 14 }}>
+  يجب إتمام الدفع لتأكيد الحجز
+</p>
             </div>
           </div>
         </div>

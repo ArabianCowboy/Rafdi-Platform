@@ -29,6 +29,7 @@ function PaymentPage() {
   const [error, setError] = useState('');
   const [paymentData, setPaymentData] = useState(null);
   const [processing, setProcessing] = useState(false);
+  const [bookingDetails, setBookingDetails] = useState(null);
 
   const processBackendPayment = async (moyasarPaymentId, moyasarStatus, paymentMethod) => {
     if (processingRef.current) return;
@@ -50,6 +51,16 @@ function PaymentPage() {
       if (!res.ok) { setError(data.detail || 'حدث خطأ أثناء تأكيد الدفع'); return; }
       setPaymentData(data);
       setSuccess(true);
+
+      try {
+        const bRes = await fetch(`${API_URL}/bookings/my`, { headers: getHeaders(false) });
+        if (bRes.ok) {
+          const bookings = await bRes.json();
+          const found = bookings.find(b => b.BookingID === parseInt(currentBookingId));
+          if (found) setBookingDetails(found);
+        }
+      } catch {}
+
       localStorage.removeItem('paymentBookingId');
       localStorage.removeItem('paymentWarehouseName');
       localStorage.removeItem('paymentEstimatedPrice');
@@ -212,80 +223,134 @@ function PaymentPage() {
                 )}
 
                 {success && (
-  <div className="p-6 rounded-xl text-right bg-emerald-50 border border-emerald-200">
+                  <div className="p-6 rounded-xl text-right bg-emerald-50 border border-emerald-200">
 
-    {/* Header */}
-    <div style={{ textAlign: 'center', marginBottom: 20 }}>
-      <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#d1fae5', display: 'grid', placeItems: 'center', margin: '0 auto 12px' }}>
-        <CheckCircle size={28} color="#10b981" />
-      </div>
-      <p style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 18, color: '#065f46', marginBottom: 4 }}>
-        تم الدفع بنجاح!
-      </p>
-      <p style={{ fontSize: 13, color: '#059669' }}>تم تأكيد حجزك بنجاح</p>
-    </div>
+                    {/* Header */}
+                    <div style={{ textAlign: 'center', marginBottom: 20 }}>
+                      <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#d1fae5', display: 'grid', placeItems: 'center', margin: '0 auto 12px' }}>
+                        <CheckCircle size={28} color="#10b981" />
+                      </div>
+                      <p style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 18, color: '#065f46', marginBottom: 4 }}>
+                        تم الدفع بنجاح!
+                      </p>
+                      <p style={{ fontSize: 13, color: '#059669' }}>تم تأكيد حجزك بنجاح</p>
+                    </div>
 
-    {/* بيانات العملية */}
-    <div style={{ background: '#fff', border: '1px solid #a7f3d0', borderRadius: 12, padding: '16px 18px', marginBottom: 12 }}>
-      <p style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 700, fontSize: 13, color: '#065f46', marginBottom: 12 }}>
-        تفاصيل العملية
-      </p>
-      <div className="space-y-2.5">
-        {paymentData && (
-          <>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: 12, color: '#059669', fontFamily: 'monospace', fontWeight: 600 }}>
-                #{paymentData.PaymentID}
-              </span>
-              <span style={{ fontSize: 12, color: '#94a3b8' }}>رقم العملية</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 8, borderTop: '1px solid #d1fae5' }}>
-              <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>
-                {paymentData.PaymentMethod || 'بطاقة ائتمانية'}
-              </span>
-              <span style={{ fontSize: 12, color: '#94a3b8' }}>طريقة الدفع</span>
-            </div>
-          </>
-        )}
-        <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 8, borderTop: '1px solid #d1fae5' }}>
-          <span style={{ fontSize: 12, color: '#0f172a', fontWeight: 600 }}>{warehouseName}</span>
-          <span style={{ fontSize: 12, color: '#94a3b8' }}>المستودع</span>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 8, borderTop: '1px solid #d1fae5' }}>
-          <span style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 18, color: '#0f172a' }}>
-            {paymentData ? parseFloat(paymentData.Amount).toLocaleString() : estimatedPrice.toLocaleString()} ر.س
-          </span>
-          <span style={{ fontSize: 12, color: '#94a3b8' }}>المبلغ المدفوع</span>
-        </div>
-      </div>
-    </div>
+                    {/* المبلغ الإجمالي - بارز */}
+                    <div style={{ background: '#10b981', borderRadius: 12, padding: '20px 18px', marginBottom: 12, textAlign: 'center' }}>
+                      <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)', marginBottom: 4 }}>المبلغ المدفوع</p>
+                      <p style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 28, color: '#fff' }}>
+                        {paymentData ? parseFloat(paymentData.Amount).toLocaleString() : estimatedPrice.toLocaleString()}
+                        <span style={{ fontSize: 14, fontWeight: 400, marginRight: 4 }}>ر.س</span>
+                      </p>
+                    </div>
 
-    {/* بيانات الحجز */}
-    <div style={{ background: '#fff', border: '1px solid #a7f3d0', borderRadius: 12, padding: '16px 18px', marginBottom: 20 }}>
-      <p style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 700, fontSize: 13, color: '#065f46', marginBottom: 12 }}>
-        تفاصيل الحجز
-      </p>
-      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <span style={{ fontSize: 12, color: '#059669', fontFamily: 'monospace', fontWeight: 600 }}>
-          #{bookingId}
-        </span>
-        <span style={{ fontSize: 12, color: '#94a3b8' }}>رقم الحجز</span>
-      </div>
-    </div>
+                    {/* تفاصيل الحجز */}
+                    <div style={{ background: '#fff', border: '1px solid #a7f3d0', borderRadius: 12, padding: '16px 18px', marginBottom: 12 }}>
+                      <p style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 700, fontSize: 13, color: '#065f46', marginBottom: 12 }}>
+                        تفاصيل الحجز
+                      </p>
+                      <div className="space-y-2.5">
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <span style={{ fontSize: 12, color: '#0f172a', fontWeight: 600 }}>{warehouseName}</span>
+                          <span style={{ fontSize: 12, color: '#94a3b8' }}>المستودع</span>
+                        </div>
+                        {bookingDetails && (
+                          <>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 8, borderTop: '1px solid #d1fae5' }}>
+                              <span style={{ fontSize: 12, color: '#059669', fontFamily: 'monospace', fontWeight: 600 }}>
+                                {bookingDetails.StartDate} ← {bookingDetails.EndDate}
+                              </span>
+                              <span style={{ fontSize: 12, color: '#94a3b8' }}>الفترة</span>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 8, borderTop: '1px solid #d1fae5' }}>
+                              <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>
+                                {Math.ceil((new Date(bookingDetails.EndDate) - new Date(bookingDetails.StartDate)) / 86400000) + 1} يوم
+                              </span>
+                              <span style={{ fontSize: 12, color: '#94a3b8' }}>المدة</span>
+                            </div>
+                          </>
+                        )}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 8, borderTop: '1px solid #d1fae5' }}>
+                          <span style={{ fontSize: 12, color: '#059669', fontFamily: 'monospace', fontWeight: 600 }}>
+                            #{bookingId}
+                          </span>
+                          <span style={{ fontSize: 12, color: '#94a3b8' }}>رقم الحجز</span>
+                        </div>
+                      </div>
+                    </div>
 
-    {/* زر */}
-    <button onClick={() => navigate('/home')}
-      style={{
-        width: '100%', padding: '12px 16px', borderRadius: 10,
-        background: '#10b981', color: '#fff',
-        fontFamily: "'Tajawal', sans-serif", fontWeight: 700, fontSize: 15,
-        border: 'none', cursor: 'pointer',
-        boxShadow: '0 6px 14px -6px rgba(16,185,129,0.5)',
-      }}>
-      العودة للرئيسية
-    </button>
-  </div>
-)}
+                    {/* تفاصيل العملية */}
+                    {paymentData && (
+                      <div style={{ background: '#fff', border: '1px solid #a7f3d0', borderRadius: 12, padding: '16px 18px', marginBottom: 12 }}>
+                        <p style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 700, fontSize: 13, color: '#065f46', marginBottom: 12 }}>
+                          تفاصيل العملية
+                        </p>
+                        <div className="space-y-2.5">
+                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span style={{ fontSize: 12, color: '#059669', fontFamily: 'monospace', fontWeight: 600 }}>
+                              #{paymentData.PaymentID}
+                            </span>
+                            <span style={{ fontSize: 12, color: '#94a3b8' }}>رقم العملية</span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 8, borderTop: '1px solid #d1fae5' }}>
+                            <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>
+                              {paymentData.PaymentMethod || 'بطاقة ائتمانية'}
+                            </span>
+                            <span style={{ fontSize: 12, color: '#94a3b8' }}>طريقة الدفع</span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 8, borderTop: '1px solid #d1fae5' }}>
+                            <span style={{ fontSize: 12, color: '#0f172a', fontFamily: 'monospace' }}>
+                              {paymentData.PaymentDate}
+                            </span>
+                            <span style={{ fontSize: 12, color: '#94a3b8' }}>تاريخ الدفع</span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 8, borderTop: '1px solid #d1fae5' }}>
+                            <span className="text-xs font-bold px-2.5 py-1 rounded-lg border bg-emerald-50 text-emerald-700 border-emerald-200">
+                              {paymentData.Status === 'paid' ? 'مدفوع' : paymentData.Status}
+                            </span>
+                            <span style={{ fontSize: 12, color: '#94a3b8' }}>حالة الدفع</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* العمولات */}
+                    {paymentData && (
+                      <div style={{ background: '#fff', border: '1px solid #a7f3d0', borderRadius: 12, padding: '16px 18px', marginBottom: 20 }}>
+                        <p style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 700, fontSize: 13, color: '#065f46', marginBottom: 12 }}>
+                          تفاصيل المبلغ
+                        </p>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, direction: 'rtl' }}>
+                          <div style={{ background: '#f8fafc', borderRadius: 10, padding: '10px 12px', textAlign: 'center' }}>
+                            <p style={{ fontSize: 11, color: '#94a3b8', marginBottom: 4 }}>عمولة المنصة</p>
+                            <p style={{ fontWeight: 700, fontSize: 14, color: '#0f172a' }}>
+                              {parseFloat(paymentData.commission_amount).toLocaleString()} ر.س
+                            </p>
+                          </div>
+                          <div style={{ background: '#f8fafc', borderRadius: 10, padding: '10px 12px', textAlign: 'center' }}>
+                            <p style={{ fontSize: 11, color: '#94a3b8', marginBottom: 4 }}>صافي المبلغ للمالك</p>
+                            <p style={{ fontWeight: 700, fontSize: 14, color: '#0f172a' }}>
+                              {parseFloat(paymentData.net_amount).toLocaleString()} ر.س
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* زر */}
+                    <button onClick={() => navigate('/home')}
+                      style={{
+                        width: '100%', padding: '12px 16px', borderRadius: 10,
+                        background: '#10b981', color: '#fff',
+                        fontFamily: "'Tajawal', sans-serif", fontWeight: 700, fontSize: 15,
+                        border: 'none', cursor: 'pointer',
+                        boxShadow: '0 6px 14px -6px rgba(16,185,129,0.5)',
+                      }}>
+                      العودة للرئيسية
+                    </button>
+                  </div>
+                )}
 
                 {!success && !processing && (
                   <div className="moyasar-form-wrapper" />
