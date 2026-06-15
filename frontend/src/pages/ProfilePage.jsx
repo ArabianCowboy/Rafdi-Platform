@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, Mail, Save, CheckCircle, Loader } from 'lucide-react';
+import { Building2, Mail, Save, CheckCircle, Loader, KeyRound } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { API_URL, getHeaders } from '../config/api';
 
@@ -187,12 +187,30 @@ function ProfilePage() {
               </div>
 
               {/* نوع الحساب */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: '#f8fafc', borderRadius: 10, border: '1px solid #f1f5f9', marginBottom: 20 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: '#f8fafc', borderRadius: 10, border: '1px solid #f1f5f9', marginBottom: 12 }}>
                 <span style={{ fontSize: 12, color: '#94a3b8' }}>نوع الحساب</span>
                 <div className="flex gap-1.5">
                   {isOwner && <span style={{ fontSize: 12, fontWeight: 600, padding: '3px 10px', borderRadius: 6, background: '#eff6ff', color: '#1d4ed8', border: '1px solid #dbeafe' }}>مالك مستودع</span>}
                   {isRenter && <span style={{ fontSize: 12, fontWeight: 600, padding: '3px 10px', borderRadius: 6, background: '#ecfdf5', color: '#059669', border: '1px solid #a7f3d0' }}>مستأجر</span>}
                 </div>
+              </div>
+
+              {/* تغيير كلمة المرور */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: '#f8fafc', borderRadius: 10, border: '1px solid #f1f5f9', marginBottom: 20 }}>
+                <span style={{ fontSize: 12, color: '#94a3b8' }}>الأمان</span>
+                <button onClick={() => navigate('/change-password')}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 6,
+                    padding: '8px 14px', borderRadius: 8,
+                    border: '1px solid #e2e8f0', background: '#fff',
+                    fontSize: 13, fontWeight: 600, color: '#475569',
+                    cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = '#2563eb'; e.currentTarget.style.color = '#2563eb'; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = '#475569'; }}>
+                  <KeyRound size={13} />
+                  تغيير كلمة المرور
+                </button>
               </div>
 
               <form onSubmit={handleUpdateCompany}>
