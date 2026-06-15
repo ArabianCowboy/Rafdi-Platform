@@ -17,9 +17,9 @@ const paymentStatusConfig = {
 };
 
 const Row = ({ label, children }) => (
-  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '11px 0', borderBottom: '1px solid #f8fafc', direction: 'rtl' }}>
+  <div style={{ display: 'flex', flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', padding: '11px 0', borderBottom: '1px solid #f8fafc' }}>
+    <span style={{ fontSize: 12, color: '#94a3b8', flexShrink: 0, marginLeft: 8 }}>{label}</span>
     <div style={{ display: 'flex', alignItems: 'center' }}>{children}</div>
-    <span style={{ fontSize: 12, color: '#94a3b8', flexShrink: 0, marginRight: 8 }}>{label}</span>
   </div>
 );
 
