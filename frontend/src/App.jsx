@@ -9,6 +9,7 @@ import OwnerBookingsPage from './pages/OwnerBookingsPage';
 import BookingPage from "./pages/BookingPage";
 import BookingDetailPage from './pages/BookingDetailPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ChangePasswordPage from './pages/ChangePasswordPage';
 import ProfilePage from './pages/ProfilePage';
 import PaymentPage from './pages/PaymentPage';
 import AdminPage from './pages/AdminPage';
