@@ -267,23 +267,25 @@ function LoginPage() {
             </div>
 
             <div className="text-right">
-              <div className="flex justify-between items-center mb-1.5">
-                <label style={{ fontSize: 12, fontWeight: 700, color: '#475569' }}>كلمة المرور</label>
-              </div>
-              <div className="relative">
-                <input type={showPassword ? 'text' : 'password'} placeholder="••••••••"
-                  style={{ width: '100%', padding: '11px 40px', borderRadius: 10, border: '1px solid #e2e8f0', outline: 'none', background: '#fff', fontSize: 14, color: '#0f172a', direction: 'rtl', fontFamily: 'inherit', boxSizing: 'border-box' }}
-                  onFocus={e => e.target.style.borderColor = '#2563eb'}
-                  onBlur={e => e.target.style.borderColor = '#e2e8f0'}
-                  value={password} onChange={e => { setPassword(e.target.value); if (error) setError(''); }} />
-                <Lock size={15} style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                <button type="button" onClick={() => setShowPassword(!showPassword)}
-                  style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
-                  {showPassword ? <EyeOff size={10} /> : <Eye size={10} />}
-                </button>
-                <Link to="/forgot-password" style={{ fontSize: 12, fontWeight: 600, color: '#2563eb', textDecoration: 'none' }}>نسيت كلمة المرور؟</Link>
-              </div>
-            </div>
+  <div className="flex justify-between items-center mb-1.5">
+    <label style={{ fontSize: 12, fontWeight: 700, color: '#475569' }}>كلمة المرور</label>
+  </div>
+  <div className="relative">
+    <input type={showPassword ? 'text' : 'password'} placeholder="••••••••"
+      style={{ width: '100%', padding: '11px 40px', borderRadius: 10, border: '1px solid #e2e8f0', outline: 'none', background: '#fff', fontSize: 14, color: '#0f172a', direction: 'rtl', fontFamily: 'inherit', boxSizing: 'border-box' }}
+      onFocus={e => e.target.style.borderColor = '#2563eb'}
+      onBlur={e => e.target.style.borderColor = '#e2e8f0'}
+      value={password} onChange={e => { setPassword(e.target.value); if (error) setError(''); }} />
+    <Lock size={15} style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+    <button type="button" onClick={() => setShowPassword(!showPassword)}
+      style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+      {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+    </button>
+  </div>
+  <div style={{ marginTop: 6 }}>
+    <Link to="/forgot-password" style={{ fontSize: 12, fontWeight: 600, color: '#2563eb', textDecoration: 'none' }}>نسيت كلمة المرور؟</Link>
+  </div>
+</div>
 
             <button type="submit" disabled={loading}
               style={{ width: '100%', padding: '12px 16px', borderRadius: 9, background: loading ? '#93c5fd' : '#2563eb', color: '#fff', fontWeight: 700, fontSize: 14.5, border: 'none', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: '0 8px 18px -8px rgba(37,99,235,0.6)', marginTop: 8 }}>
