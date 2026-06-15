@@ -1,3 +1,4 @@
+from typing import Optional
 from app.Repo import WarehouseRepo
 from app.Dtos.Warehouse_DTOs import WarehouseCreate, WarehouseUpdate, WarehouseResponse, WarehouseToggleResponse
 from app.services.Warehouse_services import Warehouse_access_service
@@ -13,9 +14,9 @@ class WarehouseService:
         self.access_service = access_service
 
 
-    def get_all(self) -> list[WarehouseResponse]:
+    def get_all(self, exclude_company_id: Optional[int] = None) -> list[WarehouseResponse]:
 
-        warehouses = self.warehouse_repo.get_all()
+        warehouses = self.warehouse_repo.get_all(exclude_company_id)
 
         return [WarehouseResponse.model_validate(w) for w in warehouses]
 
@@ -72,3 +73,10 @@ class WarehouseService:
         self.warehouse_repo.db.commit()
 
         return WarehouseToggleResponse.model_validate(updated)
+
+
+    def delete(self, warehouse_id: int, company_id: int) -> None:
+
+        self.access_service.check_owner(warehouse_id, company_id)
+
+        self.warehouse_repo.delete(warehouse_id)

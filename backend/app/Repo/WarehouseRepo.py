@@ -14,8 +14,11 @@ class WarehouseRepo(BaseRepo[Warehouse]):
     def get_by_id(self, id: int) -> Optional[Warehouse]:
         return self.db.query(Warehouse).options(joinedload(Warehouse.company)).filter(Warehouse.WarehouseID == id).first()
 
-    def get_all(self) -> list[Warehouse]:
-        return self.db.query(Warehouse).options(joinedload(Warehouse.company)).filter(Warehouse.IsActive == True).all()
+    def get_all(self, exclude_company_id: Optional[int] = None) -> list[Warehouse]:
+        query = self.db.query(Warehouse).options(joinedload(Warehouse.company)).filter(Warehouse.IsActive == True)
+        if exclude_company_id is not None:
+            query = query.filter(Warehouse.CompanyID != exclude_company_id)
+        return query.all()
 
     def get_all_admin(self) -> list[Warehouse]:
         return self.db.query(Warehouse).options(joinedload(Warehouse.company)).all()

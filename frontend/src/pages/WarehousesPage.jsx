@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, Plus, MapPin, Package, Edit2, Power, X, Loader, Save, ImagePlus, CheckCircle } from 'lucide-react';
+import { Building2, Plus, MapPin, Package, Edit2, Power, X, Loader, Save, ImagePlus, CheckCircle, Trash2 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import LocationPickerModal from '../components/LocationPickerModal';
 import { API_URL, getHeaders } from '../config/api';
@@ -127,6 +127,23 @@ function WarehousesPage() {
     }
   };
 
+  const handleDelete = async (w) => {
+    if (!confirm(`هل أنت متأكد من حذف "${w.Name}"؟ لا يمكن التراجع عن هذا الإجراء.`)) return;
+    try {
+      const res = await fetch(`${API_URL}/warehouses/${w.WarehouseID}`, { method: 'DELETE', headers: getHeaders(false) });
+      if (res.ok) {
+        setSuccess('تم حذف المستودع بنجاح');
+        fetchWarehouses();
+        setTimeout(() => setSuccess(''), 3000);
+      } else {
+        const data = await res.json();
+        setError(parseError(data.detail));
+      }
+    } catch {
+      setError('حدث خطأ في الاتصال، حاول مرة أخرى');
+    }
+  };
+
   const inputStyle = {
     width: '100%', padding: '10px 14px', borderRadius: 10,
     border: '1px solid #e2e8f0', outline: 'none', background: '#fff',
@@ -141,32 +158,41 @@ function WarehousesPage() {
 
       <main className="max-w-6xl mx-auto px-4 py-8">
 
-{/* Header */}
-<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, direction: 'rtl' }}>
-  <div style={{ textAlign: 'right' }}>
-    <h1 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 22, color: '#0f172a' }}>
-      إدارة المستودعات
-    </h1>
-    <p style={{ fontSize: 13, color: '#64748b', marginTop: 3 }}>{warehouses.length} مستودع مسجل</p>
-  </div>
-  {isOwner && (
-    <button onClick={openCreate} style={{
-      display: 'inline-flex', alignItems: 'center', gap: 8,
-      padding: '10px 18px', background: '#2563eb', color: '#fff',
-      fontWeight: 600, fontSize: 14, borderRadius: 9, border: 'none',
-      cursor: 'pointer', fontFamily: 'inherit',
-      boxShadow: '0 6px 16px -6px rgba(37,99,235,0.55)',
-    }}>
-      <Plus size={15} />
-      إضافة مستودع
-    </button>
-  )}
-</div>
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, direction: 'rtl' }}>
+          <div style={{ textAlign: 'right' }}>
+            <h1 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 22, color: '#0f172a' }}>
+              إدارة المستودعات
+            </h1>
+            <p style={{ fontSize: 13, color: '#64748b', marginTop: 3 }}>{warehouses.length} مستودع مسجل</p>
+          </div>
+          {isOwner && (
+            <button onClick={openCreate} style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              padding: '10px 18px', background: '#2563eb', color: '#fff',
+              fontWeight: 600, fontSize: 14, borderRadius: 9, border: 'none',
+              cursor: 'pointer', fontFamily: 'inherit',
+              boxShadow: '0 6px 16px -6px rgba(37,99,235,0.55)',
+            }}>
+              <Plus size={15} />
+              إضافة مستودع
+            </button>
+          )}
+        </div>
 
         {success && (
           <div className="mb-5 p-3.5 rounded-xl flex items-center gap-2.5 bg-emerald-50 border border-emerald-200">
             <CheckCircle size={15} className="text-emerald-600 shrink-0" />
             <span style={{ fontSize: 13, fontWeight: 600, color: '#059669' }}>{success}</span>
+          </div>
+        )}
+
+        {error && (
+          <div className="mb-5 p-3.5 rounded-xl flex items-start gap-2.5 bg-red-50 border border-red-200">
+            <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center shrink-0 mt-0.5">
+              <span className="text-red-600 text-xs font-black">!</span>
+            </div>
+            <p style={{ fontSize: 13, fontWeight: 600, color: '#b91c1c' }}>{error}</p>
           </div>
         )}
 
@@ -255,6 +281,18 @@ function WarehousesPage() {
                         }}>
                         <Power size={13} />
                         {w.IsActive ? 'تعطيل' : 'تفعيل'}
+                      </button>
+                      <button onClick={() => handleDelete(w)}
+                        style={{
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          padding: '8px 12px', borderRadius: 8,
+                          border: '1px solid #fecaca', color: '#ef4444',
+                          background: '#fff', cursor: 'pointer', flexShrink: 0,
+                          transition: 'all .15s',
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.background = '#fef2f2'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = '#fff'; }}>
+                        <Trash2 size={13} />
                       </button>
                     </div>
                   )}

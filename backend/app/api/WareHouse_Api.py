@@ -24,7 +24,9 @@ def get_all(
     service     : WarehouseService = Depends(get_warehouse_service),
     current_user: dict             = Depends(get_current_user)
 ):
-    return service.get_all()
+    roles = current_user.get("roles", [])
+    exclude_company_id = current_user["company_id"] if "warehouse_owner" in roles else None
+    return service.get_all(exclude_company_id)
 
 @router.get("/my", response_model=list[WarehouseResponse])
 def get_my_warehouses(
@@ -79,5 +81,18 @@ def toggle(
 ):
     try:
         return service.toggle(warehouse_id, current_user["company_id"])
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.delete("/{warehouse_id}")
+def delete(
+    warehouse_id: int,
+    service     : WarehouseService = Depends(get_warehouse_service),
+    current_user: dict             = Depends(require_owner)
+):
+    try:
+        service.delete(warehouse_id, current_user["company_id"])
+        return {"message": "تم حذف المستودع بنجاح"}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
