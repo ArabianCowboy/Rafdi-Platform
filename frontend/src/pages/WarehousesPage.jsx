@@ -144,6 +144,12 @@ function WarehousesPage() {
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24, direction: 'rtl' }}>
           <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 12 }}>
+            <div>
+              <h1 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 22, color: '#0f172a' }}>
+                إدارة المستودعات
+              </h1>
+              <p style={{ fontSize: 13, color: '#64748b', marginTop: 3 }}>{warehouses.length} مستودع مسجل</p>
+            </div>
             {isOwner && (
               <button onClick={openCreate} style={{
                 display: 'flex', alignItems: 'center', gap: 8,
@@ -156,12 +162,6 @@ function WarehousesPage() {
                 إضافة مستودع
               </button>
             )}
-            <div>
-              <h1 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 22, color: '#0f172a' }}>
-                إدارة المستودعات
-              </h1>
-              <p style={{ fontSize: 13, color: '#64748b', marginTop: 3 }}>{warehouses.length} مستودع مسجل</p>
-            </div>
           </div>
           <div />
         </div>
