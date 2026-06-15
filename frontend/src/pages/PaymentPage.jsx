@@ -4,7 +4,7 @@ import { CheckCircle, ShieldCheck, Loader, Lock, CreditCard } from 'lucide-react
 import Navbar from '../components/Navbar';
 import { API_URL, getHeaders } from '../config/api';
 
-const MOYASAR_KEY = import.meta.env.VITE_MOYASAR_KEY || 'pk_test_xZj2Ucqc3pVSkktyUTZLs1ER6JhSKxj4Pnwvt8Ds';
+const MOYASAR_KEY = import.meta.env.VITE_MOYASAR_KEY;
 
 function PaymentPage() {
   const navigate = useNavigate();
