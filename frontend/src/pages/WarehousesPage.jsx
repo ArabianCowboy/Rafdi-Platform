@@ -142,29 +142,26 @@ function WarehousesPage() {
       <main className="max-w-6xl mx-auto px-4 py-8">
 
         {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24, direction: 'rtl' }}>
-          <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 12 }}>
-            <div>
-              <h1 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 22, color: '#0f172a' }}>
-                إدارة المستودعات
-              </h1>
-              <p style={{ fontSize: 13, color: '#64748b', marginTop: 3 }}>{warehouses.length} مستودع مسجل</p>
-            </div>
-            {isOwner && (
-              <button onClick={openCreate} style={{
-                display: 'flex', alignItems: 'center', gap: 8,
-                padding: '10px 18px', background: '#2563eb', color: '#fff',
-                fontWeight: 600, fontSize: 14, borderRadius: 9, border: 'none',
-                cursor: 'pointer', fontFamily: 'inherit',
-                boxShadow: '0 6px 16px -6px rgba(37,99,235,0.55)',
-              }}>
-                <Plus size={15} />
-                إضافة مستودع
-              </button>
-            )}
-          </div>
-          <div />
-        </div>
+<div style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 12, marginBottom: 24, direction: 'rtl', textAlign: 'right' }}>
+  <div>
+    <h1 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 22, color: '#0f172a' }}>
+      إدارة المستودعات
+    </h1>
+    <p style={{ fontSize: 13, color: '#64748b', marginTop: 3 }}>{warehouses.length} مستودع مسجل</p>
+  </div>
+  {isOwner && (
+    <button onClick={openCreate} style={{
+      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+      padding: '10px 18px', background: '#2563eb', color: '#fff',
+      fontWeight: 600, fontSize: 14, borderRadius: 9, border: 'none',
+      cursor: 'pointer', fontFamily: 'inherit', width: '100%',
+      boxShadow: '0 6px 16px -6px rgba(37,99,235,0.55)',
+    }}>
+    <Plus size={15} />
+    إضافة مستودع
+  </button>
+  )}
+</div>
 
         {success && (
           <div className="mb-5 p-3.5 rounded-xl flex items-center gap-2.5 bg-emerald-50 border border-emerald-200">
