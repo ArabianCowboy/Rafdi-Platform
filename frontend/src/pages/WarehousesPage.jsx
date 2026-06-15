@@ -151,10 +151,10 @@ function WarehousesPage() {
   </div>
   {isOwner && (
     <button onClick={openCreate} style={{
-      display: 'flex', alignItems: 'center', gap: 8,
+      display: 'inline-flex', alignItems: 'center', gap: 8,
       padding: '10px 18px', background: '#2563eb', color: '#fff',
       fontWeight: 600, fontSize: 14, borderRadius: 9, border: 'none',
-      cursor: 'pointer', fontFamily: 'inherit',
+      cursor: 'pointer', fontFamily: 'inherit', alignSelf: 'flex-end',
       boxShadow: '0 6px 16px -6px rgba(37,99,235,0.55)',
     }}>
       <Plus size={15} />
