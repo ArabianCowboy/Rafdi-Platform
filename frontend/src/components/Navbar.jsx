@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LogOut, Settings } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 
 const getUserRoles = () => {
@@ -100,23 +100,6 @@ function Navbar() {
 
         {/* Right side */}
         <div style={{ marginInlineStart: 'auto', display: 'flex', alignItems: 'center', gap: 14 }}>
-
-          {showAsOwner && (
-            <>
-              <button onClick={() => navigate('/warehouses')}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 8,
-                  padding: '9px 16px', borderRadius: 9,
-                  background: '#2563eb', color: '#fff',
-                  fontWeight: 600, fontSize: 14, border: 'none', cursor: 'pointer',
-                  boxShadow: '0 6px 16px -6px rgba(37,99,235,0.55)', fontFamily: 'inherit',
-                }}>
-                <Settings size={15} />
-                إدارة المستودعات
-              </button>
-              <span style={{ width: 1, height: 26, background: '#e2e8f0' }} />
-            </>
-          )}
 
           <NotificationBell />
 

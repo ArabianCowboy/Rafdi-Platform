@@ -142,8 +142,8 @@ function WarehousesPage() {
       <main className="max-w-6xl mx-auto px-4 py-8">
 
         {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, direction: 'rtl' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24, direction: 'rtl' }}>
+          <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 12 }}>
             {isOwner && (
               <button onClick={openCreate} style={{
                 display: 'flex', alignItems: 'center', gap: 8,
@@ -156,7 +156,7 @@ function WarehousesPage() {
                 إضافة مستودع
               </button>
             )}
-            <div style={{ textAlign: 'right' }}>
+            <div>
               <h1 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 22, color: '#0f172a' }}>
                 إدارة المستودعات
               </h1>
