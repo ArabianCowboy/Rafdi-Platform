@@ -6,7 +6,6 @@ import {
   Calendar,
   CheckCircle,
   CreditCard,
-  FileText,
   Loader,
   MapPin,
   Package,
@@ -322,7 +321,6 @@ function PaymentPage() {
                     <Receipt size={24} />
                   </div>
                   <h1 className="mt-5 text-xl font-black leading-8">{displayWarehouseName}</h1>
-                  <p className="mt-2 text-sm leading-6 text-white/65">راجع تفاصيل الحجز قبل إتمام الدفع.</p>
                 </div>
 
                 <div className="p-5">
@@ -336,9 +334,6 @@ function PaymentPage() {
                     </div>
                   </div>
 
-                  <div className="mt-4 space-y-3">
-                    <InfoRow title="رقم الحجز" value="ينشأ بعد الدفع" icon={FileText} />
-                  </div>
                 </div>
               </div>
 
@@ -349,7 +344,6 @@ function PaymentPage() {
                   </span>
                   <div>
                     <h2 className="text-sm font-extrabold text-slate-900">تفاصيل المستودع</h2>
-                    <p className="text-xs font-medium text-slate-400">بيانات الحجز قبل الدفع</p>
                   </div>
                 </div>
 
@@ -411,7 +405,6 @@ function PaymentPage() {
                     خطوة أخيرة
                   </div>
                   <h2 className="text-xl font-black text-slate-950">إتمام الدفع</h2>
-                  <p className="mt-1 text-sm leading-6 text-slate-500">اختر طريقة الدفع المناسبة وأكمل العملية بأمان.</p>
                 </div>
                 <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-slate-100 text-slate-500">
                   <CreditCard size={21} />
