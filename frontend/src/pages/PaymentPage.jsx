@@ -4,16 +4,13 @@ import {
   AlertCircle,
   ArrowLeft,
   Calendar,
-  Check,
   CheckCircle,
   CreditCard,
   FileText,
   Loader,
-  Lock,
   MapPin,
   Package,
   Receipt,
-  ShieldCheck,
   Sparkles,
   Warehouse,
 } from 'lucide-react';
@@ -38,7 +35,7 @@ const DetailRow = ({ label, children, icon: Icon }) => (
   </div>
 );
 
-const InfoRow = ({ title, value, icon: Icon }) => (
+const InfoRow = ({ title, value, icon: Icon, multiline = false }) => (
   <div className="flex items-center justify-between gap-4 border-t border-slate-100 pt-3 first:border-t-0 first:pt-0" dir="rtl">
     <div className="flex min-w-0 items-center gap-2 text-slate-600">
       {Icon && (
@@ -48,16 +45,9 @@ const InfoRow = ({ title, value, icon: Icon }) => (
       )}
       <span className="shrink-0 text-sm font-semibold">{title}</span>
     </div>
-    <span className="min-w-0 truncate text-left text-sm font-bold text-slate-800">{value}</span>
-  </div>
-);
-
-const TrustItem = ({ children }) => (
-  <div className="flex items-center gap-2.5">
-    <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-emerald-50 text-emerald-600">
-      <Check size={12} strokeWidth={3} />
+    <span className={`min-w-0 text-left text-sm font-bold text-slate-800 ${multiline ? 'whitespace-normal break-words leading-6' : 'truncate'}`}>
+      {value}
     </span>
-    <span className="text-sm font-medium text-slate-600">{children}</span>
   </div>
 );
 
@@ -224,6 +214,15 @@ function PaymentPage() {
   return (
     <div className="min-h-screen bg-[#f6f8fb]" dir="rtl" style={{ fontFamily: "'IBM Plex Sans Arabic', 'Tajawal', sans-serif" }}>
       <Navbar />
+      <style>{`
+        .moyasar-form-wrapper .mysr-form-footer,
+        .moyasar-form-wrapper .mysr-form-footer *,
+        .moyasar-form-wrapper .mysr-test-mode,
+        .moyasar-form-wrapper [class*="test-mode"],
+        .moyasar-form-wrapper > div > p:last-child {
+          display: none !important;
+        }
+      `}</style>
 
       <main className="mx-auto max-w-6xl px-4 py-8 sm:py-10">
         {success ? (
@@ -264,7 +263,7 @@ function PaymentPage() {
                         <InfoRow title="الفترة" value={`${bookingDetails.StartDate} إلى ${bookingDetails.EndDate}`} icon={Calendar} />
                         <InfoRow title="المدة" value={`${bookingDays} يوم`} />
                         {warehouse?.Location && (
-                          <InfoRow title="الموقع" value={warehouse.Location} icon={MapPin} />
+                          <InfoRow title="الموقع" value={warehouse.Location} icon={MapPin} multiline />
                         )}
                         {warehouse?.Size && (
                           <InfoRow title="المساحة" value={`${warehouse.Size?.toLocaleString()} م²`} icon={Package} />
@@ -320,7 +319,7 @@ function PaymentPage() {
                     <Receipt size={24} />
                   </div>
                   <h1 className="mt-5 text-xl font-black leading-8">{displayWarehouseName}</h1>
-                  <p className="mt-2 text-sm leading-6 text-white/65">راجع تفاصيل الحجز قبل إتمام الدفع عبر ميسر.</p>
+                  <p className="mt-2 text-sm leading-6 text-white/65">راجع تفاصيل الحجز قبل إتمام الدفع.</p>
                 </div>
 
                 <div className="p-5">
@@ -336,7 +335,6 @@ function PaymentPage() {
 
                   <div className="mt-4 space-y-3">
                     <InfoRow title="رقم الحجز" value={`#${bookingId}`} icon={FileText} />
-                    <InfoRow title="حالة الدفع" value="آمن ومشفر" icon={Lock} />
                   </div>
                 </div>
               </div>
@@ -361,7 +359,7 @@ function PaymentPage() {
                     </>
                   )}
                   {warehouse?.Location && (
-                    <InfoRow title="الموقع" value={warehouse.Location} icon={MapPin} />
+                    <InfoRow title="الموقع" value={warehouse.Location} icon={MapPin} multiline />
                   )}
                   {warehouse?.Size && (
                     <InfoRow title="المساحة" value={`${warehouse.Size?.toLocaleString()} م²`} icon={Package} />
@@ -373,6 +371,7 @@ function PaymentPage() {
               </div>
             </div>
 
+            {false && (
             <div className="grid gap-5 lg:grid-cols-[1fr_0.55fr]">
               <div className="rounded-2xl border border-slate-200 bg-white p-5" style={{ boxShadow: '0 12px 35px -30px rgba(15,23,42,0.45)' }}>
                 <div className="mb-4 flex items-center gap-2">
@@ -399,6 +398,7 @@ function PaymentPage() {
                 </div>
               </div>
             </div>
+            )}
 
             <div className="rounded-2xl border border-slate-200 bg-white" style={{ boxShadow: cardShadow }}>
               <div className="flex items-start justify-between gap-4 border-b border-slate-100 p-5 sm:p-6">
