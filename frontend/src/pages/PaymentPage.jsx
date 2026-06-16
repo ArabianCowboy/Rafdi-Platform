@@ -10,6 +10,8 @@ import {
   FileText,
   Loader,
   Lock,
+  MapPin,
+  Package,
   Receipt,
   ShieldCheck,
   Sparkles,
@@ -69,6 +71,24 @@ function PaymentPage() {
   const [paymentData, setPaymentData] = useState(null);
   const [processing, setProcessing] = useState(false);
   const [bookingDetails, setBookingDetails] = useState(null);
+
+  useEffect(() => {
+    if (!bookingId) return;
+
+    const fetchBookingDetails = async () => {
+      try {
+        const res = await apiFetch(`${API_URL}/bookings/my`, { headers: getHeaders(false) });
+        if (!res.ok) return;
+        const bookings = await res.json();
+        const found = bookings.find((b) => b.BookingID === parseInt(bookingId, 10));
+        if (found) setBookingDetails(found);
+      } catch {
+        // Details are helpful for display, but payment can continue without them.
+      }
+    };
+
+    fetchBookingDetails();
+  }, [bookingId]);
 
   const processBackendPayment = useCallback(async (moyasarPaymentId, moyasarStatus, paymentMethod) => {
     if (processingRef.current) return;
@@ -179,7 +199,10 @@ function PaymentPage() {
     };
   }, [bookingId, estimatedPrice, navigate, processBackendPayment, warehouseName]);
 
-  const paidAmount = paymentData ? paymentData.Amount : estimatedPrice;
+  const warehouse = bookingDetails?.warehouse;
+  const displayWarehouseName = warehouse?.Name || warehouseName;
+  const displayAmount = bookingDetails?.TotalPrice || estimatedPrice;
+  const paidAmount = paymentData ? paymentData.Amount : displayAmount;
   const bookingDays = bookingDetails
     ? Math.ceil((new Date(bookingDetails.EndDate) - new Date(bookingDetails.StartDate)) / 86400000) + 1
     : null;
@@ -221,13 +244,19 @@ function PaymentPage() {
                 <div className="rounded-xl border border-slate-200 bg-white p-5">
                   <h2 className="mb-4 text-base font-extrabold text-slate-900">تفاصيل الحجز</h2>
                   <div className="space-y-3">
-                    <DetailRow label={warehouseName} icon={Warehouse}>المستودع</DetailRow>
+                    <DetailRow label={displayWarehouseName} icon={Warehouse}>المستودع</DetailRow>
                     {bookingDetails && (
                       <>
                         <DetailRow label={<span className="font-mono text-xs">{bookingDetails.StartDate} إلى {bookingDetails.EndDate}</span>} icon={Calendar}>
                           الفترة
                         </DetailRow>
                         <DetailRow label={`${bookingDays} يوم`}>المدة</DetailRow>
+                        {warehouse?.Location && (
+                          <DetailRow label={warehouse.Location} icon={MapPin}>الموقع</DetailRow>
+                        )}
+                        {warehouse?.Size && (
+                          <DetailRow label={`${warehouse.Size?.toLocaleString()} م²`} icon={Package}>المساحة</DetailRow>
+                        )}
                       </>
                     )}
                   </div>
@@ -278,7 +307,7 @@ function PaymentPage() {
                   <div className="grid h-12 w-12 place-items-center rounded-xl bg-blue-500 shadow-lg shadow-blue-950/20">
                     <Receipt size={24} />
                   </div>
-                  <h1 className="mt-5 text-xl font-black leading-8">{warehouseName}</h1>
+                  <h1 className="mt-5 text-xl font-black leading-8">{displayWarehouseName}</h1>
                   <p className="mt-2 text-sm leading-6 text-white/65">راجع تفاصيل الحجز قبل إتمام الدفع عبر ميسر.</p>
                 </div>
 
@@ -287,7 +316,7 @@ function PaymentPage() {
                     <div className="flex items-center justify-between gap-4">
                       <span className="text-sm font-semibold text-slate-500">المبلغ الإجمالي</span>
                       <span className="flex items-end gap-1.5 text-slate-950">
-                        <span className="text-3xl font-black">{Number(estimatedPrice || 0).toLocaleString()}</span>
+                        <span className="text-3xl font-black">{Number(displayAmount || 0).toLocaleString()}</span>
                         <span className="pb-1 text-sm font-bold text-slate-400">ر.س</span>
                       </span>
                     </div>
@@ -301,6 +330,41 @@ function PaymentPage() {
                       <span className="text-emerald-600">آمن ومشفر</span>
                     </DetailRow>
                   </div>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200 bg-white p-5" style={{ boxShadow: '0 12px 35px -30px rgba(15,23,42,0.45)' }}>
+                <div className="mb-4 flex items-center gap-2">
+                  <span className="grid h-9 w-9 place-items-center rounded-xl bg-slate-100 text-slate-600">
+                    <Warehouse size={18} />
+                  </span>
+                  <div>
+                    <h2 className="text-sm font-extrabold text-slate-900">تفاصيل المستودع</h2>
+                    <p className="text-xs font-medium text-slate-400">بيانات الحجز قبل الدفع</p>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <DetailRow label={displayWarehouseName} icon={Warehouse}>المستودع</DetailRow>
+                  {bookingDetails && (
+                    <>
+                      <DetailRow label={<span className="font-mono text-xs">{bookingDetails.StartDate} إلى {bookingDetails.EndDate}</span>} icon={Calendar}>
+                        الفترة
+                      </DetailRow>
+                      <DetailRow label={`${bookingDays} يوم`}>المدة</DetailRow>
+                    </>
+                  )}
+                  {warehouse?.Location && (
+                    <DetailRow label={warehouse.Location} icon={MapPin}>الموقع</DetailRow>
+                  )}
+                  {warehouse?.Size && (
+                    <DetailRow label={`${warehouse.Size?.toLocaleString()} م²`} icon={Package}>المساحة</DetailRow>
+                  )}
+                  {warehouse?.PricePerDay && (
+                    <DetailRow label={`${parseFloat(warehouse.PricePerDay).toLocaleString()} ر.س/يوم`}>
+                      السعر اليومي
+                    </DetailRow>
+                  )}
                 </div>
               </div>
 

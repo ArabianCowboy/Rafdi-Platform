@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, Calendar, Loader, Layers, Users, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { Building2, Calendar, Loader, Layers, Users, CheckCircle, Clock, XCircle, MapPin } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { API_URL, getHeaders, apiFetch } from '../config/api';
 
@@ -66,7 +66,7 @@ function OwnerBookingsPage() {
         </div>
 
         {/* Filter tabs */}
-        <div className="flex gap-2 mb-5">
+        <div className="flex flex-wrap gap-2 mb-5">
           {[
             { key: 'all', label: 'الكل' },
             { key: 'confirmed', label: 'مؤكدة' },
@@ -96,59 +96,86 @@ function OwnerBookingsPage() {
             <p className="text-sm text-gray-500 font-medium">لا توجد حجوزات</p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {filtered.map((b) => {
               const status = statusConfig[b.Status] || statusConfig.pending;
               const StatusIcon = status.icon;
+              const warehouse = b.warehouse;
+              const imageUrl = warehouse?.ImagePath;
 
               return (
                 <div key={b.BookingID}
-                  className={`bg-white border rounded-xl p-5 ${b.Status === 'cancelled' ? 'border-gray-100 opacity-70' : 'border-gray-200'}`}
-                  style={{ boxShadow: '0 1px 2px rgba(15,23,42,0.04)' }}>
+                  className={`bg-white border rounded-2xl overflow-hidden transition-all ${b.Status === 'cancelled' ? 'border-gray-100 opacity-70' : 'border-gray-200 hover:border-blue-200'}`}
+                  style={{ boxShadow: '0 12px 32px -26px rgba(15,23,42,0.55)' }}>
 
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="flex items-start gap-3 text-right">
-                      <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
-                        style={{ background: '#eff6ff', border: '1px solid #dbeafe' }}>
-                        <Building2 size={18} color="#2563eb" />
-                      </div>
-                      <div>
-                        <p style={{ fontWeight: 700, fontSize: 14, color: '#0f172a' }}>
-                          {b.warehouse?.Name || `مستودع #${b.WarehouseID}`}
-                        </p>
-                        <div className="flex items-center gap-1.5 mt-1">
-                          <Users size={11} color="#94a3b8" />
-                          <p style={{ fontSize: 12, color: '#64748b' }}>
-                            {b.renter_company?.CompanyName || `شركة #${b.RenterCompanyID}`}
-                          </p>
+                  <div className="flex flex-col md:flex-row">
+                    <div className="relative h-44 md:h-auto md:w-52 shrink-0 bg-gray-100 overflow-hidden">
+                      {imageUrl ? (
+                        <img src={imageUrl} alt={warehouse?.Name || 'المستودع'} className="h-full w-full object-cover" />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-slate-50">
+                          <Building2 size={38} className="text-slate-300" />
                         </div>
-                        {b.renter_company?.CommercialRegistration && (
-                          <p style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>
-                            سجل تجاري: {b.renter_company.CommercialRegistration}
+                      )}
+                      <div className="absolute right-3 top-3">
+                        <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-md border shadow-sm ${status.className}`}>
+                          <StatusIcon size={11} />
+                          {status.label}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex min-w-0 flex-1 flex-col justify-between p-5">
+                      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                        <div className="min-w-0 text-right">
+                          <p style={{ fontWeight: 800, fontSize: 16, color: '#0f172a' }}>
+                            {warehouse?.Name || `مستودع #${b.WarehouseID}`}
                           </p>
+                          {warehouse?.Location && (
+                            <div className="mt-2 flex items-start gap-1.5 text-xs text-slate-500">
+                              <MapPin size={12} className="mt-0.5 shrink-0 text-slate-400" />
+                              <span className="leading-5">{warehouse.Location}</span>
+                            </div>
+                          )}
+                          <div className="mt-3 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2">
+                            <div className="flex items-center gap-1.5">
+                              <Users size={12} color="#94a3b8" />
+                              <p style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>
+                                {b.renter_company?.CompanyName || `شركة #${b.RenterCompanyID}`}
+                              </p>
+                            </div>
+                            {b.renter_company?.CommercialRegistration && (
+                              <p style={{ fontSize: 11, color: '#94a3b8', marginTop: 4 }}>
+                                سجل تجاري: {b.renter_company.CommercialRegistration}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex shrink-0 flex-row-reverse items-center justify-between gap-3 md:flex-col md:items-end">
+                          <span style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 900, fontSize: 19, color: '#0f172a' }}>
+                            {parseFloat(b.TotalPrice).toLocaleString()}
+                            <span style={{ fontSize: 12, fontWeight: 500, color: '#94a3b8', marginRight: 3 }}>ر.س</span>
+                          </span>
+                          <span className="rounded-lg bg-blue-50 px-2.5 py-1 font-mono text-xs font-bold text-blue-700">
+                            #{b.BookingID}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 pt-3">
+                        <div className="flex items-center gap-1.5 text-gray-500 text-xs">
+                          <Calendar size={12} className="text-gray-400 shrink-0" />
+                          <span className="font-mono">{b.StartDate}</span>
+                          <span className="text-gray-300 mx-1">←</span>
+                          <span className="font-mono">{b.EndDate}</span>
+                        </div>
+                        {warehouse?.Size && (
+                          <span className="text-xs font-semibold text-slate-400">
+                            المساحة {warehouse.Size?.toLocaleString()} م²
+                          </span>
                         )}
                       </div>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-2 justify-end">
-                      <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-md border ${status.className}`}>
-                        <StatusIcon size={11} />
-                        {status.label}
-                      </span>
-                      <span style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 15, color: '#0f172a' }}>
-                        {parseFloat(b.TotalPrice).toLocaleString()}
-                        <span style={{ fontSize: 12, fontWeight: 400, color: '#94a3b8', marginRight: 3 }}>ر.س</span>
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap items-center justify-between mt-4 pt-3 border-t border-gray-50 gap-2">
-                    <p style={{ fontSize: 12, color: '#94a3b8', fontFamily: 'monospace' }}>#{b.BookingID}</p>
-                    <div className="flex items-center gap-1.5 text-gray-500 text-xs">
-                      <Calendar size={11} className="text-gray-400 shrink-0" />
-                      <span className="font-mono">{b.StartDate}</span>
-                      <span className="text-gray-300 mx-1">←</span>
-                      <span className="font-mono">{b.EndDate}</span>
                     </div>
                   </div>
                 </div>
