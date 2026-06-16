@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Building2, CheckCircle, ChevronLeft, ChevronRight, Loader, MapPin, Package, Calendar, CreditCard, ArrowLeft } from 'lucide-react';
+import { Building2, CheckCircle, ChevronLeft, ChevronRight, Loader, MapPin, Package } from 'lucide-react';
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 import Navbar from '../components/Navbar';
@@ -18,9 +18,6 @@ function BookingPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [range, setRange] = useState({ from: undefined, to: undefined });
-
-  // بيانات الحجز بعد النجاح
-  const [bookingResult, setBookingResult] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -79,30 +76,18 @@ const handleBooking = async (e) => {
         setError(res.status === 403 ? 'الحجز متاح للمستأجرين فقط' : parseError(data.detail));
         return;
       }
-      // حفظ بيانات الحجز وعرض شاشة التأكيد
-      setBookingResult({
-        bookingId: data.BookingID,
-        warehouseName: warehouse.Name,
-        startDate,
-        endDate,
-        days,
-        totalPrice: parseFloat(data.TotalPrice) || totalPrice,
+      navigate('/payment', {
+        state: {
+          bookingId: data.BookingID,
+          warehouseName: warehouse.Name,
+          estimatedPrice: parseFloat(data.TotalPrice) || totalPrice,
+        }
       });
     } catch {
       setError('حدث خطأ في الاتصال، حاول مرة أخرى');
     } finally {
       setSubmitting(false);
     }
-  };
-
-  const handleGoToPayment = () => {
-    navigate('/payment', {
-      state: {
-        bookingId: bookingResult.bookingId,
-        warehouseName: bookingResult.warehouseName,
-        estimatedPrice: bookingResult.totalPrice,
-      }
-    });
   };
 
   return (
@@ -118,90 +103,6 @@ const handleBooking = async (e) => {
         <div className="text-center py-32">
           <p className="text-red-500 text-sm font-semibold">{error}</p>
         </div>
-      ) : bookingResult ? (
-
-        /* ===== شاشة تأكيد الحجز ===== */
-        <div className="max-w-lg mx-auto px-4 py-16">
-          <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden text-right"
-            style={{ boxShadow: '0 4px 24px -8px rgba(15,23,42,0.12)' }}>
-
-            {/* Header أخضر */}
-            <div style={{ background: 'linear-gradient(135deg, #10b981, #059669)', padding: '32px 28px', textAlign: 'center' }}>
-              <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', display: 'grid', placeItems: 'center', margin: '0 auto 16px' }}>
-                <CheckCircle size={32} color="#fff" />
-              </div>
-              <h2 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 22, color: '#fff', marginBottom: 6 }}>
-                تم الحجز بنجاح!
-              </h2>
-              <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: 14 }}>
-                يرجى إتمام الدفع لتأكيد حجزك
-              </p>
-            </div>
-
-            {/* بيانات الحجز */}
-            <div style={{ padding: '24px 28px' }}>
-
-              <div style={{ background: '#f8fafc', borderRadius: 12, padding: '16px 20px', marginBottom: 20 }}>
-                <h3 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 700, fontSize: 16, color: '#0f172a', marginBottom: 14 }}>
-                  تفاصيل الحجز
-                </h3>
-
-                <div className="space-y-3">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: 12, color: '#94a3b8' }}>المستودع</span>
-                    <span style={{ fontWeight: 600, fontSize: 14, color: '#0f172a' }}>{bookingResult.warehouseName}</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 10, borderTop: '1px solid #e2e8f0' }}>
-                    <span style={{ fontSize: 12, color: '#94a3b8' }}>الفترة</span>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <Calendar size={13} color="#94a3b8" />
-                      <span style={{ fontSize: 13, color: '#475569', fontFamily: 'monospace' }}>
-                        {bookingResult.startDate} ← {bookingResult.endDate}
-                      </span>
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 10, borderTop: '1px solid #e2e8f0' }}>
-                    <span style={{ fontSize: 12, color: '#94a3b8' }}>المدة</span>
-                    <span style={{ fontSize: 13, color: '#475569' }}>{bookingResult.days} يوم</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 10, borderTop: '1px solid #e2e8f0' }}>
-                    <span style={{ fontSize: 12, color: '#94a3b8' }}>رقم الحجز</span>
-                    <span style={{ fontSize: 12, color: '#94a3b8', fontFamily: 'monospace' }}>#{bookingResult.bookingId}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* المبلغ */}
-              <div style={{ background: '#eff6ff', borderRadius: 12, padding: '16px 20px', marginBottom: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: 13, color: '#64748b', fontWeight: 500 }}>المبلغ المطلوب</span>
-                <span style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 22, color: '#2563eb' }}>
-                  {bookingResult.totalPrice.toLocaleString()} ر.س
-                </span>
-              </div>
-
-              {/* زر الدفع */}
-<button onClick={handleGoToPayment}
-  style={{
-    width: '100%', padding: '14px 16px', borderRadius: 10,
-    background: '#2563eb', color: '#fff',
-    fontFamily: "'Tajawal', sans-serif", fontWeight: 700, fontSize: 16,
-    border: 'none', cursor: 'pointer',
-    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-    boxShadow: '0 8px 20px -8px rgba(37,99,235,0.6)',
-    marginBottom: 12,
-  }}>
-  <CreditCard size={18} />
-  الانتقال إلى الدفع
-  <ArrowLeft size={16} />
-</button>
-
-<p style={{ textAlign: 'center', fontSize: 12, color: '#94a3b8', marginTop: 14 }}>
-  يجب إتمام الدفع لتأكيد الحجز
-</p>
-            </div>
-          </div>
-        </div>
-
       ) : (
 
         /* ===== صفحة الحجز الأصلية ===== */
@@ -371,12 +272,12 @@ const handleBooking = async (e) => {
                       {submitting ? (
                         <span className="flex items-center gap-2">
                           <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin block" />
-                          جاري تأكيد الحجز...
+                          جاري تجهيز الدفع...
                         </span>
                       ) : (
                         <>
                           <CheckCircle size={15} />
-                          {days > 0 ? `تأكيد الحجز — ${totalPrice.toLocaleString()} ر.س` : 'اختر فترة الحجز'}
+                          {days > 0 ? `الدفع الآن — ${totalPrice.toLocaleString()} ر.س` : 'اختر فترة الحجز'}
                         </>
                       )}
                     </button>

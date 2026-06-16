@@ -159,7 +159,7 @@ function WarehousesPage() {
       <main className="max-w-6xl mx-auto px-4 py-8">
 
         {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, direction: 'rtl' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 12, marginBottom: 24, direction: 'rtl' }}>
           <div style={{ textAlign: 'right' }}>
             <h1 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 22, color: '#0f172a' }}>
               إدارة المستودعات
