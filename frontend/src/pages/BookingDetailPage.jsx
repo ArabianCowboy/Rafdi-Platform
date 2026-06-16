@@ -1,14 +1,27 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Building2, MapPin, Square, CreditCard, Loader, ChevronLeft } from 'lucide-react';
+import { Building2, MapPin, Package, CreditCard, CheckCircle, Clock, XCircle, Loader } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { API_URL, getHeaders } from '../config/api';
 
-const statusStyles = {
-  confirmed: { bg: '#ecfdf5', color: '#059669', dot: '#10b981', label: 'مؤكد' },
-  pending:   { bg: '#fffbeb', color: '#d97706', dot: '#f59e0b', label: 'قيد الانتظار' },
-  cancelled: { bg: '#fef2f2', color: '#dc2626', dot: '#ef4444', label: 'ملغي' },
+const statusConfig = {
+  confirmed: { label: 'مؤكد', className: 'bg-emerald-50 text-emerald-700 border border-emerald-200' },
+  pending:   { label: 'قيد الانتظار', className: 'bg-amber-50 text-amber-700 border border-amber-200' },
+  cancelled: { label: 'ملغي', className: 'bg-red-50 text-red-600 border border-red-200' },
 };
+
+const paymentStatusConfig = {
+  paid:    { label: 'مدفوع', className: 'bg-emerald-50 text-emerald-700 border border-emerald-200' },
+  pending: { label: 'غير مدفوع', className: 'bg-amber-50 text-amber-700 border border-amber-200' },
+  failed:  { label: 'فشل', className: 'bg-red-50 text-red-600 border border-red-200' },
+};
+
+const Row = ({ label, children }) => (
+  <div style={{ display: 'flex', flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', padding: '11px 0', borderBottom: '1px solid #f8fafc' }}>
+    <span style={{ fontSize: 12, color: '#94a3b8', flexShrink: 0, marginLeft: 8 }}>{label}</span>
+    <div style={{ display: 'flex', alignItems: 'center' }}>{children}</div>
+  </div>
+);
 
 function BookingDetailPage() {
   const { id } = useParams();
@@ -39,167 +52,168 @@ function BookingDetailPage() {
     fetchData();
   }, [id]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#fafafa]" dir="rtl" style={{ fontFamily: "'IBM Plex Sans Arabic', 'Tajawal', sans-serif" }}>
-        <Navbar />
-        <div className="flex justify-center items-center" style={{ height: '70vh' }}>
-          <Loader size={22} color="#cbd5e1" className="animate-spin" />
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-[#fafafa]" dir="rtl" style={{ fontFamily: "'IBM Plex Sans Arabic', 'Tajawal', sans-serif" }}>
-        <Navbar />
-        <div className="flex flex-col items-center justify-center text-center" style={{ height: '70vh' }}>
-          <p style={{ fontSize: 14, color: '#94a3b8' }}>{error}</p>
-          <button onClick={() => navigate('/bookings')} style={{ marginTop: 16, fontSize: 13, color: '#2563eb', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer' }}>
-            الرجوع للحجوزات
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const days = Math.ceil((new Date(booking.EndDate) - new Date(booking.StartDate)) / 86400000) + 1;
-  const status = statusStyles[booking.Status] || statusStyles.pending;
+  const days = booking
+    ? Math.ceil((new Date(booking.EndDate) - new Date(booking.StartDate)) / 86400000) + 1
+    : 0;
 
   return (
-    <div className="min-h-screen bg-[#fafafa]" dir="rtl" style={{ fontFamily: "'IBM Plex Sans Arabic', 'Tajawal', sans-serif" }}>
+    <div className="min-h-screen bg-[#f8fafc]" dir="rtl" style={{ fontFamily: "'IBM Plex Sans Arabic', 'Tajawal', sans-serif" }}>
 
       <Navbar />
 
-      <main className="max-w-2xl mx-auto px-5 py-10">
-
-        {/* رجوع */}
-        <button onClick={() => navigate('/bookings')}
-          style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', marginBottom: 28, fontFamily: 'inherit', padding: 0 }}
-          onMouseEnter={e => e.currentTarget.style.color = '#475569'}
-          onMouseLeave={e => e.currentTarget.style.color = '#94a3b8'}>
-          <ChevronLeft size={14} style={{ transform: 'rotate(180deg)' }} />
-          الحجوزات
-        </button>
-
-        {/* رأس الصفحة: المستودع + الحالة */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32 }}>
-          <span style={{
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-            fontSize: 12.5, fontWeight: 600, color: status.color,
-            background: status.bg, padding: '5px 12px', borderRadius: 100,
-          }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: status.dot }} />
-            {status.label}
-          </span>
-          <div style={{ textAlign: 'right' }}>
-            <h1 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 24, color: '#0f172a', lineHeight: 1.3 }}>
-              {booking.warehouse?.Name || `حجز #${id}`}
-            </h1>
-            <p style={{ fontSize: 13, color: '#94a3b8', marginTop: 4, fontFamily: 'monospace' }}>#{id}</p>
-          </div>
+      <div style={{ background: '#0d1b3e' }} className="py-8 px-4">
+        <div className="max-w-3xl mx-auto" style={{ textAlign: 'right' }}>
+          <h1 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 26, color: '#fff', marginBottom: 4 }}>
+            تفاصيل الحجز
+          </h1>
+          <p style={{ color: 'rgba(255,255,255,0.62)', fontSize: 14, fontFamily: 'monospace' }}>#{id}</p>
         </div>
+      </div>
 
-        {/* صورة المستودع */}
-        {booking.warehouse?.ImagePath && (
-          <div style={{ borderRadius: 16, overflow: 'hidden', marginBottom: 24, height: 200 }}>
-            <img src={booking.warehouse.ImagePath} alt={booking.warehouse.Name} className="w-full h-full object-cover" />
+      <main className="max-w-3xl mx-auto px-4 py-8">
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <Loader size={26} color="#2563eb" className="animate-spin" />
           </div>
-        )}
-
-        {/* الفترة — العنصر الأهم بصرياً */}
-        <div style={{ background: '#fff', borderRadius: 16, padding: '24px', marginBottom: 16, border: '1px solid #f1f5f9' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ textAlign: 'left' }}>
-              <p style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 20, color: '#0f172a' }}>
-                {booking.EndDate}
-              </p>
-              <p style={{ fontSize: 11, color: '#cbd5e1', marginTop: 2 }}>النهاية</p>
-            </div>
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 16px' }}>
-              <div style={{ width: '100%', height: 1, background: '#e2e8f0', position: 'relative' }} />
-              <p style={{ fontSize: 12, color: '#94a3b8', marginTop: 8, fontWeight: 600 }}>{days} يوم</p>
-            </div>
-            <div style={{ textAlign: 'right' }}>
-              <p style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 20, color: '#0f172a' }}>
-                {booking.StartDate}
-              </p>
-              <p style={{ fontSize: 11, color: '#cbd5e1', marginTop: 2 }}>البداية</p>
-            </div>
+        ) : error ? (
+          <div className="text-center py-20 bg-white border border-dashed border-gray-300 rounded-xl">
+            <p className="text-sm text-red-500 font-medium">{error}</p>
           </div>
-        </div>
+        ) : (
+          <div className="space-y-4">
 
-        {/* بيانات المستودع — مدمجة بدون عناوين */}
-        {booking.warehouse && (
-          <div style={{ background: '#fff', borderRadius: 16, padding: '20px 24px', marginBottom: 16, border: '1px solid #f1f5f9' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', direction: 'rtl' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#94a3b8' }}>
-                <MapPin size={14} />
-                <span style={{ fontSize: 13.5, color: '#475569' }}>{booking.warehouse.Location}</span>
+            {/* حالة الحجز */}
+            <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 14, padding: '20px', boxShadow: '0 1px 2px rgba(15,23,42,0.04)' }} dir="rtl">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg border ${statusConfig[booking.Status]?.className}`}>
+                  {booking.Status === 'confirmed' ? <CheckCircle size={13} /> : booking.Status === 'pending' ? <Clock size={13} /> : <XCircle size={13} />}
+                  {statusConfig[booking.Status]?.label}
+                </span>
+                <h2 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 17, color: '#0f172a' }}>
+                  حالة الحجز
+                </h2>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#94a3b8' }}>
-                <Square size={14} />
-                <span style={{ fontSize: 13.5, color: '#475569' }}>{booking.warehouse.Size?.toLocaleString()} م²</span>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, direction: 'rtl' }}>
+                {[
+                  { label: 'تاريخ البداية', value: booking.StartDate, mono: true },
+                  { label: 'تاريخ النهاية', value: booking.EndDate, mono: true },
+                  { label: 'مدة الإيجار', value: `${days} يوم` },
+                  { label: 'إجمالي الحجز', value: `${parseFloat(booking.TotalPrice).toLocaleString()} ر.س`, blue: true },
+                ].map((item, i) => (
+                  <div key={i} style={{ background: '#f8fafc', borderRadius: 10, padding: '12px 14px', textAlign: 'right' }}>
+                    <p style={{ fontSize: 11, color: '#94a3b8', marginBottom: 4 }}>{item.label}</p>
+                    <p style={{
+                      fontWeight: 700, fontSize: 14,
+                      color: item.blue ? '#2563eb' : '#0f172a',
+                      fontFamily: item.mono ? 'monospace' : 'inherit',
+                    }}>
+                      {item.value}
+                    </p>
+                  </div>
+                ))}
               </div>
             </div>
-          </div>
-        )}
 
-        {/* المبلغ والدفع — بطاقة واحدة بارزة */}
-        <div style={{ background: '#0d1b3e', borderRadius: 16, padding: '24px', marginBottom: 16, position: 'relative', overflow: 'hidden' }}>
-          <div style={{
-            position: 'absolute', top: -60, left: -60, width: 200, height: 200,
-            background: 'radial-gradient(circle, rgba(37,99,235,0.35), transparent 70%)', pointerEvents: 'none',
-          }} />
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative', zIndex: 1 }}>
-            <div>
+            {/* بيانات المستودع */}
+            {booking.warehouse && (
+              <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 14, overflow: 'hidden', boxShadow: '0 1px 2px rgba(15,23,42,0.04)' }}>
+                {booking.warehouse.ImagePath ? (
+                  <img src={booking.warehouse.ImagePath} alt={booking.warehouse.Name} className="w-full h-44 object-cover" />
+                ) : (
+                  <div className="h-44 flex items-center justify-center" style={{ background: '#f1f5f9' }}>
+                    <Building2 size={40} color="#cbd5e1" />
+                  </div>
+                )}
+                <div style={{ padding: 20 }} dir="rtl">
+                  <h3 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 17, color: '#0f172a', marginBottom: 14 }}>
+                    بيانات المستودع
+                  </h3>
+                  <Row label="الاسم">
+                    <span style={{ fontSize: 14, color: '#475569' }}>{booking.warehouse.Name}</span>
+                  </Row>
+                  <Row label="الموقع">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <MapPin size={13} color="#94a3b8" />
+                      <span style={{ fontSize: 14, color: '#475569' }}>{booking.warehouse.Location}</span>
+                    </div>
+                  </Row>
+                  <Row label="المساحة">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <Package size={13} color="#94a3b8" />
+                      <span style={{ fontSize: 14, color: '#475569' }}>{booking.warehouse.Size?.toLocaleString()} م²</span>
+                    </div>
+                  </Row>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 11, direction: 'rtl' }}>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: '#2563eb' }}>
+                      {parseFloat(booking.warehouse.PricePerDay).toLocaleString()} ر.س/يوم
+                    </span>
+                    <span style={{ fontSize: 12, color: '#94a3b8' }}>السعر اليومي</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* بيانات الدفع */}
+            <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 14, padding: 20, boxShadow: '0 1px 2px rgba(15,23,42,0.04)' }} dir="rtl">
+              <h3 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 17, color: '#0f172a', marginBottom: 16 }}>
+                بيانات الدفع
+              </h3>
               {payment ? (
-                <span style={{
-                  fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 100,
-                  background: payment.Status === 'paid' ? 'rgba(16,185,129,0.18)' : 'rgba(245,158,11,0.18)',
-                  color: payment.Status === 'paid' ? '#6ee7b7' : '#fbbf24',
-                }}>
-                  {payment.Status === 'paid' ? 'مدفوع' : 'غير مدفوع'}
-                </span>
+                <div>
+                  <Row label="حالة الدفع">
+                    <span className={`text-xs font-bold px-2.5 py-1 rounded-lg border ${paymentStatusConfig[payment.Status]?.className}`}>
+                      {paymentStatusConfig[payment.Status]?.label}
+                    </span>
+                  </Row>
+                  <Row label="المبلغ المدفوع">
+                    <span style={{ fontSize: 14, fontWeight: 600, color: '#0f172a' }}>
+                      {parseFloat(payment.Amount).toLocaleString()} ر.س
+                    </span>
+                  </Row>
+                  <Row label="تاريخ الدفع">
+                    <span style={{ fontSize: 14, color: '#475569', fontFamily: 'monospace' }}>{payment.PaymentDate}</span>
+                  </Row>
+                  {payment.PaymentMethod && (
+                    <Row label="طريقة الدفع">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <CreditCard size={13} color="#94a3b8" />
+                        <span style={{ fontSize: 14, color: '#475569' }}>{payment.PaymentMethod}</span>
+                      </div>
+                    </Row>
+                  )}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, direction: 'rtl', paddingTop: 12 }}>
+                    <div style={{ background: '#f8fafc', borderRadius: 10, padding: '12px 14px', textAlign: 'right' }}>
+                      <p style={{ fontSize: 11, color: '#94a3b8', marginBottom: 4 }}>عمولة المنصة</p>
+                      <p style={{ fontWeight: 700, fontSize: 14, color: '#0f172a' }}>
+                        {parseFloat(payment.commission_amount).toLocaleString()} ر.س
+                      </p>
+                    </div>
+                    <div style={{ background: '#f8fafc', borderRadius: 10, padding: '12px 14px', textAlign: 'right' }}>
+                      <p style={{ fontSize: 11, color: '#94a3b8', marginBottom: 4 }}>صافي المبلغ</p>
+                      <p style={{ fontWeight: 700, fontSize: 14, color: '#0f172a' }}>
+                        {parseFloat(payment.net_amount).toLocaleString()} ر.س
+                      </p>
+                    </div>
+                  </div>
+                </div>
               ) : (
-                <span style={{ fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 100, background: 'rgba(239,68,68,0.18)', color: '#fca5a5' }}>
-                  بلا دفع
-                </span>
+                <div className="text-center py-8 rounded-xl border border-dashed border-gray-200" style={{ background: '#f8fafc' }}>
+                  <CreditCard size={28} color="#cbd5e1" className="mx-auto mb-2" />
+                  <p style={{ fontSize: 13, color: '#94a3b8' }}>لا يوجد دفع مسجل لهذا الحجز</p>
+                </div>
               )}
             </div>
-            <div style={{ textAlign: 'right' }}>
-              <p style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 30, color: '#fff', lineHeight: 1 }}>
-                {parseFloat(booking.TotalPrice).toLocaleString()}
-                <span style={{ fontSize: 14, fontWeight: 400, color: 'rgba(255,255,255,0.5)', marginRight: 4 }}>ر.س</span>
-              </p>
-            </div>
-          </div>
 
-          {payment && (
-            <div style={{ marginTop: 18, paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
-              <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace' }}>{payment.PaymentDate}</span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'rgba(255,255,255,0.6)' }}>
-                <CreditCard size={13} />
-                <span style={{ fontSize: 12.5 }}>{payment.PaymentMethod || 'بطاقة ائتمانية'}</span>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* تفصيل العمولة — صغير وغير مزاحم */}
-        {payment && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 8px' }}>
-            <span style={{ fontSize: 12, color: '#cbd5e1' }}>
-              صافي للمالك <b style={{ color: '#94a3b8' }}>{parseFloat(payment.net_amount).toLocaleString()} ر.س</b>
-            </span>
-            <span style={{ fontSize: 12, color: '#cbd5e1' }}>
-              عمولة المنصة <b style={{ color: '#94a3b8' }}>{parseFloat(payment.commission_amount).toLocaleString()} ر.س</b>
-            </span>
           </div>
         )}
-
       </main>
+
+      <footer className="bg-white border-t border-gray-200 mt-12">
+        <div className="max-w-3xl mx-auto px-4 py-5 text-center">
+          <span style={{ color: '#64748b', fontSize: 13 }}>© Rafdi Platform 2026</span>
+        </div>
+      </footer>
     </div>
   );
 }
