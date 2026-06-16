@@ -65,29 +65,26 @@ const handleBooking = async (e) => {
     if (range.to <= range.from) { setError('تاريخ النهاية يجب أن يكون بعد تاريخ البداية'); return; }
 
     setSubmitting(true);
-    try {
-      const res = await apiFetch(`${API_URL}/bookings/`, {
-        method: 'POST',
-        headers: getHeaders(),
-        body: JSON.stringify({ WarehouseID: parseInt(id), StartDate: startDate, EndDate: endDate }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(res.status === 403 ? 'الحجز متاح للمستأجرين فقط' : parseError(data.detail));
-        return;
-      }
-      navigate('/payment', {
-        state: {
-          bookingId: data.BookingID,
+    navigate('/payment', {
+      state: {
+        bookingDraft: {
+          WarehouseID: parseInt(id, 10),
+          StartDate: startDate,
+          EndDate: endDate,
+        },
+        bookingPreview: {
+          warehouse,
           warehouseName: warehouse.Name,
-          estimatedPrice: parseFloat(data.TotalPrice) || totalPrice,
-        }
-      });
-    } catch {
-      setError('حدث خطأ في الاتصال، حاول مرة أخرى');
-    } finally {
-      setSubmitting(false);
-    }
+          startDate,
+          endDate,
+          days,
+          basePrice,
+          commission,
+          totalPrice,
+        },
+      },
+    });
+    setSubmitting(false);
   };
 
   return (

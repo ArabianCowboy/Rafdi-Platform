@@ -3,6 +3,7 @@ from typing import Optional
 from decimal import Decimal
 from datetime import date
 from app.Enums.EnumTypes import PaymentStatusEnum
+from app.Dtos.Booking_DTOs import BookingCreate
 
 class PaymentCreate(BaseModel):
     BookingID  : int
@@ -28,3 +29,6 @@ class PaymentResponse(BaseModel):
     PaymentMethod    : Optional[str] = None
 
     model_config = {"from_attributes": True}
+
+class BookingPaymentCreate(BaseModel):
+    booking: BookingCreate

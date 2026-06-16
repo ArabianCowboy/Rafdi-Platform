@@ -1,5 +1,9 @@
 from app.Repo import Payment_Repo
-from app.Dtos.Payment_DTOs import PaymentResponse
+from datetime import date
+from decimal import Decimal
+
+from app.Dtos.Booking_DTOs import BookingCreate
+from app.Dtos.Payment_DTOs import PaymentCreate, PaymentResponse
 from app.services.Payment_Services.Commission_Service import CommissionService
 from app.models.Booking_Model import BookingStatusEnum
 from app.models.Payment_Model import PaymentStatusEnum
@@ -100,6 +104,83 @@ class PaymentService:
         response.net_amount        = commission["net_amount"]
 
         return response
+
+    def process_booking_payment(
+        self,
+        booking_data: BookingCreate,
+        renter_company_id: int,
+        moyasar_payment_id: str = None,
+        moyasar_status: str = None,
+        payment_method: str = None,
+    ) -> PaymentResponse:
+        try:
+            if booking_data.EndDate <= booking_data.StartDate:
+                raise ValueError("تاريخ النهاية يجب أن يكون بعد تاريخ البداية")
+
+            warehouse = self.warehouse_repo.get_by_id(booking_data.WarehouseID)
+            if not warehouse:
+                raise ValueError("المستودع غير موجود")
+            if not warehouse.IsActive:
+                raise ValueError("المستودع غير متاح للحجز")
+            if self.booking_repo.check_overlap(
+                booking_data.WarehouseID,
+                booking_data.StartDate,
+                booking_data.EndDate,
+            ):
+                raise ValueError("التواريخ المحددة غير متاحة")
+
+            days = Decimal((booking_data.EndDate - booking_data.StartDate).days)
+            base_amount = round(days * Decimal(warehouse.PricePerDay), 2)
+            commission = self.commission_service.calculate(base_amount)
+
+            booking_data.RenterCompanyID = renter_company_id
+            booking_data.TotalPrice = base_amount
+            booking_data.Status = BookingStatusEnum.confirmed
+            booking = self.booking_repo.add(booking_data)
+
+            payment = self.payment_repo.add(PaymentCreate(
+                BookingID=booking.BookingID,
+                Amount=commission["total_amount"],
+                PaymentDate=date.today(),
+                Status=PaymentStatusEnum.paid,
+            ))
+            payment.MoyasarPaymentID = moyasar_payment_id
+            payment.MoyasarStatus = moyasar_status
+            payment.PaymentMethod = payment_method
+
+            self.payment_repo.db.commit()
+            self.payment_repo.db.refresh(payment)
+
+            try:
+                renter_user = self.user_repo.get_by_company_id(booking.RenterCompanyID)
+                owner_user = self.user_repo.get_by_company_id(warehouse.CompanyID)
+
+                if renter_user:
+                    self.notification_trigger.on_booking_confirmed(
+                        renter_user.UserID,
+                        warehouse.Name,
+                    )
+
+                if renter_user and owner_user:
+                    self.notification_trigger.on_payment_success(
+                        renter_user.UserID,
+                        owner_user.UserID,
+                        str(base_amount),
+                    )
+            except Exception:
+                pass
+
+            response = PaymentResponse.model_validate(payment)
+            response.commission_amount = commission["renter_commission"]
+            response.net_amount = commission["net_amount"]
+            return response
+
+        except ValueError:
+            self.payment_repo.db.rollback()
+            raise
+        except Exception as e:
+            self.payment_repo.db.rollback()
+            raise ValueError(str(e))
 
     def get_all(self) -> list[PaymentResponse]:
         payments = self.payment_repo.get_all()

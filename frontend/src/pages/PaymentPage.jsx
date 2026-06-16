@@ -21,6 +21,15 @@ const MOYASAR_KEY = import.meta.env.VITE_MOYASAR_KEY || 'pk_test_xZj2Ucqc3pVSkkt
 
 const cardShadow = '0 20px 50px -34px rgba(15,23,42,0.45)';
 
+const readStoredJson = (key) => {
+  try {
+    const value = localStorage.getItem(key);
+    return value ? JSON.parse(value) : null;
+  } catch {
+    return null;
+  }
+};
+
 const DetailRow = ({ label, children, icon: Icon }) => (
   <div className="flex items-center justify-between gap-4 border-t border-slate-100 pt-3 first:border-t-0 first:pt-0">
     <span className="shrink-0 text-xs font-medium text-slate-400">{label}</span>
@@ -56,19 +65,21 @@ function PaymentPage() {
   const location = useLocation();
   const processingRef = useRef(false);
 
-  const bookingIdFromState = location.state?.bookingId;
-  const warehouseNameFromState = location.state?.warehouseName;
-  const estimatedPriceFromState = location.state?.estimatedPrice;
+  const bookingDraftFromState = location.state?.bookingDraft;
+  const bookingPreviewFromState = location.state?.bookingPreview;
 
-  if (bookingIdFromState) {
-    localStorage.setItem('paymentBookingId', bookingIdFromState);
-    localStorage.setItem('paymentWarehouseName', warehouseNameFromState || 'المستودع');
-    localStorage.setItem('paymentEstimatedPrice', estimatedPriceFromState || 0);
+  if (bookingDraftFromState) {
+    localStorage.setItem('paymentBookingDraft', JSON.stringify(bookingDraftFromState));
+    localStorage.setItem('paymentBookingPreview', JSON.stringify(bookingPreviewFromState || {}));
+    localStorage.removeItem('paymentBookingId');
+    localStorage.removeItem('paymentWarehouseName');
+    localStorage.removeItem('paymentEstimatedPrice');
   }
 
-  const [bookingId] = useState(() => bookingIdFromState || localStorage.getItem('paymentBookingId'));
-  const [warehouseName] = useState(() => warehouseNameFromState || localStorage.getItem('paymentWarehouseName') || 'المستودع');
-  const [estimatedPrice] = useState(() => parseFloat(estimatedPriceFromState || localStorage.getItem('paymentEstimatedPrice') || 0));
+  const [bookingDraft] = useState(() => bookingDraftFromState || readStoredJson('paymentBookingDraft'));
+  const [bookingPreview] = useState(() => bookingPreviewFromState || readStoredJson('paymentBookingPreview') || {});
+  const warehouseName = bookingPreview.warehouseName || bookingPreview.warehouse?.Name || 'المستودع';
+  const estimatedPrice = Number(bookingPreview.totalPrice || 0);
 
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -77,22 +88,13 @@ function PaymentPage() {
   const [bookingDetails, setBookingDetails] = useState(null);
 
   useEffect(() => {
-    if (!bookingId) return;
-
-    const fetchBookingDetails = async () => {
-      try {
-        const res = await apiFetch(`${API_URL}/bookings/my`, { headers: getHeaders(false) });
-        if (!res.ok) return;
-        const bookings = await res.json();
-        const found = bookings.find((b) => b.BookingID === parseInt(bookingId, 10));
-        if (found) setBookingDetails(found);
-      } catch {
-        // Details are helpful for display, but payment can continue without them.
-      }
-    };
-
-    fetchBookingDetails();
-  }, [bookingId]);
+    if (!bookingDraft) return;
+    setBookingDetails({
+      ...bookingDraft,
+      TotalPrice: bookingPreview.basePrice || bookingPreview.totalPrice || 0,
+      warehouse: bookingPreview.warehouse,
+    });
+  }, [bookingDraft, bookingPreview]);
 
   const processBackendPayment = useCallback(async (moyasarPaymentId, moyasarStatus, paymentMethod) => {
     if (processingRef.current) return;
@@ -101,17 +103,16 @@ function PaymentPage() {
     setError('');
 
     try {
-      const currentBookingId = bookingId;
       const params = new URLSearchParams({
-        booking_id: currentBookingId,
         moyasar_payment_id: moyasarPaymentId,
         moyasar_status: moyasarStatus,
         payment_method: paymentMethod || 'creditcard',
       });
 
-      const res = await apiFetch(`${API_URL}/payments/?${params}`, {
+      const res = await apiFetch(`${API_URL}/payments/with-booking?${params}`, {
         method: 'POST',
-        headers: getHeaders(false),
+        headers: getHeaders(),
+        body: JSON.stringify({ booking: bookingDraft }),
       });
       const data = await res.json();
 
@@ -127,7 +128,7 @@ function PaymentPage() {
         const bRes = await apiFetch(`${API_URL}/bookings/my`, { headers: getHeaders(false) });
         if (bRes.ok) {
           const bookings = await bRes.json();
-          const found = bookings.find((b) => b.BookingID === parseInt(currentBookingId, 10));
+          const found = bookings.find((b) => b.BookingID === parseInt(data.BookingID, 10));
           if (found) setBookingDetails(found);
         }
       } catch {
@@ -137,16 +138,18 @@ function PaymentPage() {
       localStorage.removeItem('paymentBookingId');
       localStorage.removeItem('paymentWarehouseName');
       localStorage.removeItem('paymentEstimatedPrice');
+      localStorage.removeItem('paymentBookingDraft');
+      localStorage.removeItem('paymentBookingPreview');
     } catch {
       setError('حدث خطأ في الاتصال، حاول مرة أخرى');
     } finally {
       setProcessing(false);
       processingRef.current = false;
     }
-  }, [bookingId]);
+  }, [bookingDraft]);
 
   useEffect(() => {
-    if (!bookingId) {
+    if (!bookingDraft) {
       navigate('/home');
       return;
     }
@@ -201,11 +204,11 @@ function PaymentPage() {
       if (document.head.contains(link)) document.head.removeChild(link);
       if (document.head.contains(script)) document.head.removeChild(script);
     };
-  }, [bookingId, estimatedPrice, navigate, processBackendPayment, warehouseName]);
+  }, [bookingDraft, estimatedPrice, navigate, processBackendPayment, warehouseName]);
 
   const warehouse = bookingDetails?.warehouse;
   const displayWarehouseName = warehouse?.Name || warehouseName;
-  const displayAmount = bookingDetails?.TotalPrice || estimatedPrice;
+  const displayAmount = paymentData?.Amount || estimatedPrice;
   const paidAmount = paymentData ? paymentData.Amount : displayAmount;
   const bookingDays = bookingDetails
     ? Math.ceil((new Date(bookingDetails.EndDate) - new Date(bookingDetails.StartDate)) / 86400000) + 1
@@ -250,7 +253,7 @@ function PaymentPage() {
                     <p className="text-sm font-semibold text-slate-500">المبلغ المدفوع</p>
                   </div>
                   <div className="mt-5 rounded-lg bg-white/70 px-4 py-3 text-sm font-semibold text-slate-600">
-                    رقم الحجز <span className="font-mono text-slate-900">#{bookingId}</span>
+                    رقم الحجز <span className="font-mono text-slate-900">#{paymentData?.BookingID}</span>
                   </div>
                 </div>
 
@@ -334,7 +337,7 @@ function PaymentPage() {
                   </div>
 
                   <div className="mt-4 space-y-3">
-                    <InfoRow title="رقم الحجز" value={`#${bookingId}`} icon={FileText} />
+                    <InfoRow title="رقم الحجز" value="ينشأ بعد الدفع" icon={FileText} />
                   </div>
                 </div>
               </div>
