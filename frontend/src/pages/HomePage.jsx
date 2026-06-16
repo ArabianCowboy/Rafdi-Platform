@@ -153,19 +153,15 @@ function OwnerDashboard({ navigate }) {
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {stats.map((s, i) => (
-            <div key={i} style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 14, padding: '18px 20px', textAlign: 'right', boxShadow: '0 1px 2px rgba(15,23,42,0.04)' }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12, direction: 'rtl' }}>
-                <div style={{ textAlign: 'right' }}>
-                  <p style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 22, color: '#0f172a', lineHeight: 1 }}>
-                    {loading ? '—' : s.value}
-                  </p>
-                  <p style={{ fontSize: 13, color: '#64748b', marginTop: 4, fontWeight: 500 }}>{s.label}</p>
-                </div>
-                <div style={{ width: 38, height: 38, borderRadius: 10, background: s.bg, display: 'grid', placeItems: 'center', flexShrink: 0 }}>
-                  <s.icon size={18} color={s.color} />
-                </div>
+            <div key={i} style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 14, padding: '18px 20px', textAlign: 'center', boxShadow: '0 1px 2px rgba(15,23,42,0.04)' }}>
+              <div style={{ width: 38, height: 38, borderRadius: 10, background: s.bg, display: 'grid', placeItems: 'center', margin: '0 auto 10px' }}>
+                <s.icon size={18} color={s.color} />
               </div>
-              <p style={{ fontSize: 11, color: s.color, fontWeight: 600 }}>{s.sub}</p>
+              <p style={{ fontSize: 13, color: '#64748b', fontWeight: 600, marginBottom: 8 }}>{s.label}</p>
+              <p style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 900, fontSize: 26, color: '#0f172a', lineHeight: 1.1 }}>
+                {loading ? '—' : s.value}
+              </p>
+              <p style={{ fontSize: 11, color: s.color, fontWeight: 600, marginTop: 10 }}>{s.sub}</p>
             </div>
           ))}
         </div>
@@ -240,16 +236,27 @@ function OwnerDashboard({ navigate }) {
               {myBookings.slice(0, 4).map(b => (
                 <div key={b.BookingID} dir="rtl" style={{
                   background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12,
-                  padding: '14px 18px', boxShadow: '0 1px 2px rgba(15,23,42,0.04)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: 12, boxShadow: '0 1px 2px rgba(15,23,42,0.04)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14,
                 }}>
-                  <div style={{ textAlign: 'right' }}>
-                    <p style={{ fontWeight: 600, fontSize: 13, color: '#0f172a' }}>
-                      {b.warehouse?.Name || `مستودع #${b.WarehouseID}`}
-                    </p>
-                    <p style={{ fontSize: 12, color: '#94a3b8', marginTop: 2, fontFamily: 'monospace' }}>
-                      {b.StartDate} ← {b.EndDate}
-                    </p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
+                    <div style={{ width: 76, height: 58, borderRadius: 10, overflow: 'hidden', background: '#f1f5f9', flexShrink: 0 }}>
+                      {b.warehouse?.ImagePath ? (
+                        <img src={b.warehouse.ImagePath} alt={b.warehouse?.Name || 'المستودع'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : (
+                        <div style={{ width: '100%', height: '100%', display: 'grid', placeItems: 'center' }}>
+                          <Building2 size={24} color="#cbd5e1" />
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ textAlign: 'right', minWidth: 0 }}>
+                      <p style={{ fontWeight: 800, fontSize: 14, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {b.warehouse?.Name || `مستودع #${b.WarehouseID}`}
+                      </p>
+                      <p style={{ fontSize: 12, color: '#94a3b8', marginTop: 4, fontFamily: 'monospace' }}>
+                        {b.StartDate} ← {b.EndDate}
+                      </p>
+                    </div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
                     <span style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 700, fontSize: 14, color: '#0f172a' }}>

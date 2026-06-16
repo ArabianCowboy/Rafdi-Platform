@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, Plus, MapPin, Package, Edit2, Power, X, Loader, Save, ImagePlus, CheckCircle, Trash2 } from 'lucide-react';
+import { Building2, Plus, MapPin, Package, Edit2, Power, X, Loader, Save, ImagePlus, CheckCircle } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import LocationPickerModal from '../components/LocationPickerModal';
 import { API_URL, getHeaders, apiFetch } from '../config/api';
@@ -122,23 +122,6 @@ function WarehousesPage() {
       const res = await apiFetch(`${API_URL}/warehouses/${w.WarehouseID}/toggle`, { method: 'PATCH', headers: getHeaders(false) });
       if (res.ok) fetchWarehouses();
       else setError('فشل تغيير حالة المستودع، حاول مرة أخرى');
-    } catch {
-      setError('حدث خطأ في الاتصال، حاول مرة أخرى');
-    }
-  };
-
-  const handleDelete = async (w) => {
-    if (!confirm(`هل أنت متأكد من حذف "${w.Name}"؟ لا يمكن التراجع عن هذا الإجراء.`)) return;
-    try {
-      const res = await apiFetch(`${API_URL}/warehouses/${w.WarehouseID}`, { method: 'DELETE', headers: getHeaders(false) });
-      if (res.ok) {
-        setSuccess('تم حذف المستودع بنجاح');
-        fetchWarehouses();
-        setTimeout(() => setSuccess(''), 3000);
-      } else {
-        const data = await res.json();
-        setError(parseError(data.detail));
-      }
     } catch {
       setError('حدث خطأ في الاتصال، حاول مرة أخرى');
     }
@@ -281,18 +264,6 @@ function WarehousesPage() {
                         }}>
                         <Power size={13} />
                         {w.IsActive ? 'تعطيل' : 'تفعيل'}
-                      </button>
-                      <button onClick={() => handleDelete(w)}
-                        style={{
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          padding: '8px 12px', borderRadius: 8,
-                          border: '1px solid #fecaca', color: '#ef4444',
-                          background: '#fff', cursor: 'pointer', flexShrink: 0,
-                          transition: 'all .15s',
-                        }}
-                        onMouseEnter={e => { e.currentTarget.style.background = '#fef2f2'; }}
-                        onMouseLeave={e => { e.currentTarget.style.background = '#fff'; }}>
-                        <Trash2 size={13} />
                       </button>
                     </div>
                   )}

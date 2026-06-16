@@ -38,6 +38,20 @@ const DetailRow = ({ label, children, icon: Icon }) => (
   </div>
 );
 
+const InfoRow = ({ title, value, icon: Icon }) => (
+  <div className="flex items-center justify-between gap-4 border-t border-slate-100 pt-3 first:border-t-0 first:pt-0" dir="rtl">
+    <div className="flex min-w-0 items-center gap-2 text-slate-600">
+      {Icon && (
+        <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-500">
+          <Icon size={14} />
+        </span>
+      )}
+      <span className="shrink-0 text-sm font-semibold">{title}</span>
+    </div>
+    <span className="min-w-0 truncate text-left text-sm font-bold text-slate-800">{value}</span>
+  </div>
+);
+
 const TrustItem = ({ children }) => (
   <div className="flex items-center gap-2.5">
     <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-emerald-50 text-emerald-600">
@@ -244,18 +258,16 @@ function PaymentPage() {
                 <div className="rounded-xl border border-slate-200 bg-white p-5">
                   <h2 className="mb-4 text-base font-extrabold text-slate-900">تفاصيل الحجز</h2>
                   <div className="space-y-3">
-                    <DetailRow label={displayWarehouseName} icon={Warehouse}>المستودع</DetailRow>
+                    <InfoRow title="المستودع" value={displayWarehouseName} icon={Warehouse} />
                     {bookingDetails && (
                       <>
-                        <DetailRow label={<span className="font-mono text-xs">{bookingDetails.StartDate} إلى {bookingDetails.EndDate}</span>} icon={Calendar}>
-                          الفترة
-                        </DetailRow>
-                        <DetailRow label={`${bookingDays} يوم`}>المدة</DetailRow>
+                        <InfoRow title="الفترة" value={`${bookingDetails.StartDate} إلى ${bookingDetails.EndDate}`} icon={Calendar} />
+                        <InfoRow title="المدة" value={`${bookingDays} يوم`} />
                         {warehouse?.Location && (
-                          <DetailRow label={warehouse.Location} icon={MapPin}>الموقع</DetailRow>
+                          <InfoRow title="الموقع" value={warehouse.Location} icon={MapPin} />
                         )}
                         {warehouse?.Size && (
-                          <DetailRow label={`${warehouse.Size?.toLocaleString()} م²`} icon={Package}>المساحة</DetailRow>
+                          <InfoRow title="المساحة" value={`${warehouse.Size?.toLocaleString()} م²`} icon={Package} />
                         )}
                       </>
                     )}
@@ -297,8 +309,8 @@ function PaymentPage() {
             </div>
           </section>
         ) : (
-          <section className="grid gap-6 lg:grid-cols-[0.9fr_1.25fr]">
-            <aside className="space-y-4">
+          <section className="mx-auto max-w-4xl space-y-5">
+            <div className="grid gap-5 lg:grid-cols-2">
               <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white" style={{ boxShadow: cardShadow }}>
                 <div className="relative bg-[#0d1b3e] p-6 text-white">
                   <div className="absolute left-5 top-5 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-white/80">
@@ -323,12 +335,8 @@ function PaymentPage() {
                   </div>
 
                   <div className="mt-4 space-y-3">
-                    <DetailRow label="رقم الحجز" icon={FileText}>
-                      <span className="font-mono">#{bookingId}</span>
-                    </DetailRow>
-                    <DetailRow label="حالة الدفع" icon={Lock}>
-                      <span className="text-emerald-600">آمن ومشفر</span>
-                    </DetailRow>
+                    <InfoRow title="رقم الحجز" value={`#${bookingId}`} icon={FileText} />
+                    <InfoRow title="حالة الدفع" value="آمن ومشفر" icon={Lock} />
                   </div>
                 </div>
               </div>
@@ -345,29 +353,27 @@ function PaymentPage() {
                 </div>
 
                 <div className="space-y-3">
-                  <DetailRow label={displayWarehouseName} icon={Warehouse}>المستودع</DetailRow>
+                  <InfoRow title="المستودع" value={displayWarehouseName} icon={Warehouse} />
                   {bookingDetails && (
                     <>
-                      <DetailRow label={<span className="font-mono text-xs">{bookingDetails.StartDate} إلى {bookingDetails.EndDate}</span>} icon={Calendar}>
-                        الفترة
-                      </DetailRow>
-                      <DetailRow label={`${bookingDays} يوم`}>المدة</DetailRow>
+                      <InfoRow title="الفترة" value={`${bookingDetails.StartDate} إلى ${bookingDetails.EndDate}`} icon={Calendar} />
+                      <InfoRow title="المدة" value={`${bookingDays} يوم`} />
                     </>
                   )}
                   {warehouse?.Location && (
-                    <DetailRow label={warehouse.Location} icon={MapPin}>الموقع</DetailRow>
+                    <InfoRow title="الموقع" value={warehouse.Location} icon={MapPin} />
                   )}
                   {warehouse?.Size && (
-                    <DetailRow label={`${warehouse.Size?.toLocaleString()} م²`} icon={Package}>المساحة</DetailRow>
+                    <InfoRow title="المساحة" value={`${warehouse.Size?.toLocaleString()} م²`} icon={Package} />
                   )}
                   {warehouse?.PricePerDay && (
-                    <DetailRow label={`${parseFloat(warehouse.PricePerDay).toLocaleString()} ر.س/يوم`}>
-                      السعر اليومي
-                    </DetailRow>
+                    <InfoRow title="السعر اليومي" value={`${parseFloat(warehouse.PricePerDay).toLocaleString()} ر.س/يوم`} />
                   )}
                 </div>
               </div>
+            </div>
 
+            <div className="grid gap-5 lg:grid-cols-[1fr_0.55fr]">
               <div className="rounded-2xl border border-slate-200 bg-white p-5" style={{ boxShadow: '0 12px 35px -30px rgba(15,23,42,0.45)' }}>
                 <div className="mb-4 flex items-center gap-2">
                   <span className="grid h-9 w-9 place-items-center rounded-xl bg-blue-50 text-blue-600">
@@ -392,7 +398,7 @@ function PaymentPage() {
                   <span className="text-sm font-black">Moyasar</span>
                 </div>
               </div>
-            </aside>
+            </div>
 
             <div className="rounded-2xl border border-slate-200 bg-white" style={{ boxShadow: cardShadow }}>
               <div className="flex items-start justify-between gap-4 border-b border-slate-100 p-5 sm:p-6">
