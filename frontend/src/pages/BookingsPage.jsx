@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Building2, Calendar, CreditCard, Loader, Layers, X, AlertTriangle } from 'lucide-react';
 import Navbar from '../components/Navbar';
-import { API_URL, getHeaders } from '../config/api';
+import { API_URL, getHeaders, apiFetch } from '../config/api';
 
 const statusConfig = {
   confirmed: { label: 'مؤكد', className: 'bg-emerald-50 text-emerald-700 border border-emerald-200' },
@@ -26,7 +26,7 @@ function BookingsPage() {
 
   const fetchBookings = async () => {
     try {
-      const res = await fetch(`${API_URL}/bookings/my`, { headers: getHeaders(false) });
+      const res = await apiFetch(`${API_URL}/bookings/my`, { headers: getHeaders(false) });
       if (res.ok) {
         const data = await res.json();
         setBookings(data.reverse());
@@ -40,7 +40,7 @@ function BookingsPage() {
     setCancellingId(bookingId);
     setCancelError('');
     try {
-      const res = await fetch(`${API_URL}/bookings/${bookingId}/status`, {
+      const res = await apiFetch(`${API_URL}/bookings/${bookingId}/status`, {
         method: 'PATCH',
         headers: getHeaders(),
         body: JSON.stringify({ Status: 'cancelled' })

@@ -13,7 +13,7 @@ import {
   Wallet,
 } from 'lucide-react';
 import NotificationBell from '../components/NotificationBell';
-import { API_URL } from '../config/api';
+import { API_URL, getHeaders, apiFetch, logout } from '../config/api';
 
 const tabs = [
   { key: 'dashboard', label: 'لوحة التحكم' },
@@ -164,8 +164,8 @@ function AdminPage() {
     setError('');
 
     try {
-      const res = await fetch(`${API_URL}/admin/${tab === 'dashboard' ? 'dashboard' : tab}`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await apiFetch(`${API_URL}/admin/${tab === 'dashboard' ? 'dashboard' : tab}`, {
+        headers: getHeaders(false),
       });
 
       const data = await res.json().catch(() => null);
@@ -206,8 +206,7 @@ function AdminPage() {
   }, [activeTab, isAuthorized]);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/login');
+    logout();
   };
 
   const handleCompanyStatus = async (company) => {
@@ -220,12 +219,9 @@ function AdminPage() {
     setSuccess('');
 
     try {
-      const res = await fetch(`${API_URL}/admin/companies/${company.CompanyID}/status`, {
+      const res = await apiFetch(`${API_URL}/admin/companies/${company.CompanyID}/status`, {
         method: 'PATCH',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers: getHeaders(),
         body: JSON.stringify({ Status: nextStatus }),
       });
 
@@ -254,12 +250,9 @@ function AdminPage() {
     setSuccess('');
 
     try {
-      const res = await fetch(`${API_URL}/admin/warehouses/${warehouse.WarehouseID}/status`, {
+      const res = await apiFetch(`${API_URL}/admin/warehouses/${warehouse.WarehouseID}/status`, {
         method: 'PATCH',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers: getHeaders(),
         body: JSON.stringify({ IsActive: nextStatus }),
       });
 

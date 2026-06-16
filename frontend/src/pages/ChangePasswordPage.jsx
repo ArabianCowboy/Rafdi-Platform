@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, Eye, EyeOff, ShieldCheck, X, CheckCircle, Mail, ArrowLeft, Loader } from 'lucide-react';
-import { API_URL, getHeaders } from '../config/api';
+import { API_URL, getHeaders, apiFetch } from '../config/api';
 
 const parseError = (detail) => {
   if (!detail) return 'حدث خطأ';
@@ -26,7 +26,7 @@ function ChangePasswordPage() {
   useEffect(() => {
     const fetchEmail = async () => {
       try {
-        const res = await fetch(`${API_URL}/auth/me`, { headers: getHeaders(false) });
+        const res = await apiFetch(`${API_URL}/auth/me`, { headers: getHeaders(false) });
         if (res.ok) {
           const data = await res.json();
           setEmailState(data.Email || '');

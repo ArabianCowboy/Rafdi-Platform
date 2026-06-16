@@ -4,7 +4,7 @@ import { Building2, CheckCircle, ChevronLeft, ChevronRight, Loader, MapPin, Pack
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 import Navbar from '../components/Navbar';
-import { API_URL, getHeaders } from '../config/api';
+import { API_URL, getHeaders, apiFetch } from '../config/api';
 
 const today = new Date();
 today.setHours(0, 0, 0, 0);
@@ -26,8 +26,8 @@ function BookingPage() {
     const fetchData = async () => {
       try {
         const [warehouseRes, datesRes] = await Promise.all([
-          fetch(`${API_URL}/warehouses/${id}`, { headers: getHeaders(false) }),
-          fetch(`${API_URL}/bookings/booked-dates/${id}`, { headers: getHeaders(false) }),
+          apiFetch(`${API_URL}/warehouses/${id}`, { headers: getHeaders(false) }),
+          apiFetch(`${API_URL}/bookings/booked-dates/${id}`, { headers: getHeaders(false) }),
         ]);
         if (!warehouseRes.ok) throw new Error();
         setWarehouse(await warehouseRes.json());
@@ -69,7 +69,7 @@ const handleBooking = async (e) => {
 
     setSubmitting(true);
     try {
-      const res = await fetch(`${API_URL}/bookings/`, {
+      const res = await apiFetch(`${API_URL}/bookings/`, {
         method: 'POST',
         headers: getHeaders(),
         body: JSON.stringify({ WarehouseID: parseInt(id), StartDate: startDate, EndDate: endDate }),

@@ -59,6 +59,7 @@ export const AuthScreen = () => {
         if (!res.ok) { setLoginError(data.detail || (language === 'ar' ? 'بيانات غير صحيحة' : 'Invalid credentials')); return; }
 
         localStorage.setItem('token', data.access_token);
+        localStorage.setItem('refresh_token', data.refresh_token);
         setUser({
           id: data.user_id || Math.random().toString(),
           companyName: data.company_name || formData.email,

@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Building2, Package, Users, MapPin, Loader, Search, ChevronLeft, TrendingUp, Calendar, DollarSign, Plus } from "lucide-react";
 import Navbar from "../components/Navbar";
-import { API_URL, getHeaders } from '../config/api';
+import { API_URL, getHeaders, apiFetch } from '../config/api';
 
 const getUserRoles = () => {
   try {
@@ -88,8 +88,8 @@ function OwnerDashboard({ navigate }) {
     const fetch_ = async () => {
       try {
         const [wRes, bRes] = await Promise.all([
-          fetch(`${API_URL}/warehouses/my`, { headers: getHeaders(false) }),
-          fetch(`${API_URL}/bookings/owner`, { headers: getHeaders(false) }),
+          apiFetch(`${API_URL}/warehouses/my`, { headers: getHeaders(false) }),
+          apiFetch(`${API_URL}/bookings/owner`, { headers: getHeaders(false) }),
         ]);
         if (wRes.ok) setMyWarehouses(await wRes.json());
         if (bRes.ok) setMyBookings(await bRes.json());
@@ -310,7 +310,7 @@ function HomePage() {
     if (showOwnerDashboard) return;
     const fetchData = async () => {
       try {
-        const res = await fetch(`${API_URL}/warehouses/`, { headers: getHeaders(false) });
+        const res = await apiFetch(`${API_URL}/warehouses/`, { headers: getHeaders(false) });
         if (res.ok) setWarehouses(await res.json());
       } catch (err) {
         console.error('فشل تحميل المستودعات', err);

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Building2, Calendar, Loader, Layers, Users, CheckCircle, Clock, XCircle } from 'lucide-react';
 import Navbar from '../components/Navbar';
-import { API_URL, getHeaders } from '../config/api';
+import { API_URL, getHeaders, apiFetch } from '../config/api';
 
 const statusConfig = {
   confirmed: { label: 'مؤكد', className: 'bg-emerald-50 text-emerald-700 border border-emerald-200', icon: CheckCircle },
@@ -19,7 +19,7 @@ function OwnerBookingsPage() {
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const res = await fetch(`${API_URL}/bookings/owner`, { headers: getHeaders(false) });
+        const res = await apiFetch(`${API_URL}/bookings/owner`, { headers: getHeaders(false) });
         if (res.ok) setBookings(await res.json());
       } catch {} finally { setLoading(false); }
     };

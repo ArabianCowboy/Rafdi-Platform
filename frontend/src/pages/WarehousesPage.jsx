@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Building2, Plus, MapPin, Package, Edit2, Power, X, Loader, Save, ImagePlus, CheckCircle, Trash2 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import LocationPickerModal from '../components/LocationPickerModal';
-import { API_URL, getHeaders } from '../config/api';
+import { API_URL, getHeaders, apiFetch } from '../config/api';
 
 const CLOUDINARY_CLOUD = import.meta.env.VITE_CLOUDINARY_CLOUD;
 const CLOUDINARY_PRESET = import.meta.env.VITE_CLOUDINARY_PRESET;
@@ -63,7 +63,7 @@ function WarehousesPage() {
   const fetchWarehouses = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/warehouses/my`, { headers: getHeaders(false) });
+      const res = await apiFetch(`${API_URL}/warehouses/my`, { headers: getHeaders(false) });
       if (res.ok) setWarehouses(await res.json());
     } catch (err) {
       console.error('فشل تحميل المستودعات', err);
@@ -107,7 +107,7 @@ function WarehousesPage() {
       const body = editWarehouse
         ? { ...form, Size: parseFloat(form.Size), PricePerDay: parseFloat(form.PricePerDay) }
         : { ...form, CompanyID: getCompanyId(), Size: parseFloat(form.Size), PricePerDay: parseFloat(form.PricePerDay) };
-      const res = await fetch(url, { method, headers: getHeaders(), body: JSON.stringify(body) });
+      const res = await apiFetch(url, { method, headers: getHeaders(), body: JSON.stringify(body) });
       const data = await res.json();
       if (!res.ok) { setError(parseError(data.detail)); return; }
       setSuccess(editWarehouse ? 'تم تعديل المستودع بنجاح' : 'تم إنشاء المستودع بنجاح');
@@ -119,7 +119,7 @@ function WarehousesPage() {
 
   const handleToggle = async (w) => {
     try {
-      const res = await fetch(`${API_URL}/warehouses/${w.WarehouseID}/toggle`, { method: 'PATCH', headers: getHeaders(false) });
+      const res = await apiFetch(`${API_URL}/warehouses/${w.WarehouseID}/toggle`, { method: 'PATCH', headers: getHeaders(false) });
       if (res.ok) fetchWarehouses();
       else setError('فشل تغيير حالة المستودع، حاول مرة أخرى');
     } catch {
@@ -130,7 +130,7 @@ function WarehousesPage() {
   const handleDelete = async (w) => {
     if (!confirm(`هل أنت متأكد من حذف "${w.Name}"؟ لا يمكن التراجع عن هذا الإجراء.`)) return;
     try {
-      const res = await fetch(`${API_URL}/warehouses/${w.WarehouseID}`, { method: 'DELETE', headers: getHeaders(false) });
+      const res = await apiFetch(`${API_URL}/warehouses/${w.WarehouseID}`, { method: 'DELETE', headers: getHeaders(false) });
       if (res.ok) {
         setSuccess('تم حذف المستودع بنجاح');
         fetchWarehouses();

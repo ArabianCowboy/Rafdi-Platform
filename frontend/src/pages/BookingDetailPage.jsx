@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Building2, MapPin, Package, CreditCard, CheckCircle, Clock, XCircle, Loader } from 'lucide-react';
 import Navbar from '../components/Navbar';
-import { API_URL, getHeaders } from '../config/api';
+import { API_URL, getHeaders, apiFetch } from '../config/api';
 
 const statusConfig = {
   confirmed: { label: 'مؤكد', className: 'bg-emerald-50 text-emerald-700 border border-emerald-200' },
@@ -34,14 +34,14 @@ function BookingDetailPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const bookingsRes = await fetch(`${API_URL}/bookings/my`, { headers: getHeaders(false) });
+        const bookingsRes = await apiFetch(`${API_URL}/bookings/my`, { headers: getHeaders(false) });
         if (bookingsRes.ok) {
           const bookings = await bookingsRes.json();
           const found = bookings.find(b => b.BookingID === parseInt(id));
           if (found) setBooking(found);
           else { setError('الحجز غير موجود'); return; }
         }
-        const paymentRes = await fetch(`${API_URL}/payments/${id}`, { headers: getHeaders(false) });
+        const paymentRes = await apiFetch(`${API_URL}/payments/${id}`, { headers: getHeaders(false) });
         if (paymentRes.ok) setPayment(await paymentRes.json());
       } catch {
         setError('حدث خطأ في تحميل البيانات');

@@ -15,21 +15,26 @@ const refreshAccessToken = async () => {
     return null;
   }
 
-  const res = await fetch(`${API_URL}/auth/refresh`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ refresh_token: refreshToken }),
-  });
+  try {
+    const res = await fetch(`${API_URL}/auth/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: refreshToken }),
+    });
 
-  if (!res.ok) {
+    if (!res.ok) {
+      logout();
+      return null;
+    }
+
+    const data = await res.json();
+    localStorage.setItem('token', data.access_token);
+    localStorage.setItem('refresh_token', data.refresh_token);
+    return data.access_token;
+  } catch {
     logout();
     return null;
   }
-
-  const data = await res.json();
-  localStorage.setItem('token', data.access_token);
-  localStorage.setItem('refresh_token', data.refresh_token);
-  return data.access_token;
 };
 
 
@@ -50,9 +55,23 @@ const apiFetch = async (url, options = {}) => {
   return res;
 };
 
-const logout = () => {
+const logout = async () => {
+  const refreshToken = localStorage.getItem('refresh_token');
+
+  if (refreshToken) {
+    try {
+      await fetch(`${API_URL}/auth/logout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh_token: refreshToken }),
+      });
+    } catch {}
+  }
+
   localStorage.removeItem('token');
   localStorage.removeItem('refresh_token');
+  localStorage.removeItem('company_name');
+  localStorage.removeItem('selectedRole');
   window.location.href = '/login';
 };
 

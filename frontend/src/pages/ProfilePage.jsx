@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Building2, Mail, Save, CheckCircle, Loader, KeyRound } from 'lucide-react';
 import Navbar from '../components/Navbar';
-import { API_URL, getHeaders } from '../config/api';
+import { API_URL, getHeaders, apiFetch } from '../config/api';
 
 const getUserInfo = () => {
   try {
@@ -35,7 +35,7 @@ function ProfilePage() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await fetch(`${API_URL}/auth/me`, { headers: getHeaders(false) });
+        const res = await apiFetch(`${API_URL}/auth/me`, { headers: getHeaders(false) });
         if (res.ok) {
           const data = await res.json();
           setProfile(data);
@@ -53,7 +53,7 @@ function ProfilePage() {
     if (!companyName) { showError('يرجى إدخال اسم الشركة'); return; }
     setLoadingCompany(true);
     try {
-      const res = await fetch(`${API_URL}/auth/profile/company`, {
+      const res = await apiFetch(`${API_URL}/auth/profile/company`, {
         method: 'PATCH', headers: getHeaders(),
         body: JSON.stringify({ company_name: companyName }),
       });
@@ -71,7 +71,7 @@ function ProfilePage() {
     if (!email) { showError('يرجى إدخال البريد الإلكتروني'); return; }
     setLoadingEmail(true);
     try {
-      const res = await fetch(`${API_URL}/auth/profile/email`, {
+      const res = await apiFetch(`${API_URL}/auth/profile/email`, {
         method: 'PATCH', headers: getHeaders(),
         body: JSON.stringify({ email }),
       });

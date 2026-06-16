@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { AlertCircle, Bell, CheckCheck, Loader2 } from 'lucide-react';
-import { API_URL } from '../config/api';
+import { API_URL, getHeaders, apiFetch } from '../config/api';
 
 const typeStyles = {
   info: {
@@ -68,8 +68,8 @@ function NotificationBell() {
       setError('');
 
       try {
-        const res = await fetch(`${API_URL}/notifications`, {
-          headers: { Authorization: `Bearer ${token}` },
+        const res = await apiFetch(`${API_URL}/notifications`, {
+          headers: getHeaders(false),
           signal: controller.signal,
         });
 
@@ -124,8 +124,8 @@ function NotificationBell() {
     setError('');
 
     try {
-      const res = await fetch(`${API_URL}/notifications`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await apiFetch(`${API_URL}/notifications`, {
+        headers: getHeaders(false),
       });
       const data = await res.json().catch(() => null);
 
@@ -149,9 +149,9 @@ function NotificationBell() {
     setReadingId(notificationId);
 
     try {
-      const res = await fetch(`${API_URL}/notifications/${notificationId}/read`, {
+      const res = await apiFetch(`${API_URL}/notifications/${notificationId}/read`, {
         method: 'PATCH',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: getHeaders(false),
       });
 
       const data = await res.json().catch(() => null);
@@ -179,9 +179,9 @@ function NotificationBell() {
     setError('');
 
     try {
-      const res = await fetch(`${API_URL}/notifications/read-all`, {
+      const res = await apiFetch(`${API_URL}/notifications/read-all`, {
         method: 'PATCH',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: getHeaders(false),
       });
 
       const data = await res.json().catch(() => null);

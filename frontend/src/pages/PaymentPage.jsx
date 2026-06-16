@@ -16,13 +16,11 @@ import {
   Warehouse,
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
-import { API_URL, getHeaders } from '../config/api';
+import { API_URL, getHeaders, apiFetch } from '../config/api';
 
 const MOYASAR_KEY = import.meta.env.VITE_MOYASAR_KEY || 'pk_test_xZj2Ucqc3pVSkktyUTZLs1ER6JhSKxj4Pnwvt8Ds';
 
 const cardShadow = '0 20px 50px -34px rgba(15,23,42,0.45)';
-
-const formatCurrency = (value) => `${Number(value || 0).toLocaleString()} ر.س`;
 
 const DetailRow = ({ label, children, icon: Icon }) => (
   <div className="flex items-center justify-between gap-4 border-t border-slate-100 pt-3 first:border-t-0 first:pt-0">
@@ -87,7 +85,7 @@ function PaymentPage() {
         payment_method: paymentMethod || 'creditcard',
       });
 
-      const res = await fetch(`${API_URL}/payments/?${params}`, {
+      const res = await apiFetch(`${API_URL}/payments/?${params}`, {
         method: 'POST',
         headers: getHeaders(false),
       });
@@ -102,7 +100,7 @@ function PaymentPage() {
       setSuccess(true);
 
       try {
-        const bRes = await fetch(`${API_URL}/bookings/my`, { headers: getHeaders(false) });
+        const bRes = await apiFetch(`${API_URL}/bookings/my`, { headers: getHeaders(false) });
         if (bRes.ok) {
           const bookings = await bRes.json();
           const found = bookings.find((b) => b.BookingID === parseInt(currentBookingId, 10));
@@ -209,11 +207,11 @@ function PaymentPage() {
               <div className="grid gap-5 p-5 sm:p-7 lg:grid-cols-[1fr_0.9fr]">
                 <div className="rounded-xl border border-blue-100 bg-blue-50/70 p-5">
                   <div className="flex items-end justify-between gap-4">
-                    <p className="text-sm font-semibold text-slate-500">المبلغ المدفوع</p>
                     <div className="flex items-end gap-2">
                       <span className="text-4xl font-black text-blue-700">{Number(paidAmount || 0).toLocaleString()}</span>
                       <span className="pb-1 text-sm font-bold text-blue-400">ر.س</span>
                     </div>
+                    <p className="text-sm font-semibold text-slate-500">المبلغ المدفوع</p>
                   </div>
                   <div className="mt-5 rounded-lg bg-white/70 px-4 py-3 text-sm font-semibold text-slate-600">
                     رقم الحجز <span className="font-mono text-slate-900">#{bookingId}</span>
@@ -223,13 +221,13 @@ function PaymentPage() {
                 <div className="rounded-xl border border-slate-200 bg-white p-5">
                   <h2 className="mb-4 text-base font-extrabold text-slate-900">تفاصيل الحجز</h2>
                   <div className="space-y-3">
-                    <DetailRow label="المستودع" icon={Warehouse}>{warehouseName}</DetailRow>
+                    <DetailRow label={warehouseName} icon={Warehouse}>المستودع</DetailRow>
                     {bookingDetails && (
                       <>
-                        <DetailRow label="الفترة" icon={Calendar}>
-                          <span className="font-mono text-xs">{bookingDetails.StartDate} إلى {bookingDetails.EndDate}</span>
+                        <DetailRow label={<span className="font-mono text-xs">{bookingDetails.StartDate} إلى {bookingDetails.EndDate}</span>} icon={Calendar}>
+                          الفترة
                         </DetailRow>
-                        <DetailRow label="المدة">{bookingDays} يوم</DetailRow>
+                        <DetailRow label={`${bookingDays} يوم`}>المدة</DetailRow>
                       </>
                     )}
                   </div>
@@ -259,24 +257,11 @@ function PaymentPage() {
                   </div>
                 )}
 
-                {paymentData && (
-                  <div className="grid gap-3 sm:grid-cols-2 lg:col-span-2">
-                    <div className="rounded-xl border border-slate-200 bg-white p-4">
-                      <p className="text-xs font-semibold text-slate-400">عمولة المنصة</p>
-                      <p className="mt-1 text-lg font-black text-slate-900">{formatCurrency(paymentData.commission_amount)}</p>
-                    </div>
-                    <div className="rounded-xl border border-slate-200 bg-white p-4">
-                      <p className="text-xs font-semibold text-slate-400">صافي المبلغ للمالك</p>
-                      <p className="mt-1 text-lg font-black text-slate-900">{formatCurrency(paymentData.net_amount)}</p>
-                    </div>
-                  </div>
-                )}
-
                 <button
-                  onClick={() => navigate('/home')}
+                  onClick={() => navigate('/bookings')}
                   className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 lg:col-span-2"
                 >
-                  العودة للرئيسية
+                  العودة للحجوزات
                   <ArrowLeft size={17} />
                 </button>
               </div>

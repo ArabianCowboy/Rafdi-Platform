@@ -1,6 +1,7 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
 import NotificationBell from './NotificationBell';
+import { logout } from '../config/api';
 
 const getUserRoles = () => {
   try {
@@ -8,6 +9,30 @@ const getUserRoles = () => {
     if (!token) return [];
     return JSON.parse(atob(token.split('.')[1])).roles || [];
   } catch { return []; }
+};
+
+const getCompanyName = () => {
+  const storedName = localStorage.getItem('company_name');
+  if (storedName) return storedName;
+
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) return 'المستخدم';
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const name =
+      payload.company_name ||
+      payload.companyName ||
+      payload.company?.Name ||
+      payload.company?.CompanyName ||
+      payload.name;
+
+    if (name) {
+      localStorage.setItem('company_name', name);
+      return name;
+    }
+  } catch {}
+
+  return 'المستخدم';
 };
 
 const WarehouseLogo = () => (
@@ -34,14 +59,11 @@ function Navbar() {
   const showAsOwner = isOwner && (!isRenter || selectedRole === 'owner');
   const showAsRenter = isRenter && (!isOwner || selectedRole === 'renter');
 
-  const companyName = localStorage.getItem('company_name') || 'المستخدم';
+  const companyName = getCompanyName();
   const avatarLetter = companyName.charAt(0);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('company_name');
-    localStorage.removeItem('selectedRole');
-    navigate('/login');
+    logout();
   };
 
   const navLinks = [
