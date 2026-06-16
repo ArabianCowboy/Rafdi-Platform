@@ -148,35 +148,35 @@ const handleBooking = async (e) => {
 
                 <div className="space-y-3">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontWeight: 600, fontSize: 14, color: '#0f172a' }}>{bookingResult.warehouseName}</span>
                     <span style={{ fontSize: 12, color: '#94a3b8' }}>المستودع</span>
+                    <span style={{ fontWeight: 600, fontSize: 14, color: '#0f172a' }}>{bookingResult.warehouseName}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 10, borderTop: '1px solid #e2e8f0' }}>
+                    <span style={{ fontSize: 12, color: '#94a3b8' }}>الفترة</span>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                       <Calendar size={13} color="#94a3b8" />
                       <span style={{ fontSize: 13, color: '#475569', fontFamily: 'monospace' }}>
                         {bookingResult.startDate} ← {bookingResult.endDate}
                       </span>
                     </div>
-                    <span style={{ fontSize: 12, color: '#94a3b8' }}>الفترة</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 10, borderTop: '1px solid #e2e8f0' }}>
-                    <span style={{ fontSize: 13, color: '#475569' }}>{bookingResult.days} يوم</span>
                     <span style={{ fontSize: 12, color: '#94a3b8' }}>المدة</span>
+                    <span style={{ fontSize: 13, color: '#475569' }}>{bookingResult.days} يوم</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 10, borderTop: '1px solid #e2e8f0' }}>
-                    <span style={{ fontSize: 12, color: '#94a3b8', fontFamily: 'monospace' }}>#{bookingResult.bookingId}</span>
                     <span style={{ fontSize: 12, color: '#94a3b8' }}>رقم الحجز</span>
+                    <span style={{ fontSize: 12, color: '#94a3b8', fontFamily: 'monospace' }}>#{bookingResult.bookingId}</span>
                   </div>
                 </div>
               </div>
 
               {/* المبلغ */}
               <div style={{ background: '#eff6ff', borderRadius: 12, padding: '16px 20px', marginBottom: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: 13, color: '#64748b', fontWeight: 500 }}>المبلغ المطلوب</span>
                 <span style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 22, color: '#2563eb' }}>
                   {bookingResult.totalPrice.toLocaleString()} ر.س
                 </span>
-                <span style={{ fontSize: 13, color: '#64748b', fontWeight: 500 }}>المبلغ المطلوب</span>
               </div>
 
               {/* زر الدفع */}
@@ -254,11 +254,11 @@ const handleBooking = async (e) => {
                 <h4 className="text-xs font-bold text-gray-600 mb-3">دليل التقويم</h4>
                 <div className="space-y-2">
                   <div className="flex items-center justify-start gap-2 text-xs text-gray-500">
-                    <span>أيام محجوزة</span>
+                    <span>غير متاح</span>
                     <div className="w-4 h-4 rounded bg-red-100 border border-red-300" />
                   </div>
                   <div className="flex items-center justify-start gap-2 text-xs text-gray-500">
-                    <span>الفترة المختارة</span>
+                    <span>متاح</span>
                     <div className="w-4 h-4 rounded" style={{ background: '#2563eb' }} />
                   </div>
                 </div>
@@ -354,8 +354,8 @@ const handleBooking = async (e) => {
                     {days > 0 && (
                       <div className="flex items-center justify-between text-xs rounded-xl px-4 py-2.5"
                         style={{ background: '#eff6ff', border: '1px solid #dbeafe' }}>
-                        <span style={{ color: '#2563eb', fontWeight: 600 }}>{days} يوم</span>
                         <span className="text-gray-500">مدة الحجز</span>
+                        <span style={{ color: '#2563eb', fontWeight: 600 }}>{days} يوم</span>
                       </div>
                     )}
 

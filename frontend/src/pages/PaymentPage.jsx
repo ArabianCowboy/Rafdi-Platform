@@ -26,6 +26,7 @@ const formatCurrency = (value) => `${Number(value || 0).toLocaleString()} ر.س`
 
 const DetailRow = ({ label, children, icon: Icon }) => (
   <div className="flex items-center justify-between gap-4 border-t border-slate-100 pt-3 first:border-t-0 first:pt-0">
+    <span className="shrink-0 text-xs font-medium text-slate-400">{label}</span>
     <div className="flex min-w-0 items-center gap-2 text-slate-700">
       {Icon && (
         <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-slate-100 text-slate-500">
@@ -34,7 +35,6 @@ const DetailRow = ({ label, children, icon: Icon }) => (
       )}
       <span className="truncate text-sm font-semibold">{children}</span>
     </div>
-    <span className="shrink-0 text-xs font-medium text-slate-400">{label}</span>
   </div>
 );
 
@@ -211,8 +211,8 @@ function PaymentPage() {
                   <div className="flex items-end justify-between gap-4">
                     <p className="text-sm font-semibold text-slate-500">المبلغ المدفوع</p>
                     <div className="flex items-end gap-2">
-                    <span className="text-4xl font-black text-blue-700">{Number(paidAmount || 0).toLocaleString()}</span>
-                    <span className="pb-1 text-sm font-bold text-blue-400">ر.س</span>
+                      <span className="text-4xl font-black text-blue-700">{Number(paidAmount || 0).toLocaleString()}</span>
+                      <span className="pb-1 text-sm font-bold text-blue-400">ر.س</span>
                     </div>
                   </div>
                   <div className="mt-5 rounded-lg bg-white/70 px-4 py-3 text-sm font-semibold text-slate-600">
@@ -337,11 +337,11 @@ function PaymentPage() {
               </div>
 
               <div className="flex items-center justify-between rounded-2xl border border-blue-100 bg-blue-50/70 px-5 py-4">
+                <span className="text-xs font-bold text-blue-400">الدفع مؤمن عبر</span>
                 <div className="flex items-center gap-2 text-blue-700">
                   <CreditCard size={17} />
                   <span className="text-sm font-black">Moyasar</span>
                 </div>
-                <span className="text-xs font-bold text-blue-400">الدفع مؤمن عبر</span>
               </div>
             </aside>
 

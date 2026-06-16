@@ -85,13 +85,13 @@ function BookingDetailPage() {
             {/* حالة الحجز */}
             <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 14, padding: '20px', boxShadow: '0 1px 2px rgba(15,23,42,0.04)' }} dir="rtl">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                <h2 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 17, color: '#0f172a' }}>
+                  حالة الحجز
+                </h2>
                 <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg border ${statusConfig[booking.Status]?.className}`}>
                   {booking.Status === 'confirmed' ? <CheckCircle size={13} /> : booking.Status === 'pending' ? <Clock size={13} /> : <XCircle size={13} />}
                   {statusConfig[booking.Status]?.label}
                 </span>
-                <h2 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 17, color: '#0f172a' }}>
-                  حالة الحجز
-                </h2>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, direction: 'rtl' }}>
@@ -145,10 +145,10 @@ function BookingDetailPage() {
                     </div>
                   </Row>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 11, direction: 'rtl' }}>
+                    <span style={{ fontSize: 12, color: '#94a3b8' }}>السعر اليومي</span>
                     <span style={{ fontSize: 14, fontWeight: 700, color: '#2563eb' }}>
                       {parseFloat(booking.warehouse.PricePerDay).toLocaleString()} ر.س/يوم
                     </span>
-                    <span style={{ fontSize: 12, color: '#94a3b8' }}>السعر اليومي</span>
                   </div>
                 </div>
               </div>
