@@ -10,6 +10,14 @@ const statusConfig = {
   cancelled: { label: 'ملغي', className: 'bg-red-50 text-red-600 border border-red-200', icon: XCircle },
 };
 
+const getCompanyName = (booking) =>
+  booking.renter_company?.CompanyName ||
+  booking.renter_company?.Name ||
+  booking.renter_company?.company_name ||
+  booking.RenterCompanyName ||
+  booking.CompanyName ||
+  'شركة غير محددة';
+
 function OwnerBookingsPage() {
   const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
@@ -102,6 +110,7 @@ function OwnerBookingsPage() {
               const StatusIcon = status.icon;
               const warehouse = b.warehouse;
               const imageUrl = warehouse?.ImagePath;
+              const companyName = getCompanyName(b);
 
               return (
                 <div key={b.BookingID}
@@ -141,7 +150,7 @@ function OwnerBookingsPage() {
                             <div className="flex items-center gap-1.5">
                               <Users size={12} color="#94a3b8" />
                               <p style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>
-                                {b.renter_company?.CompanyName || `شركة #${b.RenterCompanyID}`}
+                                {companyName}
                               </p>
                             </div>
                             {b.renter_company?.CommercialRegistration && (

@@ -420,7 +420,7 @@ function AdminPage() {
 
                     return (
                       <tr key={company.CompanyID} className="hover:bg-gray-50/70">
-                        <td className="px-4 py-3 font-bold text-gray-900">{company.Name || `شركة #${company.CompanyID}`}</td>
+                        <td className="px-4 py-3 font-bold text-gray-900">{company.Name || 'شركة غير محددة'}</td>
                         <td className="px-4 py-3 text-gray-500">{company.CommercialRegistration || '—'}</td>
                         <td className="px-4 py-3"><CompanyStatusBadge active={isActive} /></td>
                         <td className="px-4 py-3">{formatNumber(company.total_users)}</td>
@@ -475,7 +475,7 @@ function AdminPage() {
                 <tbody className="divide-y divide-gray-100 text-sm text-gray-700">
                   {warehouses.map((warehouse) => {
                     const pending = actionPending === `warehouse-${warehouse.WarehouseID}`;
-                    const ownerName = warehouse.company?.Name || `شركة #${warehouse.CompanyID}`;
+                    const ownerName = warehouse.company?.Name || warehouse.company?.CompanyName || 'شركة غير محددة';
 
                     return (
                       <tr key={warehouse.WarehouseID} className="hover:bg-gray-50/70">

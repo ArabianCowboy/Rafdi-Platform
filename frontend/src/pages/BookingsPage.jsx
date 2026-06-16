@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, Calendar, CreditCard, Loader, Layers, X, AlertTriangle } from 'lucide-react';
+import { Building2, Calendar, CreditCard, Loader, Layers, X, AlertTriangle, MapPin } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { API_URL, getHeaders, apiFetch } from '../config/api';
 
@@ -66,10 +66,16 @@ function BookingsPage() {
 
       <Navbar />
 
-      <div style={{ background: '#0d1b3e' }} className="py-8 px-4">
+      <div
+        className="px-4 py-8"
+        style={{
+          background: 'linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%)',
+          borderBottom: '1px solid #dbeafe',
+        }}
+      >
         <div className="max-w-5xl mx-auto text-right">
-          <h1 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 26, color: '#fff', marginBottom: 4 }}>حجوزاتي</h1>
-          <p style={{ color: 'rgba(255,255,255,0.62)', fontSize: 15 }}>متابعة جميع حجوزاتك وحالة الدفع</p>
+          <h1 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 26, color: '#0f172a', marginBottom: 4 }}>حجوزاتي</h1>
+          <p style={{ color: '#64748b', fontSize: 15 }}>متابعة جميع حجوزاتك وحالة الدفع</p>
         </div>
       </div>
 
@@ -88,75 +94,86 @@ function BookingsPage() {
             </button>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {bookings.map((b) => {
               const status = statusConfig[b.Status] || statusConfig.pending;
               const payment = paymentConfig[b.Status] || paymentConfig.pending;
               const isCancelling = cancellingId === b.BookingID;
+              const warehouse = b.warehouse;
+              const imageUrl = warehouse?.ImagePath;
 
               return (
                 <div key={b.BookingID}
                   onClick={() => navigate(`/booking-detail/${b.BookingID}`)}
-                  className={`bg-white border rounded-xl overflow-hidden transition-all cursor-pointer ${
+                  className={`bg-white border rounded-2xl overflow-hidden transition-all cursor-pointer ${
                     b.Status === 'cancelled' ? 'border-gray-100 opacity-70' : 'border-gray-200'
                   }`}
-                  style={{ boxShadow: '0 1px 2px rgba(15,23,42,0.04)' }}
+                  style={{ boxShadow: '0 12px 32px -26px rgba(15,23,42,0.55)' }}
                   onMouseEnter={e => { if (b.Status !== 'cancelled') e.currentTarget.style.borderColor = '#2563eb'; }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = b.Status === 'cancelled' ? '#f3f4f6' : '#e2e8f0'; }}
                 >
-                  <div className="p-5" dir="rtl">
-
-                    {/* Row 1: warehouse info يمين — badges يسار */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
-
-                      {/* يمين — بيانات المستودع */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <div style={{ width: 40, height: 40, borderRadius: 10, background: '#eff6ff', border: '1px solid #dbeafe', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
-                          <Building2 size={18} color="#2563eb" />
+                  <div className="flex flex-col md:flex-row" dir="rtl">
+                    <div className="relative h-44 md:h-auto md:w-52 shrink-0 bg-gray-100 overflow-hidden">
+                      {imageUrl ? (
+                        <img src={imageUrl} alt={warehouse?.Name || 'المستودع'} className="h-full w-full object-cover" />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-slate-50">
+                          <Building2 size={38} className="text-slate-300" />
                         </div>
-                        <div style={{ textAlign: 'right' }}>
-                          <p style={{ fontWeight: 700, fontSize: 14, color: '#0f172a' }}>
-                            {b.warehouse?.Name || `مستودع #${b.WarehouseID}`}
-                          </p>
-                          {b.warehouse?.company?.CompanyName && (
-                            <p style={{ fontSize: 12, fontWeight: 600, color: '#2563eb', marginTop: 2 }}>
-                              {b.warehouse.company.CompanyName}
-                            </p>
-                          )}
-                          {b.warehouse?.Location && (
-                            <p style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>{b.warehouse.Location}</p>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* يسار — badges */}
-                      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                        <span className={`text-xs font-semibold px-2.5 py-1 rounded-md border ${status.className}`}>
+                      )}
+                      <div className="absolute right-3 top-3 flex flex-wrap gap-1.5">
+                        <span className={`text-xs font-semibold px-2.5 py-1 rounded-md border shadow-sm ${status.className}`}>
                           {status.label}
                         </span>
-                        <span className={`text-xs font-semibold px-2.5 py-1 rounded-md border flex items-center gap-1 ${payment.className}`}>
+                        <span className={`text-xs font-semibold px-2.5 py-1 rounded-md border flex items-center gap-1 shadow-sm ${payment.className}`}>
                           <CreditCard size={11} />
                           {payment.label}
                         </span>
                       </div>
                     </div>
 
-                    {/* Row 2: المبلغ */}
-                    <div style={{ marginTop: 12, textAlign: 'right' }}>
-                      <span style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 16, color: '#0f172a' }}>
-                        {parseFloat(b.TotalPrice).toLocaleString()}
-                        <span style={{ fontSize: 12, fontWeight: 400, color: '#94a3b8', marginRight: 4 }}>ر.س</span>
-                      </span>
-                    </div>
+                    <div className="flex min-w-0 flex-1 flex-col justify-between p-5">
+                      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                        <div className="min-w-0 text-right">
+                          <p style={{ fontWeight: 800, fontSize: 16, color: '#0f172a' }}>
+                            {warehouse?.Name || `مستودع #${b.WarehouseID}`}
+                          </p>
+                          {warehouse?.company?.CompanyName && (
+                            <p style={{ fontSize: 12, fontWeight: 700, color: '#2563eb', marginTop: 4 }}>
+                              {warehouse.company.CompanyName}
+                            </p>
+                          )}
+                          {warehouse?.Location && (
+                            <div className="mt-2 flex items-start gap-1.5 text-xs text-slate-500">
+                              <MapPin size={12} className="mt-0.5 shrink-0 text-slate-400" />
+                              <span className="leading-5">{warehouse.Location}</span>
+                            </div>
+                          )}
+                        </div>
 
-                    {/* Row 3: التواريخ + الرقم */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, paddingTop: 12, borderTop: '1px solid #f8fafc' }}>
-                      <p style={{ fontSize: 12, color: '#94a3b8', fontFamily: 'monospace' }}>{b.BookingID}#</p>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#64748b' }}>
-                        <Calendar size={11} color="#94a3b8" />
-                        <span style={{ fontFamily: 'monospace' }}>{b.StartDate}</span>
-                        <span style={{ color: '#cbd5e1' }}>←</span>
-                        <span style={{ fontFamily: 'monospace' }}>{b.EndDate}</span>
+                        <div className="flex shrink-0 flex-row-reverse items-center justify-between gap-3 md:flex-col md:items-end">
+                          <span style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 900, fontSize: 19, color: '#0f172a' }}>
+                            {parseFloat(b.TotalPrice).toLocaleString()}
+                            <span style={{ fontSize: 12, fontWeight: 500, color: '#94a3b8', marginRight: 3 }}>ر.س</span>
+                          </span>
+                          <span className="rounded-lg bg-blue-50 px-2.5 py-1 font-mono text-xs font-bold text-blue-700">
+                            #{b.BookingID}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 pt-3">
+                        <div className="flex items-center gap-1.5 text-gray-500 text-xs">
+                          <Calendar size={12} className="text-gray-400 shrink-0" />
+                          <span className="font-mono">{b.StartDate}</span>
+                          <span className="text-gray-300 mx-1">←</span>
+                          <span className="font-mono">{b.EndDate}</span>
+                        </div>
+                        {warehouse?.Size && (
+                          <span className="text-xs font-semibold text-slate-400">
+                            المساحة {warehouse.Size?.toLocaleString()} م²
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
