@@ -238,11 +238,11 @@ const handleBooking = async (e) => {
                     {warehouse?.Name}
                   </h2>
                   <div className="space-y-2 mb-3">
-                    <div className="flex items-center justify-end gap-1.5 text-gray-500 text-sm">
+                    <div className="flex items-center justify-start gap-1.5 text-gray-500 text-sm">
                       <span>{warehouse?.Location}</span>
                       <MapPin size={13} className="text-gray-400 shrink-0" />
                     </div>
-                    <div className="flex items-center justify-end gap-1.5 text-gray-500 text-sm">
+                    <div className="flex items-center justify-start gap-1.5 text-gray-500 text-sm">
                       <span>{warehouse?.Size?.toLocaleString()} م²</span>
                       <Package size={13} className="text-gray-400 shrink-0" />
                     </div>
@@ -253,11 +253,11 @@ const handleBooking = async (e) => {
               <div className="bg-white border border-gray-200 rounded-xl p-4 text-right" style={{ boxShadow: '0 1px 2px rgba(15,23,42,0.04)' }}>
                 <h4 className="text-xs font-bold text-gray-600 mb-3">دليل التقويم</h4>
                 <div className="space-y-2">
-                  <div className="flex items-center justify-end gap-2 text-xs text-gray-500">
+                  <div className="flex items-center justify-start gap-2 text-xs text-gray-500">
                     <span>أيام محجوزة</span>
                     <div className="w-4 h-4 rounded bg-red-100 border border-red-300" />
                   </div>
-                  <div className="flex items-center justify-end gap-2 text-xs text-gray-500">
+                  <div className="flex items-center justify-start gap-2 text-xs text-gray-500">
                     <span>الفترة المختارة</span>
                     <div className="w-4 h-4 rounded" style={{ background: '#2563eb' }} />
                   </div>
@@ -333,19 +333,19 @@ const handleBooking = async (e) => {
                           <p className="text-xs font-bold text-gray-600 text-right">ملخص التكلفة</p>
                         </div>
                         <div className="px-4 py-3 space-y-2.5 text-right">
-                          <div className="flex justify-between items-center text-sm">
-                            <span className="font-semibold text-gray-900">{basePrice.toLocaleString()} ر.س</span>
+                          <div className="flex justify-between items-center gap-4 text-sm">
                             <span className="text-gray-500 text-xs">{days} يوم × {warehouse?.PricePerDay?.toLocaleString()} ر.س</span>
+                            <span className="font-semibold text-gray-900">{basePrice.toLocaleString()} ر.س</span>
                           </div>
-                          <div className="flex justify-between items-center text-sm">
-                            <span className="font-semibold" style={{ color: '#2563eb' }}>+{commission.toLocaleString()} ر.س</span>
+                          <div className="flex justify-between items-center gap-4 text-sm">
                             <span className="text-gray-500 text-xs">رسوم المنصة (5%)</span>
+                            <span className="font-semibold" style={{ color: '#2563eb' }}>+{commission.toLocaleString()} ر.س</span>
                           </div>
-                          <div className="flex justify-between items-center pt-2.5 border-t border-gray-200">
+                          <div className="flex justify-between items-center gap-4 pt-2.5 border-t border-gray-200">
+                            <span className="text-xs font-bold text-gray-500">الإجمالي</span>
                             <span style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 18, color: '#0f172a' }}>
                               {totalPrice.toLocaleString()} ر.س
                             </span>
-                            <span className="text-xs font-bold text-gray-500">الإجمالي</span>
                           </div>
                         </div>
                       </div>

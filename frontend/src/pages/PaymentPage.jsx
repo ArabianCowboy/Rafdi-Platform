@@ -208,10 +208,12 @@ function PaymentPage() {
 
               <div className="grid gap-5 p-5 sm:p-7 lg:grid-cols-[1fr_0.9fr]">
                 <div className="rounded-xl border border-blue-100 bg-blue-50/70 p-5">
-                  <p className="text-sm font-semibold text-slate-500">المبلغ المدفوع</p>
-                  <div className="mt-2 flex items-end gap-2">
+                  <div className="flex items-end justify-between gap-4">
+                    <p className="text-sm font-semibold text-slate-500">المبلغ المدفوع</p>
+                    <div className="flex items-end gap-2">
                     <span className="text-4xl font-black text-blue-700">{Number(paidAmount || 0).toLocaleString()}</span>
                     <span className="pb-1 text-sm font-bold text-blue-400">ر.س</span>
+                    </div>
                   </div>
                   <div className="mt-5 rounded-lg bg-white/70 px-4 py-3 text-sm font-semibold text-slate-600">
                     رقم الحجز <span className="font-mono text-slate-900">#{bookingId}</span>
@@ -299,9 +301,11 @@ function PaymentPage() {
                   <div className="rounded-xl bg-slate-50 p-5">
                     <div className="flex items-center justify-between gap-4">
                       <span className="text-sm font-semibold text-slate-500">المبلغ الإجمالي</span>
-                      <span className="text-3xl font-black text-slate-950">{Number(estimatedPrice || 0).toLocaleString()}</span>
+                      <span className="flex items-end gap-1.5 text-slate-950">
+                        <span className="text-3xl font-black">{Number(estimatedPrice || 0).toLocaleString()}</span>
+                        <span className="pb-1 text-sm font-bold text-slate-400">ر.س</span>
+                      </span>
                     </div>
-                    <div className="mt-2 text-left text-sm font-bold text-slate-400">ر.س</div>
                   </div>
 
                   <div className="mt-4 space-y-3">
