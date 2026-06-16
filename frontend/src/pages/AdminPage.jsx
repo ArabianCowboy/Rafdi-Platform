@@ -420,7 +420,7 @@ function AdminPage() {
 
                     return (
                       <tr key={company.CompanyID} className="hover:bg-gray-50/70">
-                        <td className="px-4 py-3 font-bold text-gray-900">{company.Name || 'شركة غير محددة'}</td>
+                        <td className="px-4 py-3 font-bold text-gray-900">{company.Name || company.CompanyName || company.company_name || company.companyName || 'شركة غير محددة'}</td>
                         <td className="px-4 py-3 text-gray-500">{company.CommercialRegistration || '—'}</td>
                         <td className="px-4 py-3"><CompanyStatusBadge active={isActive} /></td>
                         <td className="px-4 py-3">{formatNumber(company.total_users)}</td>
@@ -475,7 +475,16 @@ function AdminPage() {
                 <tbody className="divide-y divide-gray-100 text-sm text-gray-700">
                   {warehouses.map((warehouse) => {
                     const pending = actionPending === `warehouse-${warehouse.WarehouseID}`;
-                    const ownerName = warehouse.company?.Name || warehouse.company?.CompanyName || 'شركة غير محددة';
+                    const ownerName =
+                      warehouse.company?.Name ||
+                      warehouse.company?.CompanyName ||
+                      warehouse.company?.name ||
+                      warehouse.company?.company_name ||
+                      warehouse.company?.companyName ||
+                      warehouse.CompanyName ||
+                      warehouse.company_name ||
+                      warehouse.companyName ||
+                      'شركة غير محددة';
 
                     return (
                       <tr key={warehouse.WarehouseID} className="hover:bg-gray-50/70">
@@ -530,7 +539,7 @@ function AdminPage() {
                   {users.map((user) => (
                     <tr key={user.UserID} className="hover:bg-gray-50/70">
                       <td className="px-4 py-3 font-medium text-gray-900">{user.Email}</td>
-                      <td className="px-4 py-3 text-gray-500">{user.CompanyName || '—'}</td>
+                      <td className="px-4 py-3 text-gray-500">{user.CompanyName || user.company_name || user.companyName || user.company?.Name || user.company?.CompanyName || '—'}</td>
                       <td className="px-4 py-3">
                         <div className="flex flex-wrap justify-end gap-1.5">
                           {(user.Roles || []).length > 0 ? user.Roles.map((role) => <RoleBadge key={role} role={role} />) : '—'}

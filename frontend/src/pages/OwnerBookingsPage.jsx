@@ -13,9 +13,21 @@ const statusConfig = {
 const getCompanyName = (booking) =>
   booking.renter_company?.CompanyName ||
   booking.renter_company?.Name ||
+  booking.renter_company?.name ||
   booking.renter_company?.company_name ||
+  booking.renter_company?.companyName ||
+  booking.renterCompany?.CompanyName ||
+  booking.renterCompany?.Name ||
+  booking.renterCompany?.name ||
+  booking.renterCompany?.company_name ||
+  booking.company?.CompanyName ||
+  booking.company?.Name ||
+  booking.company?.name ||
+  booking.company?.company_name ||
   booking.RenterCompanyName ||
   booking.CompanyName ||
+  booking.company_name ||
+  booking.companyName ||
   'شركة غير محددة';
 
 function OwnerBookingsPage() {

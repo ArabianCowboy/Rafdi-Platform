@@ -29,7 +29,18 @@ const StatusBadge = ({ active }) => (
   </span>
 );
 
-const WarehouseCard = ({ w, isRenter, onBook }) => (
+const WarehouseCard = ({ w, isRenter, onBook }) => {
+  const companyName =
+    w.company?.CompanyName ||
+    w.company?.Name ||
+    w.company?.name ||
+    w.company?.company_name ||
+    w.company?.companyName ||
+    w.CompanyName ||
+    w.company_name ||
+    w.companyName;
+
+  return (
   <div dir="rtl" className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 transition-colors group"
     style={{ boxShadow: '0 1px 2px rgba(15,23,42,0.04)' }}>
     <div className="relative h-48 bg-gray-100 overflow-hidden">
@@ -54,9 +65,9 @@ const WarehouseCard = ({ w, isRenter, onBook }) => (
       <h3 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 700, fontSize: 15, color: '#0f172a', marginBottom: 6 }}>
         {w.Name}
       </h3>
-      {w.company?.CompanyName && (
+      {companyName && (
         <div className="flex items-center gap-1.5 text-xs mb-2" style={{ color: '#64748b' }}>
-          <Users size={10} className="text-gray-300 shrink-0" /><span>{w.company.CompanyName}</span>
+          <Users size={10} className="text-gray-300 shrink-0" /><span>{companyName}</span>
         </div>
       )}
       <div className="flex items-center gap-1.5 text-xs mb-1" style={{ color: '#64748b' }}>
@@ -76,7 +87,8 @@ const WarehouseCard = ({ w, isRenter, onBook }) => (
       )}
     </div>
   </div>
-);
+  );
+};
 
 function OwnerDashboard({ navigate }) {
   const [myWarehouses, setMyWarehouses] = useState([]);

@@ -61,12 +61,18 @@ function BookingDetailPage() {
 
       <Navbar />
 
-      <div style={{ background: '#0d1b3e' }} className="py-8 px-4">
+      <div
+        className="py-8 px-4"
+        style={{
+          background: 'linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%)',
+          borderBottom: '1px solid #dbeafe',
+        }}
+      >
         <div className="max-w-3xl mx-auto" style={{ textAlign: 'right' }}>
-          <h1 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 26, color: '#fff', marginBottom: 4 }}>
+          <h1 style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 800, fontSize: 26, color: '#0f172a', marginBottom: 4 }}>
             تفاصيل الحجز
           </h1>
-          <p style={{ color: 'rgba(255,255,255,0.62)', fontSize: 14, fontFamily: 'monospace' }}>#{id}</p>
+          <p style={{ color: '#64748b', fontSize: 14, fontFamily: 'monospace' }}>#{id}</p>
         </div>
       </div>
 

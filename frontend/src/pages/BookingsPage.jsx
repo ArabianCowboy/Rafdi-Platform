@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, Calendar, CreditCard, Loader, Layers, X, AlertTriangle, MapPin } from 'lucide-react';
+import { Building2, Calendar, CreditCard, Loader, Layers, MapPin } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { API_URL, getHeaders, apiFetch } from '../config/api';
 
@@ -16,13 +16,35 @@ const paymentConfig = {
   cancelled: { label: 'ملغي', className: 'bg-red-50 text-red-500 border border-red-100' },
 };
 
+const getOwnerCompanyName = (booking) =>
+  booking.warehouse?.company?.CompanyName ||
+  booking.warehouse?.company?.Name ||
+  booking.warehouse?.company?.name ||
+  booking.warehouse?.company?.company_name ||
+  booking.warehouse?.company?.companyName ||
+  booking.warehouse?.CompanyName ||
+  booking.warehouse?.company_name ||
+  booking.warehouse?.companyName ||
+  booking.owner_company?.CompanyName ||
+  booking.owner_company?.Name ||
+  booking.owner_company?.name ||
+  booking.owner_company?.company_name ||
+  booking.ownerCompany?.CompanyName ||
+  booking.ownerCompany?.Name ||
+  booking.company?.CompanyName ||
+  booking.company?.Name ||
+  booking.company?.name ||
+  booking.company?.company_name ||
+  booking.OwnerCompanyName ||
+  booking.CompanyName ||
+  booking.company_name ||
+  booking.companyName ||
+  'شركة غير محددة';
+
 function BookingsPage() {
   const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [cancellingId, setCancellingId] = useState(null);
-  const [confirmCancel, setConfirmCancel] = useState(null);
-  const [cancelError, setCancelError] = useState('');
 
   const fetchBookings = async () => {
     try {
@@ -35,31 +57,6 @@ function BookingsPage() {
   };
 
   useEffect(() => { fetchBookings(); }, []);
-
-  const handleCancel = async (bookingId) => {
-    setCancellingId(bookingId);
-    setCancelError('');
-    try {
-      const res = await apiFetch(`${API_URL}/bookings/${bookingId}/status`, {
-        method: 'PATCH',
-        headers: getHeaders(),
-        body: JSON.stringify({ Status: 'cancelled' })
-      });
-      if (res.ok) {
-        setConfirmCancel(null);
-        fetchBookings();
-      } else {
-        const data = await res.json();
-        setCancelError(data.detail || 'حدث خطأ أثناء الإلغاء');
-      }
-    } catch {
-      setCancelError('حدث خطأ في الاتصال');
-    } finally {
-      setCancellingId(null);
-    }
-  };
-
-  const canCancel = (booking) => booking.Status === 'pending';
 
   return (
     <div className="min-h-screen bg-[#f8fafc]" dir="rtl" style={{ fontFamily: "'IBM Plex Sans Arabic', 'Tajawal', sans-serif" }}>
@@ -98,9 +95,9 @@ function BookingsPage() {
             {bookings.map((b) => {
               const status = statusConfig[b.Status] || statusConfig.pending;
               const payment = paymentConfig[b.Status] || paymentConfig.pending;
-              const isCancelling = cancellingId === b.BookingID;
               const warehouse = b.warehouse;
               const imageUrl = warehouse?.ImagePath;
+              const ownerCompanyName = getOwnerCompanyName(b);
 
               return (
                 <div key={b.BookingID}
@@ -121,15 +118,6 @@ function BookingsPage() {
                           <Building2 size={38} className="text-slate-300" />
                         </div>
                       )}
-                      <div className="absolute right-3 top-3 flex flex-wrap gap-1.5">
-                        <span className={`text-xs font-semibold px-2.5 py-1 rounded-md border shadow-sm ${status.className}`}>
-                          {status.label}
-                        </span>
-                        <span className={`text-xs font-semibold px-2.5 py-1 rounded-md border flex items-center gap-1 shadow-sm ${payment.className}`}>
-                          <CreditCard size={11} />
-                          {payment.label}
-                        </span>
-                      </div>
                     </div>
 
                     <div className="flex min-w-0 flex-1 flex-col justify-between p-5">
@@ -138,11 +126,9 @@ function BookingsPage() {
                           <p style={{ fontWeight: 800, fontSize: 16, color: '#0f172a' }}>
                             {warehouse?.Name || `مستودع #${b.WarehouseID}`}
                           </p>
-                          {warehouse?.company?.CompanyName && (
-                            <p style={{ fontSize: 12, fontWeight: 700, color: '#2563eb', marginTop: 4 }}>
-                              {warehouse.company.CompanyName}
-                            </p>
-                          )}
+                          <p style={{ fontSize: 12, fontWeight: 700, color: '#2563eb', marginTop: 4 }}>
+                            {ownerCompanyName}
+                          </p>
                           {warehouse?.Location && (
                             <div className="mt-2 flex items-start gap-1.5 text-xs text-slate-500">
                               <MapPin size={12} className="mt-0.5 shrink-0 text-slate-400" />
@@ -152,6 +138,15 @@ function BookingsPage() {
                         </div>
 
                         <div className="flex shrink-0 flex-row-reverse items-center justify-between gap-3 md:flex-col md:items-end">
+                          <div className="flex flex-wrap justify-end gap-1.5">
+                            <span className={`text-xs font-semibold px-2.5 py-1 rounded-md border ${status.className}`}>
+                              {status.label}
+                            </span>
+                            <span className={`text-xs font-semibold px-2.5 py-1 rounded-md border flex items-center gap-1 ${payment.className}`}>
+                              <CreditCard size={11} />
+                              {payment.label}
+                            </span>
+                          </div>
                           <span style={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 900, fontSize: 19, color: '#0f172a' }}>
                             {parseFloat(b.TotalPrice).toLocaleString()}
                             <span style={{ fontSize: 12, fontWeight: 500, color: '#94a3b8', marginRight: 3 }}>ر.س</span>
@@ -177,37 +172,6 @@ function BookingsPage() {
                       </div>
                     </div>
                   </div>
-
-                  {/* زر الإلغاء */}
-                  {canCancel(b) && (
-                    <div className="px-5 pb-4" dir="rtl" onClick={e => e.stopPropagation()}>
-                      {cancelError && cancellingId === null && confirmCancel === b.BookingID && (
-                        <p className="text-xs text-red-600 font-semibold text-right mb-2">{cancelError}</p>
-                      )}
-                      {confirmCancel === b.BookingID ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, direction: 'rtl' }}>
-                          <button onClick={() => handleCancel(b.BookingID)} disabled={isCancelling}
-                            className="px-3 py-1.5 text-xs font-bold text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors disabled:opacity-60 flex items-center gap-1.5">
-                            {isCancelling ? <span className="w-3 h-3 border border-white/30 border-t-white rounded-full animate-spin block" /> : <X size={12} />}
-                            نعم، إلغاء
-                          </button>
-                          <button onClick={() => setConfirmCancel(null)}
-                            className="px-3 py-1.5 text-xs font-bold text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                            لا
-                          </button>
-                          <p className="text-xs text-gray-500 font-medium">هل أنت متأكد؟</p>
-                        </div>
-                      ) : (
-                        <div style={{ display: 'flex', direction: 'rtl' }}>
-                          <button onClick={() => { setConfirmCancel(b.BookingID); setCancelError(''); }}
-                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors">
-                            <X size={12} />
-                            إلغاء الحجز
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
                 </div>
               );
             })}
@@ -223,36 +187,6 @@ function BookingsPage() {
           </div>
         )}
       </main>
-
-      {/* Cancel modal */}
-      {confirmCancel && (
-        <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setConfirmCancel(null)} />
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm relative z-10 p-5" dir="rtl">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center">
-                <AlertTriangle size={16} className="text-red-500" />
-              </div>
-              <h3 className="font-bold text-gray-900 text-sm">إلغاء الحجز</h3>
-            </div>
-            <p className="text-sm text-gray-500 mb-5 leading-relaxed">
-              هل أنت متأكد من إلغاء هذا الحجز؟ لا يمكن التراجع عن هذا الإجراء.
-            </p>
-            {cancelError && <p className="text-xs text-red-600 font-semibold mb-3">{cancelError}</p>}
-            <div className="flex gap-2">
-              <button onClick={() => handleCancel(confirmCancel)} disabled={!!cancellingId}
-                className="flex-1 py-2.5 text-sm font-bold text-white bg-red-500 hover:bg-red-600 rounded-xl transition-colors disabled:opacity-60 flex items-center justify-center gap-1.5">
-                {cancellingId ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin block" /> : null}
-                نعم، إلغاء
-              </button>
-              <button onClick={() => { setConfirmCancel(null); setCancelError(''); }}
-                className="flex-1 py-2.5 text-sm font-bold text-gray-700 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
-                رجوع
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       <footer className="bg-white border-t border-gray-200 mt-12">
         <div className="max-w-5xl mx-auto px-4 py-5 text-center">
