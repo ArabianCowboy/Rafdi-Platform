@@ -57,7 +57,7 @@ class WarehouseRepo(BaseRepo[Warehouse]):
             warehouse.PricePerDay = obj.PricePerDay
         if obj.Description:
             warehouse.Description = obj.Description
-        if obj.ImagePath:
+        if obj.ImagePath is not None:
             warehouse.ImagePath   = obj.ImagePath
         if obj.IsActive is not None:
             warehouse.IsActive = obj.IsActive

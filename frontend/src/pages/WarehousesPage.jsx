@@ -7,6 +7,7 @@ import { API_URL, getHeaders, apiFetch } from '../config/api';
 
 const CLOUDINARY_CLOUD = import.meta.env.VITE_CLOUDINARY_CLOUD;
 const CLOUDINARY_PRESET = import.meta.env.VITE_CLOUDINARY_PRESET;
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
 const getUserRoles = () => {
   try {
@@ -79,7 +80,14 @@ function WarehousesPage() {
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    if (!file.type.startsWith('image/')) { setError('يرجى اختيار صورة صحيحة'); return; }
+    if (!CLOUDINARY_CLOUD || !CLOUDINARY_PRESET) {
+      setError('إعدادات رفع الصور غير مكتملة');
+      return;
+    }
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      setError('يرجى اختيار صورة بصيغة PNG أو JPG أو WebP');
+      return;
+    }
     if (file.size > 5 * 1024 * 1024) { setError('حجم الصورة يجب أن يكون أقل من 5MB'); return; }
     setUploading(true); setError('');
     try {
@@ -88,10 +96,17 @@ function WarehousesPage() {
       formData.append('upload_preset', CLOUDINARY_PRESET);
       const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, { method: 'POST', body: formData });
       const data = await res.json();
-      if (data.secure_url) setForm(prev => ({ ...prev, ImagePath: data.secure_url }));
-      else setError('فشل رفع الصورة، حاول مرة أخرى');
-    } catch { setError('حدث خطأ أثناء رفع الصورة');
-    } finally { setUploading(false); }
+      if (!res.ok || !data.secure_url) {
+        setError(data?.error?.message || 'فشل رفع الصورة، حاول مرة أخرى');
+        return;
+      }
+      setForm(prev => ({ ...prev, ImagePath: data.secure_url }));
+    } catch {
+      setError('حدث خطأ أثناء رفع الصورة');
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
   };
 
   const handleSubmit = async (e) => {
