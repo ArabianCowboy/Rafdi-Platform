@@ -1,8 +1,8 @@
-import os
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 
-SECRET_KEY         = os.getenv("SECRET_KEY", "rafdi-secret-key-2026")
+from app.config import SECRET_KEY
+
 ALGORITHM          = "HS256"
 ACCESS_TOKEN_EXPIRE  = 15    # دقيقة
 REFRESH_TOKEN_EXPIRE = 7     # أيام

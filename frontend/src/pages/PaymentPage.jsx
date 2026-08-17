@@ -16,7 +16,7 @@ import {
 import Navbar from '../components/Navbar';
 import { API_URL, getHeaders, apiFetch } from '../config/api';
 
-const MOYASAR_KEY = import.meta.env.VITE_MOYASAR_KEY || 'pk_test_xZj2Ucqc3pVSkktyUTZLs1ER6JhSKxj4Pnwvt8Ds';
+const MOYASAR_KEY = import.meta.env.VITE_MOYASAR_KEY;
 
 const cardShadow = '0 20px 50px -34px rgba(15,23,42,0.45)';
 
@@ -167,6 +167,11 @@ function PaymentPage() {
       return;
     }
 
+    if (!MOYASAR_KEY) {
+      queueMicrotask(() => setError('مفتاح Moyasar غير مضبوط. أضف VITE_MOYASAR_KEY في frontend/.env'));
+      return;
+    }
+
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = 'https://cdn.moyasar.com/mpf/1.14.0/moyasar.css';
@@ -203,7 +208,7 @@ function PaymentPage() {
       if (document.head.contains(link)) document.head.removeChild(link);
       if (document.head.contains(script)) document.head.removeChild(script);
     };
-  }, [bookingDraft, estimatedPrice, navigate, processBackendPayment, warehouseName]);
+  }, [bookingDraft, estimatedPrice, navigate, processBackendPayment, warehouseName, MOYASAR_KEY]);
 
   const warehouse = bookingDetails?.warehouse;
   const displayWarehouseName = warehouse?.Name || warehouseName;
@@ -429,10 +434,15 @@ function PaymentPage() {
                   </div>
                 )}
 
-                {!processing && (
+                {!processing && MOYASAR_KEY && (
                   <div className="rounded-xl border border-slate-100 bg-slate-50 p-3 sm:p-4">
                     <div className="moyasar-form-wrapper" />
                   </div>
+                )}
+                {!processing && !MOYASAR_KEY && (
+                  <p className="text-sm font-medium leading-6 text-slate-500">
+                    لن يظهر نموذج الدفع حتى تضيف VITE_MOYASAR_KEY في frontend/.env وتعيد تشغيل Vite.
+                  </p>
                 )}
               </div>
             </div>

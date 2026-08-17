@@ -10,6 +10,7 @@ from fastapi.testclient import TestClient
 
 os.environ.pop("MYSQL_URL", None)
 os.environ["DATABASE_URL"] = "sqlite:///./test_notifications_api.db"
+os.environ.setdefault("SECRET_KEY", "test-secret-key")
 
 from app.api.Auth_middleware import get_current_user
 from app.api import Admin_Api as admin_api

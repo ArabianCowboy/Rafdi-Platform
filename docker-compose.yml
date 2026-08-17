@@ -4,8 +4,10 @@ services:
     container_name: rafdi-api
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     environment:
-      DATABASE_URL: mysql+pymysql://root:1234@db:3306/rafdi
+      DATABASE_URL: mysql+pymysql://root:${MYSQL_ROOT_PASSWORD}@db:3306/${MYSQL_DATABASE:-rafdi}
     depends_on:
       db:
         condition: service_healthy
@@ -24,8 +26,8 @@ services:
     container_name: rafdi-mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: 1234
-      MYSQL_DATABASE: rafdi
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-rafdi}
     ports:
       - "3307:3306"
     volumes:

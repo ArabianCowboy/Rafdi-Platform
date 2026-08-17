@@ -5,5 +5,6 @@ pymysql
 cryptography
 pydantic[email]
 python-jose[cryptography]
+python-dotenv
 httpx
 slowapi

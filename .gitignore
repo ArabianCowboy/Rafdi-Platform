@@ -5,6 +5,9 @@ backend/tests/
 __pycache__/
 *.pyc
 .env
+frontend/.env
+frontend/.env.local
+*.db
 opencode.json
 .opencode/
 .agents/

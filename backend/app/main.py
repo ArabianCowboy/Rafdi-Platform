@@ -24,7 +24,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     TrustedHostMiddleware,
-    allowed_hosts=["api.rafdi.com", "www.rafdi.com", "rafdi.com", "localhost"]
+    allowed_hosts=["api.rafdi.com", "www.rafdi.com", "rafdi.com", "localhost", "127.0.0.1"]
 )
 
 app.add_middleware(
@@ -33,6 +33,7 @@ app.add_middleware(
         "https://www.rafdi.com",
         "https://rafdi.com",
         "http://localhost:5173",
+        "http://127.0.0.1:5173",
     ],
     allow_credentials=True,
     allow_methods=["*"],
