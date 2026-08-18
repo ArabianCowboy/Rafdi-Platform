@@ -2,8 +2,8 @@ from pydantic import BaseModel
 from typing import Optional
 from decimal import Decimal
 from datetime import date
-from app.Enums.EnumTypes import PaymentStatusEnum
-from app.Dtos.Booking_DTOs import BookingCreate
+from app.enums.enum_types import PaymentStatusEnum
+from app.dtos.booking_dtos import BookingCreate
 
 class PaymentCreate(BaseModel):
     BookingID  : int

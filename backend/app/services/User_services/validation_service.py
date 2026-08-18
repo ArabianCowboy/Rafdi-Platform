@@ -1,5 +1,6 @@
-from app.Repo import UserRepo, CompanyRepo
-from app.Dtos.Auth_DTOs import RegisterCreate
+from app.repo.user_repo import UserRepo
+from app.repo.company_repo import CompanyRepo
+from app.dtos.auth_dtos import RegisterCreate
 
 
 class ValidationService:

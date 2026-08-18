@@ -1,23 +1,24 @@
-from app.Repo import Payment_Repo
+from app.repo.payment_repo import PaymentRepo
 from datetime import date
 from decimal import Decimal
 
-from app.Dtos.Booking_DTOs import BookingCreate
-from app.Dtos.Payment_DTOs import PaymentCreate, PaymentResponse
-from app.services.Payment_Services.Commission_Service import CommissionService
-from app.models.Booking_Model import BookingStatusEnum
-from app.models.Payment_Model import PaymentStatusEnum
-from app.Repo import Booking_Repo, UserRepo
-from app.Repo.WarehouseRepo import WarehouseRepo
-from app.services.Notification_Services.NotificationTrigger_Service import NotificationTriggerService
+from app.dtos.booking_dtos import BookingCreate
+from app.dtos.payment_dtos import PaymentCreate, PaymentResponse
+from app.services.payment_services.commission_service import CommissionService
+from app.models.booking_model import BookingStatusEnum
+from app.models.payment_model import PaymentStatusEnum
+from app.repo.booking_repo import BookingRepo
+from app.repo.user_repo import UserRepo
+from app.repo.warehouse_repo import WarehouseRepo
+from app.services.notification_services.notification_trigger_service import NotificationTriggerService
 
 
 class PaymentService:
 
     def __init__(
         self,
-        payment_repo      : Payment_Repo,
-        booking_repo      : Booking_Repo,
+        payment_repo      : PaymentRepo,
+        booking_repo      : BookingRepo,
         commission_service: CommissionService,
         notification_trigger: NotificationTriggerService,
         user_repo: UserRepo,

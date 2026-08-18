@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app.Dtos.Warehouse_DTOs import WarehouseCreate, WarehouseUpdate, WarehouseResponse, WarehouseToggleResponse
-from app.Repo.WarehouseRepo import WarehouseRepo
-from app.services.Warehouse_services.Warehouse_service import WarehouseService
-from app.services.Warehouse_services.Warehouse_access_service import WarehouseAccessService
-from app.api.Auth_middleware import get_current_user, require_owner
+from app.dtos.warehouse_dtos import WarehouseCreate, WarehouseUpdate, WarehouseResponse, WarehouseToggleResponse
+from app.repo.warehouse_repo import WarehouseRepo
+from app.services.warehouse_services.warehouse_service import WarehouseService
+from app.services.warehouse_services.warehouse_access_service import WarehouseAccessService
+from app.api.auth_middleware import get_current_user, require_owner
 from app.config import get_db
 
 router = APIRouter(prefix="/warehouses", tags=["Warehouses"])

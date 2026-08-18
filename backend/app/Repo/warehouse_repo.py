@@ -1,9 +1,9 @@
 from typing import Optional
 from sqlalchemy.orm import Session, joinedload
 
-from app.Repo.Base_Repo import BaseRepo
+from app.repo.base_repo import BaseRepo
 from app.models import Warehouse
-from app.Dtos.Warehouse_DTOs import WarehouseCreate, WarehouseUpdate
+from app.dtos.warehouse_dtos import WarehouseCreate, WarehouseUpdate
 
 
 class WarehouseRepo(BaseRepo[Warehouse]):

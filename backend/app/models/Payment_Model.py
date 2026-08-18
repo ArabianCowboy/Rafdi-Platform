@@ -1,13 +1,13 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Optional
 
-from app.models.Base_Model import Base, TimestampMixin
+from app.models.base_model import Base, TimestampMixin
 from sqlalchemy import Date, Numeric, Enum, ForeignKey, DECIMAL, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from app.Enums.EnumTypes import PaymentStatusEnum
+from app.enums.enum_types import PaymentStatusEnum
 
 if TYPE_CHECKING:
-    from app.models.Booking_Model import Booking
+    from app.models.booking_model import Booking
     
 class Payment(TimestampMixin, Base):
     __tablename__ = "payments"

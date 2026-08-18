@@ -1,6 +1,6 @@
-from app.Repo.Notification_Repo import NotificationRepo
-from app.Dtos.Notification_DTOs import NotificationCreate, NotificationResponse
-from app.Enums.EnumTypes import NotificationTypeEnum
+from app.repo.notification_repo import NotificationRepo
+from app.dtos.notification_dtos import NotificationCreate, NotificationResponse
+from app.enums.enum_types import NotificationTypeEnum
 
 
 class NotificationService:

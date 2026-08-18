@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
-from app.Dtos.Role_DTOs import RoleResponse
+from app.dtos.role_dtos import RoleResponse
 
 class UserRoleCreate(BaseModel):
     RolesID: int

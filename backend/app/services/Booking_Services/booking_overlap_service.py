@@ -1,5 +1,5 @@
 from datetime import date
-from app.Repo.Booking_Repo import BookingRepo
+from app.repo.booking_repo import BookingRepo
  
  
 class BookingOverlapService:

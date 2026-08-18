@@ -1,10 +1,10 @@
 from typing import Optional
 from sqlalchemy.orm import Session
  
-from app.Repo.Base_Repo import BaseRepo
+from app.repo.base_repo import BaseRepo
 from app.models import Booking
-from app.Dtos.Booking_DTOs import BookingCreate, BookingStatusUpdate
-from app.models.Booking_Model import BookingStatusEnum
+from app.dtos.booking_dtos import BookingCreate, BookingStatusUpdate
+from app.models.booking_model import BookingStatusEnum
 
 class BookingRepo(BaseRepo[Booking]):
  

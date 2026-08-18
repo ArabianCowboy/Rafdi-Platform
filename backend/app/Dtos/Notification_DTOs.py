@@ -1,8 +1,8 @@
 from datetime import datetime
 from pydantic import BaseModel
 from typing import Optional
-from app.Enums.EnumTypes import NotificationTypeEnum
-from app.Dtos.User_DTOs import UserResponse
+from app.enums.enum_types import NotificationTypeEnum
+from app.dtos.user_dtos import UserResponse
 
 class NotificationCreate(BaseModel):
     UserID : int

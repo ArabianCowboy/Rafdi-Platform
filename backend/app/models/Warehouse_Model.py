@@ -1,13 +1,13 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Optional
 
-from app.models.Base_Model import Base, TimestampMixin
+from app.models.base_model import Base, TimestampMixin
 from sqlalchemy import String, Boolean, Text, Numeric, ForeignKey,DECIMAL
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 if TYPE_CHECKING:
-    from app.models.Company_Model import Company
-    from app.models.Booking_Model import Booking
+    from app.models.company_model import Company
+    from app.models.booking_model import Booking
     
 class Warehouse(TimestampMixin, Base):
     __tablename__ = "warehouses"

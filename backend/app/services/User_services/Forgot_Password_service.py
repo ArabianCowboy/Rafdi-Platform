@@ -1,7 +1,7 @@
-from app.Repo.user_repo import UserRepo
-from app.services.User_services.Otp_Service import OTPService
-from app.services.User_services.Email_Service import EmailService
-from app.services.User_services.password_service import PasswordService
+from app.repo.user_repo import UserRepo
+from app.services.user_services.otp_service import OTPService
+from app.services.user_services.email_service import EmailService
+from app.services.user_services.password_service import PasswordService
 
 
 class ForgotPasswordService:

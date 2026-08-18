@@ -1,6 +1,6 @@
 from datetime import date
 from decimal import Decimal
-from app.Repo import WarehouseRepo
+from app.repo.warehouse_repo import WarehouseRepo
 
 
 def calculate_days(start: date, end: date) -> Decimal:

@@ -1,14 +1,14 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Optional
 
-from app.models.Base_Model import Base, TimestampMixin
+from app.models.base_model import Base, TimestampMixin
 from sqlalchemy import String, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 if TYPE_CHECKING:
-    from app.models.Company_Model import Company
-    from app.models.User_Role_Model import User_Role
-    from app.models.Notification_Model import Notification
+    from app.models.company_model import Company
+    from app.models.user_role_model import UserRole
+    from app.models.notification_model import Notification
 
 class User(TimestampMixin, Base):
 
@@ -21,5 +21,5 @@ class User(TimestampMixin, Base):
  
  
     company      : Mapped[Optional["Company"]]  = relationship(back_populates="users")
-    user_roles   : Mapped[list["User_Role"]]     = relationship(back_populates="user")
+    user_roles   : Mapped[list["UserRole"]]     = relationship(back_populates="user")
     notifications: Mapped[list["Notification"]] = relationship(back_populates="user")

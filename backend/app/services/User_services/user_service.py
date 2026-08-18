@@ -1,10 +1,11 @@
 from typing import Optional
 
-from app.Repo import UserRepo, CompanyRepo
-from app.Dtos.User_DTOs import UserResponse, UserUpdate
-from app.services.User_services.password_service import PasswordService
-from app.services.User_services.validation_service import ValidationService
-from app.services.User_services.role_assignment_service import RoleAssignmentService
+from app.repo.user_repo import UserRepo
+from app.repo.company_repo import CompanyRepo
+from app.dtos.user_dtos import UserResponse, UserUpdate
+from app.services.user_services.password_service import PasswordService
+from app.services.user_services.validation_service import ValidationService
+from app.services.user_services.role_assignment_service import RoleAssignmentService
 
 
 class UserService:

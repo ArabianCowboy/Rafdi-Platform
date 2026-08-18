@@ -1,9 +1,10 @@
 from typing import Optional
 from sqlalchemy.orm import Session
  
-from app.Repo.Base_Repo import BaseRepo
+from app.repo.base_repo import BaseRepo
 from app.models import Role
-from app.Dtos import RoleCreate, RoleUpdate
+from app.dtos.role_dtos import RoleCreate
+from app.dtos.role_dtos import RoleUpdate
 
 class RoleRepo(BaseRepo[Role]):
  

@@ -6,13 +6,13 @@ from typing import Optional, TYPE_CHECKING
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.Repo.Base_Repo import BaseRepo
+from app.repo.base_repo import BaseRepo
 from app.models import Company
-from app.Dtos.Company_DTOs import CompanyUpdate
-from app.Dtos.Auth_DTOs import RegisterCreate
+from app.dtos.company_dtos import CompanyUpdate
+from app.dtos.auth_dtos import RegisterCreate
 
 if TYPE_CHECKING:
-    from app.models.User_Model import User
+    from app.models.user_model import User
 
 
 class CompanyRepo(BaseRepo[Company]):

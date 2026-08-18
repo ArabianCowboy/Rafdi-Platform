@@ -1,15 +1,15 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from app.models.Base_Model import Base,TimestampMixin
+from app.models.base_model import Base,TimestampMixin
 from sqlalchemy import Date, Numeric, Enum, ForeignKey, DECIMAL
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from app.Enums.EnumTypes import BookingStatusEnum
+from app.enums.enum_types import BookingStatusEnum
 
 if TYPE_CHECKING:
-    from app.models.Warehouse_Model import Warehouse
-    from app.models.Company_Model import Company
-    from app.models.Payment_Model import Payment
+    from app.models.warehouse_model import Warehouse
+    from app.models.company_model import Company
+    from app.models.payment_model import Payment
 
 class Booking(TimestampMixin, Base):
     __tablename__ = "bookings"

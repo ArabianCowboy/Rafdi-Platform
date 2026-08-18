@@ -1,9 +1,9 @@
 from typing import Optional
 from sqlalchemy.orm import Session
  
-from app.Repo.Base_Repo import BaseRepo
+from app.repo.base_repo import BaseRepo
 from app.models import Payment
-from app.Dtos.Payment_DTOs import PaymentCreate
+from app.dtos.payment_dtos import PaymentCreate
 
 class PaymentRepo(BaseRepo[Payment]):
  

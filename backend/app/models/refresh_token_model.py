@@ -5,10 +5,10 @@ from datetime import datetime
 from sqlalchemy import String, ForeignKey, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.models.Base_Model import Base, TimestampMixin
+from app.models.base_model import Base, TimestampMixin
 
 if TYPE_CHECKING:
-    from app.models.User_Model import User
+    from app.models.user_model import User
 
 
 class RefreshToken(TimestampMixin, Base):

@@ -1,10 +1,10 @@
 from typing import Optional
 from sqlalchemy.orm import Session, joinedload
 
-from app.Repo.Base_Repo import BaseRepo
-from app.models import User, User_Role
-from app.Dtos.User_DTOs import UserUpdate
-from app.Dtos.Auth_DTOs import RegisterCreate
+from app.repo.base_repo import BaseRepo
+from app.models import User, UserRole
+from app.dtos.user_dtos import UserUpdate
+from app.dtos.auth_dtos import RegisterCreate
 
 
 class UserRepo(BaseRepo[User]):
@@ -29,7 +29,7 @@ class UserRepo(BaseRepo[User]):
             self.db.query(User)
             .options(
                 joinedload(User.company),
-                joinedload(User.user_roles).joinedload(User_Role.role),
+                joinedload(User.user_roles).joinedload(UserRole.role),
             )
             .order_by(User.UserID.asc())
             .all()

@@ -1,10 +1,10 @@
-from app.Repo import UserRoleRepo
-from app.Repo import Role_Repo
+from app.repo.user_role_repo import UserRoleRepo
+from app.repo.role_repo import RoleRepo
 
 
 class RoleAssignmentService:
 
-    def __init__(self, user_role_repo: UserRoleRepo, role_repo: Role_Repo):
+    def __init__(self, user_role_repo: UserRoleRepo, role_repo: RoleRepo):
         self.user_role_repo = user_role_repo
         self.role_repo      = role_repo
 

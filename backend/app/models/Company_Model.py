@@ -1,14 +1,14 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from app.models.Base_Model import Base,TimestampMixin
+from app.models.base_model import Base,TimestampMixin
 from sqlalchemy import String, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 if TYPE_CHECKING:
-    from app.models.User_Model import User
-    from app.models.Warehouse_Model import Warehouse
-    from app.models.Booking_Model import Booking
+    from app.models.user_model import User
+    from app.models.warehouse_model import Warehouse
+    from app.models.booking_model import Booking
     
 
 class Company(TimestampMixin, Base):

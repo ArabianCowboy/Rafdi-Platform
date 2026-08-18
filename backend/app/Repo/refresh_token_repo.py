@@ -2,7 +2,7 @@ from typing import Optional
 from datetime import datetime
 from sqlalchemy.orm import Session
 
-from app.models.RefreshToken_Model import RefreshToken
+from app.models.refresh_token_model import RefreshToken
 
 
 class RefreshTokenRepo:

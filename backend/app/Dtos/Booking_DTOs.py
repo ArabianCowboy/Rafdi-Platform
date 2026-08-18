@@ -2,9 +2,9 @@ from pydantic import BaseModel
 from typing import Optional
 from decimal import Decimal
 from datetime import date
-from app.Dtos.Company_DTOs import CompanyResponse
-from app.Dtos.Warehouse_DTOs import WarehouseResponse
-from app.Enums.EnumTypes import BookingStatusEnum
+from app.dtos.company_dtos import CompanyResponse
+from app.dtos.warehouse_dtos import WarehouseResponse
+from app.enums.enum_types import BookingStatusEnum
 
 class BookingCreate(BaseModel):
     WarehouseID    : int

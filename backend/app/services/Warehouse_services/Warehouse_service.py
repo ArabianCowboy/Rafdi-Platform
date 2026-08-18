@@ -1,14 +1,14 @@
 from typing import Optional
-from app.Repo import WarehouseRepo
-from app.Dtos.Warehouse_DTOs import WarehouseCreate, WarehouseUpdate, WarehouseResponse, WarehouseToggleResponse
-from app.services.Warehouse_services import Warehouse_access_service
+from app.repo.warehouse_repo import WarehouseRepo
+from app.dtos.warehouse_dtos import WarehouseCreate, WarehouseUpdate, WarehouseResponse, WarehouseToggleResponse
+from app.services.warehouse_services.warehouse_access_service import WarehouseAccessService
 
 class WarehouseService:
 
     def __init__(
         self,
         warehouse_repo  : WarehouseRepo,
-        access_service  : Warehouse_access_service,
+        access_service  : WarehouseAccessService,
     ):
         self.warehouse_repo = warehouse_repo
         self.access_service = access_service

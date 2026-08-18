@@ -1,14 +1,16 @@
 from datetime import date
 
-from app.Repo import WarehouseRepo
-from app.Dtos.Booking_DTOs import BookingCreate, BookingStatusUpdate, BookingResponse
-from app.Dtos.Payment_DTOs import PaymentCreate
-from app.Enums.EnumTypes import BookingStatusEnum
-from app.services.Booking_Services.BookingOverlap_Service import BookingOverlapService
-from app.services.Booking_Services.BookingPrice_Service import BookingPriceService
-from app.services.Notification_Services import NotificationTrigger_Service
-from app.models.Payment_Model import PaymentStatusEnum
-from app.Repo import Booking_Repo, Payment_Repo, UserRepo
+from app.repo.warehouse_repo import WarehouseRepo
+from app.dtos.booking_dtos import BookingCreate, BookingStatusUpdate, BookingResponse
+from app.dtos.payment_dtos import PaymentCreate
+from app.enums.enum_types import BookingStatusEnum
+from app.services.booking_services.booking_overlap_service import BookingOverlapService
+from app.services.booking_services.booking_price_service import BookingPriceService
+from app.services.notification_services.notification_trigger_service import NotificationTriggerService
+from app.models.payment_model import PaymentStatusEnum
+from app.repo.booking_repo import BookingRepo
+from app.repo.payment_repo import PaymentRepo
+from app.repo.user_repo import UserRepo
 
 
 class BookingService:
@@ -16,13 +18,13 @@ class BookingService:
 
     def __init__(
         self,
-        booking_repo         : Booking_Repo,
-        payment_repo         : Payment_Repo,
+        booking_repo         : BookingRepo,
+        payment_repo         : PaymentRepo,
         warehouse_repo       : WarehouseRepo,
         user_repo            : UserRepo,
         overlap_service      : BookingOverlapService,
         price_service        : BookingPriceService,
-        notification_trigger : NotificationTrigger_Service,
+        notification_trigger : NotificationTriggerService,
     ):
         self.booking_repo         = booking_repo
         self.payment_repo         = payment_repo

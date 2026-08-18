@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr
 from typing import Optional
-from app.Dtos.Company_DTOs import CompanyResponse
+from app.dtos.company_dtos import CompanyResponse
 
 class UserUpdate(BaseModel):
     CompanyID: Optional[int]       = None

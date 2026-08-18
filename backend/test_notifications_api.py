@@ -12,20 +12,20 @@ os.environ.pop("MYSQL_URL", None)
 os.environ["DATABASE_URL"] = "sqlite:///./test_notifications_api.db"
 os.environ.setdefault("SECRET_KEY", "test-secret-key")
 
-from app.api.Auth_middleware import get_current_user
-from app.api import Admin_Api as admin_api
-from app.Dtos.Auth_DTOs import RegisterCreate
-from app.Dtos.Booking_DTOs import BookingStatusUpdate
-from app.Dtos.Company_DTOs import CompanyStatusUpdate
-from app.Enums.EnumTypes import AccountTypeEnum, BookingStatusEnum, PaymentStatusEnum
+from app.api.auth_middleware import get_current_user
+from app.api import admin_api
+from app.dtos.auth_dtos import RegisterCreate
+from app.dtos.booking_dtos import BookingStatusUpdate
+from app.dtos.company_dtos import CompanyStatusUpdate
+from app.enums.enum_types import AccountTypeEnum, BookingStatusEnum, PaymentStatusEnum
 from app.config import SessionLocal, engine
 from app.main import app
 from app.models import Company, Notification, User
-from app.models.Base_Model import Base
-from app.services.Payment_Services.Commission_Service import CommissionService
-from app.services.Payment_Services.Payment_Service import PaymentService
-from app.services.Booking_Services.Booking_Service import BookingService
-from app.services.User_services.auth_service import AuthService
+from app.models.base_model import Base
+from app.services.payment_services.commission_service import CommissionService
+from app.services.payment_services.payment_service import PaymentService
+from app.services.booking_services.booking_service import BookingService
+from app.services.user_services.auth_service import AuthService
 
 
 class NotificationApiTests(unittest.TestCase):

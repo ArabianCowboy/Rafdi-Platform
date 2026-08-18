@@ -1,29 +1,29 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
-from app.Dtos.Auth_DTOs import RegisterCreate, LoginCreate, TokenResponse, ProfileUpdate
-from app.Dtos.User_DTOs import UserResponse
-from app.Dtos.Auth_DTOs import ForgotPasswordRequest, ResetPasswordRequest
-from app.Dtos.Auth_DTOs import RefreshTokenRequest
-from app.Dtos.Company_DTOs import CompanyResponse
-from app.Repo.user_repo import UserRepo
-from app.Repo.Companey_Repo import CompanyRepo
-from app.Repo.Notification_Repo import NotificationRepo
-from app.Repo.UserRoleRepo import UserRoleRepo
-from app.Repo.Role_Repo import RoleRepo
-from app.Repo.RefreshToken_Repo import RefreshTokenRepo
-from app.services.User_services.auth_service import AuthService
-from app.services.User_services.password_service import PasswordService
-from app.services.User_services.validation_service import ValidationService
-from app.services.User_services.role_assignment_service import RoleAssignmentService
-from app.services.User_services.UserProfileUpdate_service import UserProfileService
-from app.services.Jwt_Services.Jwt_service import JWTService
-from app.services.User_services.Otp_Service import OTPService
-from app.services.User_services.Email_Service import EmailService
-from app.services.User_services.Forgot_Password_service import ForgotPasswordService
-from app.services.Notification_Services.Notification_Service import NotificationService
-from app.services.Notification_Services.NotificationTrigger_Service import NotificationTriggerService
-from app.api.Auth_middleware import get_current_user
+from app.dtos.auth_dtos import RegisterCreate, LoginCreate, TokenResponse, ProfileUpdate
+from app.dtos.user_dtos import UserResponse
+from app.dtos.auth_dtos import ForgotPasswordRequest, ResetPasswordRequest
+from app.dtos.auth_dtos import RefreshTokenRequest
+from app.dtos.company_dtos import CompanyResponse
+from app.repo.user_repo import UserRepo
+from app.repo.company_repo import CompanyRepo
+from app.repo.notification_repo import NotificationRepo
+from app.repo.user_role_repo import UserRoleRepo
+from app.repo.role_repo import RoleRepo
+from app.repo.refresh_token_repo import RefreshTokenRepo
+from app.services.user_services.auth_service import AuthService
+from app.services.user_services.password_service import PasswordService
+from app.services.user_services.validation_service import ValidationService
+from app.services.user_services.role_assignment_service import RoleAssignmentService
+from app.services.user_services.user_profile_update_service import UserProfileService
+from app.services.jwt_services.jwt_service import JWTService
+from app.services.user_services.otp_service import OTPService
+from app.services.user_services.email_service import EmailService
+from app.services.user_services.forgot_password_service import ForgotPasswordService
+from app.services.notification_services.notification_service import NotificationService
+from app.services.notification_services.notification_trigger_service import NotificationTriggerService
+from app.api.auth_middleware import get_current_user
 from app.config import get_db
 from app.limiter import limiter
 

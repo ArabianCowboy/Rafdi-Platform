@@ -1,15 +1,16 @@
 from datetime import datetime, timedelta
 
-from app.Repo import UserRoleRepo
-from app.Repo.RefreshToken_Repo import RefreshTokenRepo
-from app.Dtos.User_DTOs import UserResponse
-from app.Dtos.Auth_DTOs import RegisterCreate, TokenResponse
-from app.services.User_services.password_service import PasswordService
-from app.services.User_services.validation_service import ValidationService
-from app.services.User_services.role_assignment_service import RoleAssignmentService
-from app.services.Jwt_Services.Jwt_service import JWTService, REFRESH_TOKEN_EXPIRE
-from app.Repo import CompanyRepo, UserRepo
-from app.services.Notification_Services.NotificationTrigger_Service import NotificationTriggerService
+from app.repo.user_role_repo import UserRoleRepo
+from app.repo.refresh_token_repo import RefreshTokenRepo
+from app.dtos.user_dtos import UserResponse
+from app.dtos.auth_dtos import RegisterCreate, TokenResponse
+from app.services.user_services.password_service import PasswordService
+from app.services.user_services.validation_service import ValidationService
+from app.services.user_services.role_assignment_service import RoleAssignmentService
+from app.services.jwt_services.jwt_service import JWTService, REFRESH_TOKEN_EXPIRE
+from app.repo.company_repo import CompanyRepo
+from app.repo.user_repo import UserRepo
+from app.services.notification_services.notification_trigger_service import NotificationTriggerService
 
 
 class AuthService:

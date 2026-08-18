@@ -1,7 +1,8 @@
-from app.Repo import UserRepo, CompanyRepo
-from app.Dtos.Auth_DTOs import ProfileUpdate
-from app.Dtos.User_DTOs import UserResponse
-from app.Dtos.Company_DTOs import CompanyResponse
+from app.repo.user_repo import UserRepo
+from app.repo.company_repo import CompanyRepo
+from app.dtos.auth_dtos import ProfileUpdate
+from app.dtos.user_dtos import UserResponse
+from app.dtos.company_dtos import CompanyResponse
 
 
 class UserProfileService:

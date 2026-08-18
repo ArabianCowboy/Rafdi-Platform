@@ -1,9 +1,9 @@
 from typing import Optional
 from sqlalchemy.orm import Session
  
-from app.Repo.Base_Repo import BaseRepo
+from app.repo.base_repo import BaseRepo
 from app.models import Notification
-from app.Dtos.Notification_DTOs import NotificationCreate, NotificationUpdate
+from app.dtos.notification_dtos import NotificationCreate, NotificationUpdate
 
 class NotificationRepo(BaseRepo[Notification]):
  

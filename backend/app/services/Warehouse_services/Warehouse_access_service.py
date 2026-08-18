@@ -1,4 +1,4 @@
-from app.Repo import WarehouseRepo
+from app.repo.warehouse_repo import WarehouseRepo
 
 
 class WarehouseAccessService:

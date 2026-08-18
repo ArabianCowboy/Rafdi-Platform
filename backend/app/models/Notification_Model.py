@@ -1,13 +1,13 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from app.models.Base_Model import Base, TimestampMixin
+from app.models.base_model import Base, TimestampMixin
 from sqlalchemy import String, Boolean, Enum, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from app.Enums.EnumTypes import NotificationTypeEnum
+from app.enums.enum_types import NotificationTypeEnum
 
 if TYPE_CHECKING:
-    from app.models.User_Model import User
+    from app.models.user_model import User
     
 class Notification(Base, TimestampMixin):
     __tablename__ = "notifications"
